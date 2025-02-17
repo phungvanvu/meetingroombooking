@@ -36,13 +36,24 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder(10);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO createUser(UserDTO userDTO) {
         if (userRepository.existsByUserName(userDTO.getUserName())) {
             throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
         }
 
+        // Kiểm tra email hợp lệ
+        if (userDTO.getEmail() != null && !isValidEmailDomain(userDTO.getEmail())) {
+            throw new AppEx(ErrorCode.INVALID_EMAIL_DOMAIN);
+        }
+
+        // Kiểm tra nếu mật khẩu là null
+        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            throw new AppEx(ErrorCode.PASSWORD_NOT_PROVIDED);  // Thêm mã lỗi nếu không có mật khẩu
+        }
+
         User user = userMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Mã hóa mật khẩu
 
         Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(userDTO.getRoles()));
         if (roles.isEmpty()) {
@@ -51,18 +62,24 @@ public class UserService {
 
         user.setRoles(roles);
         user = userRepository.save(user);
+
+        // Ẩn mật khẩu trước khi trả về DTO
+        UserDTO responseDTO = userMapper.toDTO(user);
+        responseDTO.setPassword(null);  // Đảm bảo không trả về mật khẩu
+
         return userMapper.toDTO(user);
     }
 
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+
+
     public List<UserDTO> getAllUsers() {
         log.info("In method getAllUsers");
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     public UserDTO getUserById(int userId) {
         log.info("In method getUserById");
         User user = userRepository.findById(userId)
@@ -79,19 +96,47 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    // valid tên miền email
+    private boolean isValidEmailDomain(String email) {
+        return email.matches("^[\\w-\\.]+@[\\w-]+\\.(vn|edu|com)$");
+    }
+
+    @PostAuthorize("returnObject.userName == authentication.name")
     public UserDTO updateUser(int userId, UserDTO userDTO) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
-        userMapper.updateEntity(user, userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        // Validate email domain
+        if (userDTO.getEmail() != null && !isValidEmailDomain(userDTO.getEmail())) {
+            throw new AppEx(ErrorCode.INVALID_EMAIL_DOMAIN);
+        }
 
-        var roles = roleRepository.findAllById(userDTO.getRoles());
-        user.setRoles(new HashSet<>(roles));
+        // Cập nhật các trường ngoài roles và password
+        if (userDTO.getUserName() != null) {
+            user.setUserName(userDTO.getUserName());
+        }
+        if (userDTO.getFullName() != null) {
+            user.setFullName(userDTO.getFullName());
+        }
+        if (userDTO.getEmail() != null) {
+            user.setEmail(userDTO.getEmail());
+        }
 
-        return userMapper.toDTO(userRepository.save(user));
+        // Không thay đổi roles
+        // Nếu có password, thì mã hóa và thay đổi password
+        if (userDTO.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
+
+        // Save the updated user entity and return DTO
+        user = userRepository.save(user);
+        return userMapper.toDTO(user);
     }
+
+
+
+
+
 
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(int userId) {

@@ -18,7 +18,10 @@ public enum ErrorCode {
     TIME_FRAME_TOO_LONG(505, "The time frame exceeds 365 days."),
     VALIDATION_ERROR(400, "Validation error occurred."),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-    UNAUTHENTICATED(401, "User is not authenticated.");
+    UNAUTHENTICATED(401, "User is not authenticated."),
+    INVALID_EMAIL_DOMAIN(400, "Invalid email domain. Only .vn, .edu, and .com are allowed."),
+    PASSWORD_NOT_PROVIDED(400, "Password must be provided.");
+
 
 
     private final int code;

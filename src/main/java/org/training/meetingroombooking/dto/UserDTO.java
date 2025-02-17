@@ -1,24 +1,31 @@
 package org.training.meetingroombooking.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.training.meetingroombooking.entity.GroupEntity;
 import java.util.Set;
 
 public class UserDTO {
-    @Size(min = 3, message = "UserName must be at least 3 characters")
+    @Size(min = 3, max = 20, message = "UserName must be between 3 and 20 characters")
+    @Pattern(regexp = "^[^\\s]+$", message = "Username cannot contain spaces")
     private String userName;
 
-    @NotNull
+    @NotNull(message = "Full name cannot be null")
     private String fullName;
 
     private String department;
 
     @Email
+    @Pattern(regexp = "^[\\w._%+-]+@[\\w.-]+\\.(com|vn|edu)$", message = "Email must have a valid domain like .com, .vn, .edu")
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)  // Chỉ cho phép ghi, không đọc
     @Size(min = 8, message = "Password must be at least 8 characters")
+
     private String password;
 
     private boolean enabled = true;
