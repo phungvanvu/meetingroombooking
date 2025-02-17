@@ -9,6 +9,7 @@ import java.util.Collections;
 @Component
 public class PermissionMapperImpl implements PermissionMapper {
 
+    @Override
     public Permission toEntity(PermissionDTO permissionDTO) {
         if (permissionDTO == null) {
             return null;
