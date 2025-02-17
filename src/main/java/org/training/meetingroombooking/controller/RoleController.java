@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
 import org.training.meetingroombooking.dto.RoleDTO;
@@ -16,7 +17,7 @@ public class RoleController {
         this.roleService = roleService;
     }
     @PostMapping
-    ApiResponse<RoleDTO> create(@RequestBody RoleDTO request) {
+    ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {
         return ApiResponse.<RoleDTO>builder()
                 .success(true)
                 .data(roleService.create(request))

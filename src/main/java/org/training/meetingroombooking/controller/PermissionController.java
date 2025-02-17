@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
 import org.training.meetingroombooking.dto.PermissionDTO;
@@ -18,7 +19,7 @@ public class PermissionController {
     }
 
     @PostMapping
-    public ApiResponse<PermissionDTO> create(@RequestBody PermissionDTO request) {
+    public ApiResponse<PermissionDTO> create(@Valid @RequestBody PermissionDTO request) {
         return ApiResponse.<PermissionDTO>builder()
                 .success(true)
                 .data(permissionService.create(request))

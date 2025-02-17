@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 @Service
 public class UserService {
     private final RoleRepository roleRepository;
@@ -36,6 +35,7 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder(10);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO createUser(UserDTO userDTO) {
         if (userRepository.existsByUserName(userDTO.getUserName())) {
             throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
@@ -58,18 +58,17 @@ public class UserService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAllUsers() {
-        log.info("In method getAllUsers");
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserById(int userId) {
-        log.info("In method getUserById");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
         return userMapper.toDTO(user);
     }
 
+    @PostAuthorize("returnObject.userName == authentication.name")
     public UserDTO getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -79,7 +78,7 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    @PostAuthorize("returnObject.userName == authentication.name")
     public UserDTO updateUser(int userId, UserDTO userDTO) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
