@@ -3,11 +3,9 @@ package org.training.meetingroombooking.service;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.training.meetingroombooking.dto.RoleDTO;
 import org.training.meetingroombooking.mapper.RoleMapper;
@@ -27,6 +25,7 @@ public class RoleService {
         this.roleMapper = roleMapper;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public RoleDTO create(RoleDTO roleDTO) {
         var role = roleMapper.toEntity(roleDTO);
         var permissions = permissionRepository.findAllById(roleDTO.getPermissions());
@@ -35,10 +34,12 @@ public class RoleService {
         return roleMapper.toDTO(role);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<RoleDTO> getAll() {
         return roleRepository.findAll().stream().map(roleMapper::toDTO).toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String role) {
         roleRepository.deleteById(role);
     }

@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import com.nimbusds.jose.JOSEException;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    ApiResponse<AuthResponse> auth(@RequestBody AuthRequest request) {
+    ApiResponse<AuthResponse> auth(@Valid @RequestBody AuthRequest request) {
         var result = authService.authenticate(request);
         return ApiResponse.<AuthResponse>builder()
                 .success(true)

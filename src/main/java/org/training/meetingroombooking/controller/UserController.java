@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiResponse<UserDTO> createUser(@RequestBody @Valid UserDTO request) {
+    public ApiResponse<UserDTO> createUser(@Valid @RequestBody UserDTO request) {
         return ApiResponse.<UserDTO>builder()
                         .success(true)
                         .data(userService.createUser(request))
@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserDTO> updateUser(@PathVariable int userId, @RequestBody UserDTO request) {
+    ApiResponse<UserDTO> updateUser(@PathVariable int userId, @Valid @RequestBody UserDTO request) {
         return ApiResponse.<UserDTO>builder()
                 .success(true)
                 .data(userService.updateUser(userId, request))

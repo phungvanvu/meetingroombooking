@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.dto.PermissionDTO;
 import org.training.meetingroombooking.entity.Permission;
@@ -20,17 +21,20 @@ public class PermissionService {
         this.permissionMapper = permissionMapper;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public PermissionDTO create(PermissionDTO permissionDTO) {
         Permission permission = permissionMapper.toEntity(permissionDTO);
         permission = permissionRepository.save(permission);
         return permissionMapper.toDTO(permission);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionDTO> getAllPermissions() {
         var permissions = permissionRepository.findAll();
         return permissions.stream().map(permissionMapper::toDTO).toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deletePermission(String permission) {
         permissionRepository.deleteById(permission);
     }
