@@ -2,6 +2,7 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
 import org.training.meetingroombooking.dto.UserDTO;
@@ -19,13 +20,16 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')") //chỉ admin mới tạo user
     @PostMapping
     public ApiResponse<UserDTO> createUser(@RequestBody @Valid UserDTO request) {
         return ApiResponse.<UserDTO>builder()
-                        .success(true)
-                        .data(userService.createUser(request))
-                        .build();
+                .success(true)
+                .data(userService.createUser(request))
+                .build();
     }
+
 
     @GetMapping
     ApiResponse<List<UserDTO>> getUsers() {
