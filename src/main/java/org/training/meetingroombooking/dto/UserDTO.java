@@ -1,27 +1,34 @@
 package org.training.meetingroombooking.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.training.meetingroombooking.entity.GroupEntity;
 import java.util.Set;
 
 public class UserDTO {
-    @Size(min = 3, message = "UserName must be at least 3 characters")
+
+    @NotNull(message = "UserName cannot be null")
+    @Size(min = 3, max = 50, message = "UserName must be between 3 and 50 characters")
+    @Pattern(regexp = "^[^\\s]+$", message = "Username and password should not contain any spaces")
     private String userName;
 
-    @NotNull
+    @Size(min = 1, max = 50, message = "FullName cannot be empty")
     private String fullName;
 
+    @Size(min = 1, max = 75, message = "department must be between 1 and 75 characters")
     private String department;
 
-    @Email
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", message = "Invalid email format. Please provide a valid email address with proper domain (e.g., user@example.com).")
+    @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String email;
 
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 8, max = 50, message = "Password must be between 8 and 50 characters")
+    @Pattern(regexp = "^[^\\s]+$", message = "Username and password should not contain any spaces")
     private String password;
 
     private boolean enabled = true;
+
     private GroupEntity group;
 
     private Set<String> roles;
@@ -107,7 +114,7 @@ public class UserDTO {
     }
 
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.fullName = fullName != null ? fullName.trim() : null;
     }
 
     public String getDepartment() {
