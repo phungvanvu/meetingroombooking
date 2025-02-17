@@ -40,7 +40,7 @@ public class ApplicationInitConfig {
             if (userRepository.findByUserName("admin").isEmpty()) {
                 User user = new User();
                 user.setUserName("admin");
-                user.setPassword(passwordEncoder.encode("admin"));
+                user.setPassword(passwordEncoder.encode("12345678"));
                 user.setRoles(Set.of(adminRole));
                 userRepository.save(user);
                 log.warn("Admin has been created with default password, please change password");
