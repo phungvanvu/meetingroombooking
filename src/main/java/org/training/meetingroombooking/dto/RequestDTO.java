@@ -1,20 +1,34 @@
 package org.training.meetingroombooking.dto;
 
+import jakarta.validation.constraints.Size;
 import org.training.meetingroombooking.entity.User;
 
 import java.time.LocalDate;
 
 public class RequestDTO {
+    @Size(min = 1, max = 100, message = "title cannot be empty")
     private String title;
+
+    @Size(min = 1, max = 100)
     private String location;
+
+    @Size(min = 1, max = 255, message = "Description must be between 1 and 255 characters")
     private String description;
+
+    @Size(min = 1, max = 255)
     private String jobLevel;
+
     private boolean status;
+
+    @Size(min = 1, max = 100)
     private String approval;
+
     private LocalDate target;
     private LocalDate onboard;
     private User createdBy;
     private User hrPic;
+
+    @Size(min = 1, max = 255)
     private String action;
 
     public RequestDTO() {}
