@@ -20,7 +20,13 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
     UNAUTHENTICATED(401, "User is not authenticated."),
     INVALID_EMAIL_DOMAIN(400, "Invalid email domain. Only .vn, .edu, and .com are allowed."),
-    PASSWORD_NOT_PROVIDED(400, "Password must be provided.");
+    PASSWORD_NOT_PROVIDED(400, "Password must be provided."),
+    DEPARTMENT_CANNOT_BE_EMPTY(400,"Username cannot be empty" ),
+    EMAIL_CANNOT_BE_EMPTY(400,"Email cannot be empty"),
+    FULLNAME_CANNOT_BE_EMPTY(400,"Full name cannot be empty" ),
+    USERNAME_CANNOT_BE_EMPTY(400,"Username cannot be empty"),
+    PASSWORD_CANNOT_BE_EMPTY(400,"Password must be provided." ),
+    ROLES_CANNOT_BE_EMPTY(400, "role must be provided.");
 
 
 

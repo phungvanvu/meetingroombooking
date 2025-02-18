@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.service;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -7,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.training.meetingroombooking.dto.UserDTO;
 import org.training.meetingroombooking.entity.Role;
 import org.training.meetingroombooking.entity.User;
@@ -102,9 +104,23 @@ public class UserService {
     }
 
     @PostAuthorize("returnObject.userName == authentication.name")
-    public UserDTO updateUser(int userId, UserDTO userDTO) {
+    public UserDTO updateUser(int userId, @Valid @RequestBody UserDTO userDTO) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra các trường không được để null
+        if (userDTO.getFullName() == null || userDTO.getFullName().isEmpty()) {
+            throw new AppEx(ErrorCode.FULLNAME_CANNOT_BE_EMPTY);
+        }
+        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
+            throw new AppEx(ErrorCode.EMAIL_CANNOT_BE_EMPTY);
+        }
+        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
+            throw new AppEx(ErrorCode.PASSWORD_CANNOT_BE_EMPTY);
+        }
+        if (userDTO.getRoles() == null || userDTO.getRoles().isEmpty()) {
+            throw new AppEx(ErrorCode.ROLES_CANNOT_BE_EMPTY);
+        }
 
         // Validate email domain
         if (userDTO.getEmail() != null && !isValidEmailDomain(userDTO.getEmail())) {
@@ -132,6 +148,9 @@ public class UserService {
         user = userRepository.save(user);
         return userMapper.toDTO(user);
     }
+
+
+
 
 
 
