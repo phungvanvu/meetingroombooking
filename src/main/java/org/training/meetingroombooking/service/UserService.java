@@ -54,8 +54,6 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-
-
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
