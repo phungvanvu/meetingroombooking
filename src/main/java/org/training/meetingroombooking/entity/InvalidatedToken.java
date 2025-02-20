@@ -5,7 +5,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Entity
 @Table(name = "invalidated_token")
