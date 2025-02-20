@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.exception;
 
+import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,8 +17,9 @@ public class GbExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleValidationException(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
-        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.toApiError(errorMessage)));
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.toApiError(
+            Objects.requireNonNull(ex.getFieldError())
+            .getDefaultMessage())));
     }
 
     @ExceptionHandler(value = Exception.class)

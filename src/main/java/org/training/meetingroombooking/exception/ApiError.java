@@ -1,18 +1,11 @@
 package org.training.meetingroombooking.exception;
 
 public class ApiError {
-    private final int code;
     private final String message;
 
-    public ApiError(int code, String message) {
-        this.code = code;
+    public ApiError(String message) {
         this.message = message;
     }
-
-    public int getCode() {
-        return code;
-    }
-
     public String getMessage() {
         return message;
     }

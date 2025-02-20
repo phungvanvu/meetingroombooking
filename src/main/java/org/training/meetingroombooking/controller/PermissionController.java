@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
 import org.training.meetingroombooking.dto.PermissionDTO;
@@ -19,6 +20,7 @@ public class PermissionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<PermissionDTO> create(@Valid @RequestBody PermissionDTO request) {
         return ApiResponse.<PermissionDTO>builder()
                 .success(true)
@@ -27,6 +29,7 @@ public class PermissionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<PermissionDTO>> findAll() {
         return ApiResponse.<List<PermissionDTO>>builder()
                 .success(true)
@@ -35,6 +38,7 @@ public class PermissionController {
     }
 
     @DeleteMapping("/{permission}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> delete(@PathVariable String permission) {
         permissionService.deletePermission(permission);
         return ApiResponse.<Void>builder().success(true).build();

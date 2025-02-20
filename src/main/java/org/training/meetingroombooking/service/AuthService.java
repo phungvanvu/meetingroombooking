@@ -1,11 +1,21 @@
 package org.training.meetingroombooking.service;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.experimental.NonFinal;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,13 +34,6 @@ import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.exception.ErrorCode;
 import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -60,17 +63,21 @@ public class AuthService {
                 .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        boolean auth = passwordEncoder.matches(request.getPassword(),
-                user.getPassword());
+        boolean auth = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
         if (!auth) {
             throw new AppEx(ErrorCode.UNAUTHENTICATED);
         }
-        var token = generateToken(user);
-        return AuthResponse.builder()
-                .token(token)
-                .build();
 
+        var accessToken = generateToken(user, 30);  // Access Token sống 30 phút
+        var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
+
+        return AuthResponse.builder()
+                .accesstoken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
+
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
@@ -91,23 +98,24 @@ public class AuthService {
     public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken());
 
+        // Kiểm tra token đã bị vô hiệu hóa chưa
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
-        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
-
-        invalidatedTokenRepository.save(invalidatedToken);
+        if (invalidatedTokenRepository.existsById(jit)) {
+            throw new AppEx(ErrorCode.UNAUTHENTICATED);
+        }
 
         var username = signedJWT.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new AppEx(ErrorCode.UNAUTHENTICATED));
 
-        var user =
-                userRepository.findByUserName(username).orElseThrow(
-                        () -> new AppEx(ErrorCode.UNAUTHENTICATED));
+        var newAccessToken = generateToken(user, 30);
 
-        var token = generateToken(user);
-        return AuthResponse.builder().token(token).build();
+        return AuthResponse.builder()
+                .accesstoken(newAccessToken)
+                .refreshToken(request.getToken())
+                .build();
     }
+
 
 
     private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
@@ -128,20 +136,19 @@ public class AuthService {
     }
 
 
-    private String generateToken(User user) {
+    private String generateToken(User user, int expirationMinutes) {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                     .subject(user.getUserName())
                     .issuer("meeting-room-booking")
                     .issueTime(new Date())
-                    .expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
+                    .expirationTime(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))
                     .jwtID(UUID.randomUUID().toString())
                     .claim("scope", buildScope(user))
                     .build();
 
             JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaimsSet.toJSONObject()));
-
             jwsObject.sign(new MACSigner(SECRETKEY.getBytes()));
 
             return jwsObject.serialize();
@@ -150,6 +157,7 @@ public class AuthService {
             throw new RuntimeException(e);
         }
     }
+
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 

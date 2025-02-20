@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ public class RequestController {
   }
 
   @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RequestDTO>> getRequests() {
     return ApiResponse.<List<RequestDTO>>builder()
         .success(true)
@@ -31,6 +33,7 @@ public class RequestController {
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
   public ApiResponse<RequestDTO> createRequest(@RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -39,6 +42,7 @@ public class RequestController {
   }
 
   @GetMapping("/{requestId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RequestDTO> getRequest(@PathVariable("requestId") int requestId) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -47,6 +51,7 @@ public class RequestController {
   }
 
   @PutMapping("/{requestId}")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
   public ApiResponse<RequestDTO> updateRequest(@PathVariable int requestId, @RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -55,6 +60,7 @@ public class RequestController {
   }
 
   @DeleteMapping("/{requestId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteRequest(@PathVariable("requestId") int requestId) {
     requestService.deleteRequest(requestId);
     return ApiResponse.<String>builder().success(true).data("User has been deleted").build();

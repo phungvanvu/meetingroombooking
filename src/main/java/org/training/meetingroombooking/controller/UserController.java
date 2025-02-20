@@ -2,9 +2,12 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.training.meetingroombooking.dto.Request.UserRequest;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
-import org.training.meetingroombooking.dto.UserDTO;
+import org.training.meetingroombooking.dto.Response.UserResponse;
 import org.training.meetingroombooking.service.UserService;
 
 import java.util.List;
@@ -20,16 +23,18 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiResponse<UserDTO> createUser(@Valid @RequestBody UserDTO request) {
-        return ApiResponse.<UserDTO>builder()
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+        return ApiResponse.<UserResponse>builder()
                         .success(true)
                         .data(userService.createUser(request))
                         .build();
     }
 
     @GetMapping
-    ApiResponse<List<UserDTO>> getUsers() {
-        return ApiResponse.<List<UserDTO>>builder()
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<List<UserResponse>> getUsers() {
+        return ApiResponse.<List<UserResponse>>builder()
                 .success(true)
                 .data(userService.getAllUsers())
                 .build();
@@ -37,30 +42,34 @@ public class UserController {
 
 
     @GetMapping("/{userId}")
-    ApiResponse<UserDTO> getUser(@PathVariable("userId") int userId) {
-        return ApiResponse.<UserDTO>builder()
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") int userId) {
+        return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .data(userService.getUserById(userId))
                 .build();
     }
 
     @GetMapping("/my-info")
-    public ApiResponse<UserDTO> getMyInfo() {
-        return ApiResponse.<UserDTO>builder()
+    @PostAuthorize("returnObject.userName == authentication.name")
+    public ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .data(userService.getMyInfo())
                 .build();
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserDTO> updateUser(@PathVariable int userId, @Valid @RequestBody UserDTO request) {
-        return ApiResponse.<UserDTO>builder()
+    @PostAuthorize("returnObject.userName == authentication.name")
+    ApiResponse<UserResponse> updateUser(@PathVariable int userId, @Valid @RequestBody UserRequest request) {
+        return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .data(userService.updateUser(userId, request))
                 .build();
     }
 
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<String> deleteUser(@PathVariable int userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder().success(true).data("User has been deleted").build();

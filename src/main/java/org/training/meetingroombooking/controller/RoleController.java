@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.dto.Response.ApiResponse;
 import org.training.meetingroombooking.dto.RoleDTO;
@@ -17,6 +18,7 @@ public class RoleController {
         this.roleService = roleService;
     }
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {
         return ApiResponse.<RoleDTO>builder()
                 .success(true)
@@ -24,6 +26,7 @@ public class RoleController {
                 .build();
     }
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<List<RoleDTO>> getAll() {
         return ApiResponse.<List<RoleDTO>>builder()
                 .success(true)
@@ -32,6 +35,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/{role}")
+    @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<Void> delete(@PathVariable String role) {
         roleService.delete(role);
         return ApiResponse.<Void>builder().success(true).build();

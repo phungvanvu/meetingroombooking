@@ -2,7 +2,8 @@ package org.training.meetingroombooking.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.training.meetingroombooking.dto.UserDTO;
+import org.training.meetingroombooking.dto.Request.UserRequest;
+import org.training.meetingroombooking.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.Role;
 import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.repository.RoleRepository;
@@ -18,21 +19,21 @@ public class UserMapperImpl implements UserMapper {
     private RoleRepository roleRepository;
 
     @Override
-    public User toEntity(UserDTO userDTO) {
-        if (userDTO == null) {
+    public User toEntity(UserRequest request) {
+        if (request == null) {
             return null;
         }
         User user = new User();
-        user.setUserName(userDTO.getUserName());
-        user.setFullName(userDTO.getFullName());
-        user.setDepartment(userDTO.getDepartment());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(userDTO.getPassword());
-        user.setEnabled(userDTO.isEnabled());
-        user.setGroup(userDTO.getGroup());
+        user.setUserName(request.getUserName());
+        user.setFullName(request.getFullName());
+        user.setDepartment(request.getDepartment());
+        user.setEmail(request.getEmail());
+        user.setPassword(request.getPassword());
+        user.setEnabled(request.isEnabled());
+        user.setGroup(request.getGroup());
 
-        if (userDTO.getRoles() != null) {
-            Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(userDTO.getRoles()));
+        if (request.getRoles() != null) {
+            Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(request.getRoles()));
             user.setRoles(roles);
         }
 
@@ -40,51 +41,51 @@ public class UserMapperImpl implements UserMapper {
     }
 
     @Override
-    public UserDTO toDTO(User user) {
+    public UserResponse toDTO(User user) {
         if (user == null) {
             return null;
         }
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserName(user.getUserName());
-        userDTO.setFullName(user.getFullName());
-        userDTO.setDepartment(user.getDepartment());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setEnabled(user.isEnabled());
-        userDTO.setGroup(user.getGroup());
+        UserResponse response = new UserResponse();
+        response.setUserName(user.getUserName());
+        response.setFullName(user.getFullName());
+        response.setDepartment(user.getDepartment());
+        response.setEmail(user.getEmail());
+        response.setEnabled(user.isEnabled());
+        response.setGroup(user.getGroup());
 
         if (user.getRoles() != null) {
             Set<String> roleNames = user.getRoles().stream()
                     .map(Role::getRoleName)
                     .collect(Collectors.toSet());
-            userDTO.setRoles(roleNames);
+            response.setRoles(roleNames);
         }
 
-        return userDTO;
+        return response;
     }
 
 
     @Override
-    public void updateEntity(User user, UserDTO userDTO) {
-        if (userDTO == null || user == null) {
+    public void updateEntity(User user, UserRequest userRequest) {
+        if (userRequest == null || user == null) {
             return;
         }
-        if (userDTO.getFullName() != null) {
-            user.setFullName(userDTO.getFullName());
+        if (userRequest.getFullName() != null) {
+            user.setFullName(userRequest.getFullName());
         }
-        if (userDTO.getDepartment() != null) {
-            user.setDepartment(userDTO.getDepartment());
+        if (userRequest.getDepartment() != null) {
+            user.setDepartment(userRequest.getDepartment());
         }
-        if (userDTO.getEmail() != null) {
-            user.setEmail(userDTO.getEmail());
+        if (userRequest.getEmail() != null) {
+            user.setEmail(userRequest.getEmail());
         }
-        if (userDTO.getPassword() != null) {
-            user.setPassword(userDTO.getPassword());
+        if (userRequest.getPassword() != null) {
+            user.setPassword(userRequest.getPassword());
         }
-        if (userDTO.getGroup() != null) {
-            user.setGroup(userDTO.getGroup());
+        if (userRequest.getGroup() != null) {
+            user.setGroup(userRequest.getGroup());
         }
-        if (userDTO.getRoles() != null) {
-            Set<Role> roles = new HashSet<>(roleRepository.findAllById(userDTO.getRoles()));
+        if (userRequest.getRoles() != null) {
+            Set<Role> roles = new HashSet<>(roleRepository.findAllById(userRequest.getRoles()));
             user.setRoles(roles);
         }
     }

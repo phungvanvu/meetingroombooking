@@ -33,7 +33,8 @@ public class AuthController {
         return ApiResponse.<AuthResponse>builder()
                 .success(true)
                 .data(AuthResponse.builder()
-                        .token(result.getToken())
+                        .accesstoken(result.getAccessToken())
+                        .refreshToken(result.getRefreshToken())
                         .build())
                 .build();
     }
@@ -61,6 +62,9 @@ public class AuthController {
     ApiResponse<AuthResponse> authenticate(@RequestBody RefreshRequest request)
             throws ParseException, JOSEException {
         var result = authService.refreshToken(request);
-        return ApiResponse.<AuthResponse>builder().data(result).build();
+        return ApiResponse.<AuthResponse>builder()
+            .success(true)
+            .data(result)
+            .build();
     }
 }

@@ -1,7 +1,5 @@
 package org.training.meetingroombooking.service;
 
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.dto.RequestDTO;
 import org.training.meetingroombooking.entity.Request;
@@ -23,20 +21,18 @@ public class RequestService {
         this.requestRepository = requestRepository;
         this.requestMapper = requestMapper;
     }
-    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+
     public RequestDTO createRequest(RequestDTO requestDTO) {
         Request request = requestMapper.toEntity(requestDTO);
         Request savedRequest = requestRepository.save(request);
         return requestMapper.toDTO(savedRequest);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public RequestDTO getRequestById(int id) {
         Optional<Request> request = requestRepository.findById(id);
         return request.map(requestMapper::toDTO).orElse(null);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public List<RequestDTO> getAllRequests() {
         List<Request> requests = requestRepository.findAll();
         return requests.stream()
@@ -44,8 +40,6 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
-
-    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
     public RequestDTO updateRequest(int id, RequestDTO requestDTO) {
         Optional<Request> existingRequest = requestRepository.findById(id);
         if (existingRequest.isPresent()) {
@@ -66,7 +60,6 @@ public class RequestService {
         return null;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteRequest(int requestId) {
         if (!requestRepository.existsById(requestId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
