@@ -20,10 +20,14 @@ public class UserDTO {
     private String department;
 
     @Email
-    @Pattern(regexp = "^[\\w._%+-]+@[\\w.-]+\\.(com|vn|edu)$", message = "Email must have a valid domain like .com, .vn, .edu")
+    @NotNull(message = "Email can not empty")
+    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            message = "Invalid email format. Please provide a valid email address with proper domain (e.g., user@example.com).")
+    @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)  // Chỉ cho phép ghi, không đọc
+    @NotNull(message = "Password can not empty")
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             message = "Password must be at least 8 characters, contain at least one uppercase letter, one lowercase letter, one number, and one special character")
     private String password;
@@ -34,6 +38,7 @@ public class UserDTO {
     private boolean enabled = true;
     private GroupEntity group;
 
+    @NotNull(message = "Role can not empty")
     private Set<String> roles;
 
     public UserDTO() {}

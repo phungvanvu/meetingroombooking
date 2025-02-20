@@ -38,15 +38,10 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder(10);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     public UserDTO createUser(UserDTO userDTO) {
         if (userRepository.existsByUserName(userDTO.getUserName())) {
             throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
-        }
-
-        // Kiểm tra email hợp lệ
-        if (userDTO.getEmail() != null && !isValidEmailDomain(userDTO.getEmail())) {
-            throw new AppEx(ErrorCode.INVALID_EMAIL_DOMAIN);
         }
 
         // Kiểm tra nếu mật khẩu là null
@@ -98,36 +93,14 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    // valid tên miền email
-    private boolean isValidEmailDomain(String email) {
-        return email.matches("^[\\w-\\.]+@[\\w-]+\\.(vn|edu|com)$");
-    }
 
-    @PostAuthorize("returnObject.userName == authentication.name")
-    public UserDTO updateUser(int userId, @Valid @RequestBody UserDTO userDTO) {
+
+    //@PostAuthorize("returnObject.userName == authentication.name")
+    public UserDTO updateUser(int userId,  @Valid  UserDTO userDTO) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
-        // Kiểm tra các trường không được để null
-        if (userDTO.getFullName() == null || userDTO.getFullName().isEmpty()) {
-            throw new AppEx(ErrorCode.FULLNAME_CANNOT_BE_EMPTY);
-        }
-        if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
-            throw new AppEx(ErrorCode.EMAIL_CANNOT_BE_EMPTY);
-        }
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-            throw new AppEx(ErrorCode.PASSWORD_CANNOT_BE_EMPTY);
-        }
-        if (userDTO.getRoles() == null || userDTO.getRoles().isEmpty()) {
-            throw new AppEx(ErrorCode.ROLES_CANNOT_BE_EMPTY);
-        }
-
-        // Validate email domain
-        if (userDTO.getEmail() != null && !isValidEmailDomain(userDTO.getEmail())) {
-            throw new AppEx(ErrorCode.INVALID_EMAIL_DOMAIN);
-        }
-
-        // Cập nhật các trường ngoài roles và password
+        // update các trường trừ roles và password
         if (userDTO.getUserName() != null) {
             user.setUserName(userDTO.getUserName());
         }
@@ -138,7 +111,6 @@ public class UserService {
             user.setEmail(userDTO.getEmail());
         }
 
-        // Không thay đổi roles
         // Nếu có password, thì mã hóa và thay đổi password
         if (userDTO.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -150,14 +122,7 @@ public class UserService {
     }
 
 
-
-
-
-
-
-
-
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
     public void deleteUser(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
