@@ -1,5 +1,9 @@
 package org.training.meetingroombooking.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.dto.RequestDTO;
 import org.training.meetingroombooking.entity.Request;
@@ -20,6 +24,29 @@ public class RequestService {
     public RequestService(RequestRepository requestRepository, RequestMapper requestMapper) {
         this.requestRepository = requestRepository;
         this.requestMapper = requestMapper;
+    }
+
+    public Page<RequestDTO> getAllRequestsPaged(int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Request> requestPage = requestRepository.findAll(pageable);
+        return requestPage.map(requestMapper::toDTO);
+    }
+    public List<RequestDTO> getRequestsByExactTitle(String title) {
+        List<Request> requests = requestRepository.findByTitle(title);
+        return requests.stream().map(requestMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public List<RequestDTO> searchRequestsByTitle(String keyword) {
+        List<Request> requests = requestRepository.findByTitleContainingIgnoreCase(keyword);
+        return requests.stream().map(requestMapper::toDTO).collect(Collectors.toList());
+    }
+
+    public Page<RequestDTO> searchRequestsByTitlePaged(String keyword, int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Request> requestPage = requestRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        return requestPage.map(requestMapper::toDTO);
     }
 
     public RequestDTO createRequest(RequestDTO requestDTO) {

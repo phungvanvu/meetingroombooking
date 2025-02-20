@@ -1,0 +1,291 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">org.training.meetingroombooking.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthService (org.training.meetingroombooking.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthService</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/69)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package org.training.meetingroombooking.service;
+&nbsp;
+&nbsp;import com.nimbusds.jose.JOSEException;
+&nbsp;import com.nimbusds.jose.JWSAlgorithm;
+&nbsp;import com.nimbusds.jose.JWSHeader;
+&nbsp;import com.nimbusds.jose.JWSObject;
+&nbsp;import com.nimbusds.jose.JWSVerifier;
+&nbsp;import com.nimbusds.jose.Payload;
+&nbsp;import com.nimbusds.jose.crypto.MACSigner;
+&nbsp;import com.nimbusds.jose.crypto.MACVerifier;
+&nbsp;import com.nimbusds.jwt.JWTClaimsSet;
+&nbsp;import com.nimbusds.jwt.SignedJWT;
+&nbsp;import java.text.ParseException;
+&nbsp;import java.time.Instant;
+&nbsp;import java.time.temporal.ChronoUnit;
+&nbsp;import java.util.Date;
+&nbsp;import java.util.StringJoiner;
+&nbsp;import java.util.UUID;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;import org.springframework.security.crypto.password.PasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.util.CollectionUtils;
+&nbsp;import org.training.meetingroombooking.dto.Request.AuthRequest;
+&nbsp;import org.training.meetingroombooking.dto.Request.IntrospectRequest;
+&nbsp;import org.training.meetingroombooking.dto.Request.LogoutRequest;
+&nbsp;import org.training.meetingroombooking.dto.Request.RefreshRequest;
+&nbsp;import org.training.meetingroombooking.dto.Response.AuthResponse;
+&nbsp;import org.training.meetingroombooking.dto.Response.IntrospectResponse;
+&nbsp;import org.training.meetingroombooking.entity.InvalidatedToken;
+&nbsp;import org.training.meetingroombooking.entity.User;
+&nbsp;import org.training.meetingroombooking.exception.AppEx;
+&nbsp;import org.training.meetingroombooking.exception.ErrorCode;
+&nbsp;import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
+&nbsp;import org.training.meetingroombooking.repository.UserRepository;
+&nbsp;
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@Service
+&nbsp;public class AuthService {
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final InvalidatedTokenRepository invalidatedTokenRepository;
+&nbsp;
+&nbsp;    @Value(&quot;${security.jwt.secret}&quot;)
+&nbsp;    protected String SECRETKEY;
+&nbsp;
+<b class="nc">&nbsp;    public AuthService(UserRepository userRepository, InvalidatedTokenRepository invalidatedTokenRepository) {</b>
+<b class="nc">&nbsp;        this.userRepository = userRepository;</b>
+<b class="nc">&nbsp;        this.invalidatedTokenRepository = invalidatedTokenRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public IntrospectResponse introspect(IntrospectRequest request)
+&nbsp;            throws JOSEException, ParseException {
+<b class="nc">&nbsp;        var token = request.getToken();</b>
+&nbsp;
+<b class="nc">&nbsp;        verifyToken(token);</b>
+<b class="nc">&nbsp;        return IntrospectResponse.builder()</b>
+<b class="nc">&nbsp;                .valid(true).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public AuthResponse authenticate(AuthRequest request) {
+<b class="nc">&nbsp;        var user = userRepository.findByUserName(request.getUsername())</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new AppEx(ErrorCode.USER_NOT_FOUND));</b>
+&nbsp;
+<b class="nc">&nbsp;        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);</b>
+<b class="nc">&nbsp;        boolean auth = passwordEncoder.matches(request.getPassword(), user.getPassword());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!auth) {</b>
+<b class="nc">&nbsp;            throw new AppEx(ErrorCode.UNAUTHENTICATED);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        var accessToken = generateToken(user, 30);  // Access Token sống 30 phút</b>
+<b class="nc">&nbsp;        var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày</b>
+&nbsp;
+<b class="nc">&nbsp;        return AuthResponse.builder()</b>
+<b class="nc">&nbsp;                .accesstoken(accessToken)</b>
+<b class="nc">&nbsp;                .refreshToken(refreshToken)</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+&nbsp;        try {
+<b class="nc">&nbsp;            var signToken = verifyToken(request.getToken());</b>
+&nbsp;
+<b class="nc">&nbsp;            String jit = signToken.getJWTClaimsSet().getJWTID();</b>
+<b class="nc">&nbsp;            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();</b>
+&nbsp;
+&nbsp;            InvalidatedToken invalidatedToken =
+<b class="nc">&nbsp;                    InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();</b>
+&nbsp;
+<b class="nc">&nbsp;            invalidatedTokenRepository.save(invalidatedToken);</b>
+&nbsp;        } catch (AppEx exception) {
+<b class="nc">&nbsp;            log.info(&quot;Token already expired&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+<b class="nc">&nbsp;        var signedJWT = verifyToken(request.getToken());</b>
+&nbsp;
+&nbsp;        // Kiểm tra token đã bị vô hiệu hóa chưa
+<b class="nc">&nbsp;        var jit = signedJWT.getJWTClaimsSet().getJWTID();</b>
+<b class="nc">&nbsp;        if (invalidatedTokenRepository.existsById(jit)) {</b>
+<b class="nc">&nbsp;            throw new AppEx(ErrorCode.UNAUTHENTICATED);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        var username = signedJWT.getJWTClaimsSet().getSubject();</b>
+<b class="nc">&nbsp;        var user = userRepository.findByUserName(username)</b>
+<b class="nc">&nbsp;                .orElseThrow(() -&gt; new AppEx(ErrorCode.UNAUTHENTICATED));</b>
+&nbsp;
+<b class="nc">&nbsp;        var newAccessToken = generateToken(user, 30);</b>
+&nbsp;
+<b class="nc">&nbsp;        return AuthResponse.builder()</b>
+<b class="nc">&nbsp;                .accesstoken(newAccessToken)</b>
+<b class="nc">&nbsp;                .refreshToken(request.getToken())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+<b class="nc">&nbsp;        JWSVerifier verifier = new MACVerifier(SECRETKEY.getBytes());</b>
+&nbsp;
+<b class="nc">&nbsp;        SignedJWT signedJWT = SignedJWT.parse(token);</b>
+&nbsp;
+<b class="nc">&nbsp;        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();</b>
+&nbsp;
+<b class="nc">&nbsp;        var verified = signedJWT.verify(verifier);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!(verified &amp;&amp; expiryTime.after(new Date())))</b>
+<b class="nc">&nbsp;            throw new AppEx(ErrorCode.UNAUTHENTICATED);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))</b>
+<b class="nc">&nbsp;            throw new AppEx(ErrorCode.UNAUTHENTICATED);</b>
+<b class="nc">&nbsp;        return signedJWT;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    private String generateToken(User user, int expirationMinutes) {
+&nbsp;        try {
+<b class="nc">&nbsp;            JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);</b>
+<b class="nc">&nbsp;            JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()</b>
+<b class="nc">&nbsp;                    .subject(user.getUserName())</b>
+<b class="nc">&nbsp;                    .issuer(&quot;meeting-room-booking&quot;)</b>
+<b class="nc">&nbsp;                    .issueTime(new Date())</b>
+<b class="nc">&nbsp;                    .expirationTime(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))</b>
+<b class="nc">&nbsp;                    .jwtID(UUID.randomUUID().toString())</b>
+<b class="nc">&nbsp;                    .claim(&quot;scope&quot;, buildScope(user))</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="nc">&nbsp;            JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaimsSet.toJSONObject()));</b>
+<b class="nc">&nbsp;            jwsObject.sign(new MACSigner(SECRETKEY.getBytes()));</b>
+&nbsp;
+<b class="nc">&nbsp;            return jwsObject.serialize();</b>
+&nbsp;        } catch (JOSEException e) {
+<b class="nc">&nbsp;            log.error(&quot;Error generating token&quot;, e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String buildScope(User user) {
+<b class="nc">&nbsp;        StringJoiner stringJoiner = new StringJoiner(&quot; &quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (!CollectionUtils.isEmpty(user.getRoles()))</b>
+<b class="nc">&nbsp;            user.getRoles().forEach(role -&gt; {</b>
+<b class="nc">&nbsp;                stringJoiner.add(&quot;ROLE_&quot; + role.getRoleName());</b>
+<b class="nc">&nbsp;                if (!CollectionUtils.isEmpty(role.getPermissions()))</b>
+<b class="nc">&nbsp;                    role.getPermissions().forEach(permission</b>
+<b class="nc">&nbsp;                            -&gt; stringJoiner.add(permission.getNamePermission()));</b>
+&nbsp;            });
+&nbsp;
+<b class="nc">&nbsp;        return stringJoiner.toString();</b>
+&nbsp;    }
+&nbsp;}
+&nbsp;
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-02-20 17:49</div>
+</div>
+</body>
+</html>

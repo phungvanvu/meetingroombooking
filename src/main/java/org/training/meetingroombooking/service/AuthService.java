@@ -118,25 +118,31 @@ public class AuthService {
 
 
 
-    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SECRETKEY.getBytes());
+    protected SignedJWT verifyToken(String token) throws JOSEException {
+        try {
+            JWSVerifier verifier = new MACVerifier(SECRETKEY.getBytes());
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
+            SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        var verified = signedJWT.verify(verifier);
+            var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expiryTime.after(new Date())))
+            if (!(verified && expiryTime.after(new Date())))
+                throw new AppEx(ErrorCode.UNAUTHENTICATED);
+
+            if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+                throw new AppEx(ErrorCode.UNAUTHENTICATED);
+
+            return signedJWT;
+        } catch (ParseException e) {
             throw new AppEx(ErrorCode.UNAUTHENTICATED);
-
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new AppEx(ErrorCode.UNAUTHENTICATED);
-        return signedJWT;
+        }
     }
 
 
-    private String generateToken(User user, int expirationMinutes) {
+
+    protected String generateToken(User user, int expirationMinutes) {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
