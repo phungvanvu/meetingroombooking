@@ -1,7 +1,5 @@
 package org.training.meetingroombooking.dto.Request;
 
-import java.util.Objects;
-
 public class RefreshRequest {
     private String token;
 
