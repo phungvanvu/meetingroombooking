@@ -5,19 +5,18 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.training.meetingroombooking.dto.Request.AuthRequest;
-import org.training.meetingroombooking.dto.Request.IntrospectRequest;
-import org.training.meetingroombooking.dto.Request.LogoutRequest;
-import org.training.meetingroombooking.dto.Request.RefreshRequest;
-import org.training.meetingroombooking.dto.Response.AuthResponse;
-import org.training.meetingroombooking.dto.Response.IntrospectResponse;
+import org.training.meetingroombooking.dto.request.AuthRequest;
+import org.training.meetingroombooking.dto.request.IntrospectRequest;
+import org.training.meetingroombooking.dto.request.LogoutRequest;
+import org.training.meetingroombooking.dto.request.RefreshRequest;
+import org.training.meetingroombooking.dto.response.AuthResponse;
+import org.training.meetingroombooking.dto.response.IntrospectResponse;
 import org.training.meetingroombooking.entity.InvalidatedToken;
 import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.exception.AppEx;
@@ -164,4 +163,3 @@ public class AuthService {
         return stringJoiner.toString();
     }
 }
-

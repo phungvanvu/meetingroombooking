@@ -1,4 +1,4 @@
-package org.training.meetingroombooking.dto.Response;
+package org.training.meetingroombooking.dto.response;
 
 public class AuthResponse {
     private String token;

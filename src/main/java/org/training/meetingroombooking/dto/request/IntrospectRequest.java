@@ -1,4 +1,4 @@
-package org.training.meetingroombooking.dto.Request;
+package org.training.meetingroombooking.dto.request;
 
 public class IntrospectRequest {
     private String token;

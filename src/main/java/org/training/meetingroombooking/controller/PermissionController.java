@@ -1,7 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
+import org.training.meetingroombooking.dto.response.ApiResponse;
 import org.training.meetingroombooking.dto.PermissionDTO;
 import org.training.meetingroombooking.service.PermissionService;
 

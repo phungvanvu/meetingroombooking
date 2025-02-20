@@ -1,6 +1,4 @@
-package org.training.meetingroombooking.dto.Request;
-
-import java.util.Objects;
+package org.training.meetingroombooking.dto.request;
 
 public class LogoutRequest {
     private String token;
