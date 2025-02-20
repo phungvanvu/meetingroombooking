@@ -1,13 +1,11 @@
 package org.training.meetingroombooking.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.training.meetingroombooking.dto.UserDTO;
+import org.training.meetingroombooking.dto.Request.UserRequest;
+import org.training.meetingroombooking.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.Role;
 import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.exception.AppEx;
@@ -35,16 +33,15 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder(10);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserDTO createUser(UserDTO userDTO) {
-        if (userRepository.existsByUserName(userDTO.getUserName())) {
+    public UserResponse createUser(UserRequest request) {
+        if (userRepository.existsByUserName(request.getUserName())) {
             throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        User user = userMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(userDTO.getRoles()));
+        Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(request.getRoles()));
         if (roles.isEmpty()) {
             throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
         }
@@ -54,20 +51,17 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserDTO> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserDTO getUserById(int userId) {
+    public UserResponse getUserById(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
         return userMapper.toDTO(user);
     }
 
-    @PostAuthorize("returnObject.userName == authentication.name")
-    public UserDTO getMyInfo() {
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
 
@@ -76,21 +70,19 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    @PostAuthorize("returnObject.userName == authentication.name")
-    public UserDTO updateUser(int userId, UserDTO userDTO) {
+    public UserResponse updateUser(int userId, UserRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
-        userMapper.updateEntity(user, userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        userMapper.updateEntity(user, request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        var roles = roleRepository.findAllById(userDTO.getRoles());
+        var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
 
         return userMapper.toDTO(userRepository.save(user));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
