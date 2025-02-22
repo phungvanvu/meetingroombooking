@@ -44,10 +44,7 @@ public class UserService {
             throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
         }
 
-        // Kiểm tra nếu mật khẩu là null
-        if (userDTO.getPassword() == null || userDTO.getPassword().isEmpty()) {
-            throw new AppEx(ErrorCode.PASSWORD_NOT_PROVIDED);  // Thêm mã lỗi nếu không có mật khẩu
-        }
+
 
         User user = userMapper.toEntity(userDTO);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Mã hóa mật khẩu
@@ -64,7 +61,7 @@ public class UserService {
         UserDTO responseDTO = userMapper.toDTO(user);
         responseDTO.setPassword(null);  // Đảm bảo không trả về mật khẩu
 
-        return userMapper.toDTO(user);
+        return responseDTO;
     }
 
 

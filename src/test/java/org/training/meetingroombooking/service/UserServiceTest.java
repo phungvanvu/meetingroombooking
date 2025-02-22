@@ -6,11 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.training.meetingroombooking.dto.UserDTO;
 import org.training.meetingroombooking.entity.Role;
 import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.exception.AppEx;
+import org.training.meetingroombooking.exception.ErrorCode;
 import org.training.meetingroombooking.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
@@ -37,6 +41,12 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private Authentication authentication;  // Định nghĩa Authentication
+
+    @Mock
+    private SecurityContext securityContext;
 
     @InjectMocks
     private UserService userService;
@@ -71,8 +81,6 @@ public class UserServiceTest {
         // Chuyển DTO thành entity
         when(userMapper.toEntity(userDTO)).thenReturn(user);
 
-        // Mã hóa mật khẩu
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed_password");
 
         // Giả lập lấy danh sách role
         Role role = new Role("USER", "User role description", new HashSet<>());
@@ -80,6 +88,9 @@ public class UserServiceTest {
 
         // Giả lập lưu user vào database
         when(userRepository.save(any(User.class))).thenReturn(user);
+
+        // **Bổ sung mock cho userMapper.toDTO()**
+        when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
 
         // Gọi hàm service
         UserDTO result = userService.createUser(userDTO);
@@ -89,6 +100,7 @@ public class UserServiceTest {
         assertEquals(userDTO.getUserName(), result.getUserName());
         verify(userRepository).save(any(User.class));
     }
+
 
 
 
@@ -137,7 +149,7 @@ public class UserServiceTest {
         when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
 
         UserDTO updatedUser = new UserDTO.Builder()
-                .userName("updated_john")
+                .userName("ptlinh")
                 .fullName("Updated John Doe")
                 .email("updated@example.com")
                 .build();
@@ -145,7 +157,7 @@ public class UserServiceTest {
         UserDTO result = userService.updateUser(1, updatedUser);
 
         assertNotNull(result);
-        assertEquals("updated_john", result.getUserName());
+        assertEquals("ptlinh", result.getUserName());
     }
 
     @Test
@@ -172,5 +184,49 @@ public class UserServiceTest {
         assertThrows(AppEx.class, () -> userService.deleteUser(1));
     }
 
+    @Test
+    void getMyInfo_Success() {
+        // Giả lập user đăng nhập
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testUser");
+        SecurityContextHolder.setContext(securityContext);
+
+        // Giả lập tìm thấy user trong DB
+        User user = new User();
+        user.setUserName("testUser");
+        when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
+
+        // Giả lập ánh xạ sang DTO
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUserName("testUser");
+        when(userMapper.toDTO(user)).thenReturn(userDTO);
+
+        // Gọi phương thức service
+        UserDTO result = userService.getMyInfo();
+
+        // Kiểm tra kết quả
+        assertNotNull(result);
+        assertEquals("testUser", result.getUserName());
+        verify(userRepository).findByUserName("testUser");
+        verify(userMapper).toDTO(user);
+    }
+
+    @Test
+    void getMyInfo_UserNotFound() {
+        // Giả lập user đăng nhập
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("unknownUser");
+        SecurityContextHolder.setContext(securityContext);
+
+        // Giả lập không tìm thấy user trong DB
+        when(userRepository.findByUserName("unknownUser")).thenReturn(Optional.empty());
+
+        // Kiểm tra ngoại lệ
+        AppEx exception = assertThrows(AppEx.class, () -> userService.getMyInfo());
+
+        // Kiểm tra mã lỗi
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        verify(userRepository).findByUserName("unknownUser");
+    }
 
 }
