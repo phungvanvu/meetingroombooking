@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.service;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
 import org.training.meetingroombooking.repository.UserRepository;
+
+import java.text.ParseException;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -114,6 +117,62 @@ class AuthServiceTest {
     void verifyToken_ShouldThrowException_WhenTokenIsInvalid() {
         assertThrows(AppEx.class, () -> authService.verifyToken("invalidToken"));
     }
+    @Test
+    void generateToken_ShouldReturnValidToken() throws ParseException, JOSEException {
+        User user = new User();
+        user.setUserName("***REMOVED***User");
+
+        String token = authService.generateToken(user, 30);
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+        assertThat(signedJWT.getJWTClaimsSet().getIssuer()).isEqualTo("meeting-room-booking");
+    }
+    @Test
+    void verifyToken_ShouldReturnSignedJWT_WhenTokenIsValid() throws Exception {
+        User user = new User();
+        user.setUserName("***REMOVED***User");
+
+        String token = authService.generateToken(user, 30);
+        SignedJWT signedJWT = authService.verifyToken(token);
+
+        assertThat(signedJWT).isNotNull();
+        assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+    }
+    @Test
+    void verifyToken_ShouldThrowException_WhenTokenIsExpired() {
+        User user = new User();
+        user.setUserName("***REMOVED***User");
+
+        String expiredToken = authService.generateToken(user, -1); // Token hết hạn
+        assertThrows(AppEx.class, () -> authService.verifyToken(expiredToken));
+    }
+    @Test
+    void logout_ShouldNotSaveInvalidatedToken_WhenTokenIsExpired() throws Exception {
+        String expiredToken = authService.generateToken(new User(), -1); // Token hết hạn
+        LogoutRequest request = new LogoutRequest(expiredToken);
+
+        authService.logout(request);
+
+        verify(invalidatedTokenRepository, never()).save(any(InvalidatedToken.class));
+    }
+    @Test
+    void refreshToken_ShouldThrowException_WhenTokenIsBlacklisted() throws Exception {
+        User user = new User();
+        user.setUserName("***REMOVED***User");
+
+        String token = authService.generateToken(user, 30);
+        RefreshRequest request = new RefreshRequest(token);
+
+        when(invalidatedTokenRepository.existsById(anyString())).thenReturn(true);
+
+        assertThrows(AppEx.class, () -> authService.refreshToken(request));
+    }
+
+
+
+
+
 }
 
 
