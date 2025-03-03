@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    @PostAuthorize("returnObject.userName == authentication.name")
+    @PostAuthorize("returnObject.data.userName == authentication.name")
     public ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    @PostAuthorize("returnObject.userName == authentication.name")
+    @PostAuthorize("returnObject.data.userName == authentication.name")
     ApiResponse<UserResponse> updateUser(@PathVariable int userId, @Valid @RequestBody UserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
