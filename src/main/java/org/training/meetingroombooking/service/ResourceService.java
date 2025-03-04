@@ -1,12 +1,13 @@
 package org.training.meetingroombooking.service;
 
+import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.dto.ResourceDTO;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Service
 public class ResourceService {
     private List<ResourceDTO> resources = new ArrayList<>();
     public void addResource(ResourceDTO resource) {

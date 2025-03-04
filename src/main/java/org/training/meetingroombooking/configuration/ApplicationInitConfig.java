@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.training.meetingroombooking.entity.Role;
 import org.training.meetingroombooking.entity.User;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
@@ -47,4 +47,5 @@ public class ApplicationInitConfig {
             }
         };
     }
-}
+
+    }
