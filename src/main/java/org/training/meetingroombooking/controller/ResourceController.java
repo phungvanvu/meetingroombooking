@@ -1,16 +1,21 @@
 package org.training.meetingroombooking.controller;
 
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.training.meetingroombooking.dto.ResourceDTO;
 import org.training.meetingroombooking.service.ResourceService;
 
 import java.util.List;
 import java.util.Optional;
-
+@RestController
+@RequestMapping("/resource")
 public class ResourceController {
     private ResourceService resourceService;
     public ResourceController(ResourceService resourceService) {
         this.resourceService = resourceService;
     }
+    @PostMapping
     public void addResource(ResourceDTO resource) {
         resourceService.addResource(resource);
     }

@@ -1,12 +1,19 @@
 package org.training.meetingroombooking.entity;
 
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "resources")
 public class Resource {
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
   private long resourceId;
   private String resourceName;
   private String email;
   private String phone;
   private String StepProcess;
-  private String Create;
+  private String CreateResource;
   private String assignee;
   private String action;
   public Resource() {}
@@ -17,7 +24,7 @@ public class Resource {
     this.email = email;
     this.phone = phone;
     this.StepProcess = stepProcess;
-    this.Create = create;
+    this.CreateResource = create;
     this.assignee = assignee;
     this.action = action;
   }
@@ -62,11 +69,11 @@ public class Resource {
   }
 
   public String getCreate() {
-    return Create;
+    return CreateResource;
   }
 
   public void setCreate(String create) {
-    this.Create = create;
+    this.CreateResource = create;
   }
 
   public String getAssignee() {

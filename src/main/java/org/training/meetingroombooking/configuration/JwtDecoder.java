@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.configuration;
 
 import com.nimbusds.jose.JOSEException;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
