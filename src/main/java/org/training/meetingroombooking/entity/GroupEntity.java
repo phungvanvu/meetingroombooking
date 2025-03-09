@@ -25,6 +25,19 @@ public class GroupEntity {
     @Column(name = "created_date")
     private LocalDate date;
 
+    public GroupEntity() {
+    }
+
+    public GroupEntity(int groupId, String groupName, String location, String division, String department, boolean status, LocalDate date) {
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.location = location;
+        this.division = division;
+        this.department = department;
+        this.status = status;
+        this.date = date;
+    }
+
     public int getGroupId() { return groupId; }
     public void setGroupId(int groupId) { this.groupId = groupId; }
 

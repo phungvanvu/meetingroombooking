@@ -3,12 +3,12 @@ package org.training.meetingroombooking.dto;
 import lombok.Builder;
 
 @Builder
-public class positionRequest {
+public class PositionRequest {
     private int positionId;
     private String positionName;
     private String description;
 
-    public positionRequest(int positionId, String positionName, String description) {
+    public PositionRequest(int positionId, String positionName, String description) {
         this.positionId = positionId;
         this.positionName = positionName;
         this.description = description;
