@@ -3,8 +3,10 @@ package org.training.meetingroombooking.dto.Response;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.util.Set;
 import org.training.meetingroombooking.entity.GroupEntity;
+
+import java.util.Set;
+
 public class UserResponse {
 
 
