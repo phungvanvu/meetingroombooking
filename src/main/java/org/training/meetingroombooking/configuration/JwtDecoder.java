@@ -7,7 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
-import org.training.meetingroombooking.dto.Request.IntrospectRequest;
+import org.training.meetingroombooking.entity.dto.Request.IntrospectRequest;
 import org.training.meetingroombooking.service.AuthService;
 
 import javax.crypto.spec.SecretKeySpec;

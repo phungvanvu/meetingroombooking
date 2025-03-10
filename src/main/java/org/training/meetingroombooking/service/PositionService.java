@@ -2,11 +2,11 @@ package org.training.meetingroombooking.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.training.meetingroombooking.dto.PositionDTO;
-import org.training.meetingroombooking.entity.Position;
+import org.training.meetingroombooking.entity.dto.PositionDTO;
+import org.training.meetingroombooking.entity.models.Position;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.PositionMapper;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.PositionMapper;
 import org.training.meetingroombooking.repository.PositionRepository;
 @Service
 public class PositionService {

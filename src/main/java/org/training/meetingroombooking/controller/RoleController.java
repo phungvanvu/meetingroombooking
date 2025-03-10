@@ -3,8 +3,8 @@ package org.training.meetingroombooking.controller;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
-import org.training.meetingroombooking.dto.RoleDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.RoleDTO;
 import org.training.meetingroombooking.service.RoleService;
 
 import java.util.List;

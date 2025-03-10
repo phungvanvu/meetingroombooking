@@ -6,13 +6,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.training.meetingroombooking.dto.PermissionDTO;
-import org.training.meetingroombooking.entity.Permission;
-import org.training.meetingroombooking.mapper.PermissionMapper;
+import org.training.meetingroombooking.entity.dto.PermissionDTO;
+import org.training.meetingroombooking.entity.models.Permission;
+import org.training.meetingroombooking.entity.mapper.PermissionMapper;
 import org.training.meetingroombooking.repository.PermissionRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

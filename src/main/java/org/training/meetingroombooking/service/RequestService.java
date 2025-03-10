@@ -5,11 +5,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.training.meetingroombooking.dto.RequestDTO;
-import org.training.meetingroombooking.entity.Request;
+import org.training.meetingroombooking.entity.dto.RequestDTO;
+import org.training.meetingroombooking.entity.models.Request;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.RequestMapper;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.RequestMapper;
 import org.training.meetingroombooking.repository.RequestRepository;
 
 import java.util.List;
@@ -75,7 +75,7 @@ public class RequestService {
             request.setLocation(requestDTO.getLocation());
             request.setDescription(requestDTO.getDescription());
             request.setJobLevel(requestDTO.getJobLevel());
-            request.setStatus(requestDTO.isStatus());
+            request.setStatus(requestDTO.getStatus());
             request.setApproval(requestDTO.getApproval());
             request.setTarget(requestDTO.getTarget());
             request.setOnboard(requestDTO.getOnboard());

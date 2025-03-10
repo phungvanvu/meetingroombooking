@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.RequestDTO;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.RequestDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.RequestService;
 
 @RestController
