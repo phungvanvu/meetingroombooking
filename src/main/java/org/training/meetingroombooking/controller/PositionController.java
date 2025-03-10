@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.training.meetingroombooking.dto.PositionDTO;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.PositionDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PositionService;
 
 @RestController

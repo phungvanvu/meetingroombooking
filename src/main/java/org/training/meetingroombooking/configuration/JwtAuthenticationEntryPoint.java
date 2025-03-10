@@ -7,9 +7,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.exception.ApiError;
-import org.training.meetingroombooking.exception.ErrorCode;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override

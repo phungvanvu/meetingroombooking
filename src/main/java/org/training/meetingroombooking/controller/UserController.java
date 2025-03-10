@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.Request.UserRequest;
-import org.training.meetingroombooking.dto.Response.ApiResponse;
-import org.training.meetingroombooking.dto.Response.UserResponse;
+import org.training.meetingroombooking.entity.dto.Request.UserRequest;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.service.UserService;
 
 import java.util.List;
