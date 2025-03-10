@@ -55,6 +55,7 @@ public class AuthController {
             throws ParseException, JOSEException {
         authService.logout(request);
         return ApiResponse.<Void>builder()
+                .success(true)
                 .build();
     }
 
