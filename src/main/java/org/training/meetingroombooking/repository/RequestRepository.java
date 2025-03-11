@@ -3,7 +3,6 @@ package org.training.meetingroombooking.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.training.meetingroombooking.entity.Request;
 
 import java.util.List;
 

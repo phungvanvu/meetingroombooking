@@ -28,10 +28,8 @@ import org.training.meetingroombooking.dto.Request.LogoutRequest;
 import org.training.meetingroombooking.dto.Request.RefreshRequest;
 import org.training.meetingroombooking.dto.Response.AuthResponse;
 import org.training.meetingroombooking.dto.Response.IntrospectResponse;
-import org.training.meetingroombooking.entity.InvalidatedToken;
-import org.training.meetingroombooking.entity.User;
+import org.training.meetingroombooking.entity.models.Position.User;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
 import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 

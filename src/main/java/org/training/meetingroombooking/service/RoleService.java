@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.training.meetingroombooking.dto.RoleDTO;
-import org.training.meetingroombooking.mapper.RoleMapper;
+import org.training.meetingroombooking.entity.mapper.RoleMapper;
 import org.training.meetingroombooking.repository.PermissionRepository;
 import org.training.meetingroombooking.repository.RoleRepository;
 
