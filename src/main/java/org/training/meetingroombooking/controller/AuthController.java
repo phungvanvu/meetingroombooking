@@ -33,7 +33,7 @@ public class AuthController {
         return ApiResponse.<AuthResponse>builder()
                 .success(true)
                 .data(AuthResponse.builder()
-                        .accesstoken(result.getAccessToken())
+                        .accessToken(result.getAccessToken())
                         .refreshToken(result.getRefreshToken())
                         .build())
                 .build();

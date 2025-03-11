@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.training.meetingroombooking.entity.dto.RequestDTO;
+import org.training.meetingroombooking.entity.enums.RequestStatus;
 import org.training.meetingroombooking.entity.models.Request;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -37,28 +38,34 @@ public class RequestServiceTest {
 
     @BeforeEach
     void setUp() {
-        request = new Request();
-        request.setRequestId(1);
-        request.setTitle("Meeting");
-        request.setLocation("Room A");
-        request.setDescription("Project discussion");
-        request.setJobLevel("Senior");
-        request.setStatus(true);
-        request.setApproval("Approved");
-        request.setTarget(LocalDate.now());
-        request.setOnboard(LocalDate.now().plusDays(7));
-        request.setAction("Proceed");
+        request = Request.builder()
+                .requestId(1L)
+                .title("Meeting")
+                .location("Room A")
+                .description("Project discussion")
+                .jobLevel("Senior")
+                .status(RequestStatus.APPROVED)
+                .approval("Approved")
+                .target(LocalDate.now().plusDays(1))
+                .onboard(LocalDate.now().plusDays(7))
+                .createdBy(null)
+                .hrPic(null)
+                .action("Proceed")
+                .build();
 
-        requestDTO = new RequestDTO();
-        requestDTO.setTitle("Meeting");
-        requestDTO.setLocation("Room A");
-        requestDTO.setDescription("Project discussion");
-        requestDTO.setJobLevel("Senior");
-        requestDTO.setStatus(true);
-        requestDTO.setApproval("Approved");
-        requestDTO.setTarget(LocalDate.now());
-        requestDTO.setOnboard(LocalDate.now().plusDays(7));
-        requestDTO.setAction("Proceed");
+        requestDTO = RequestDTO.builder()
+                .title("Meeting")
+                .location("Room A")
+                .description("Project discussion")
+                .jobLevel("Senior")
+                .status(RequestStatus.APPROVED)
+                .approval("Approved")
+                .target(LocalDate.now().plusDays(1))
+                .onboard(LocalDate.now().plusDays(7))
+                .createdBy(1L) // Test dữ liệu dạng Long
+                .hrPic(2L) // Test dữ liệu dạng Long
+                .action("Proceed")
+                .build();
     }
 
     @Test
@@ -71,6 +78,7 @@ public class RequestServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
+        assertEquals("Meeting", result.getContent().get(0).getTitle());
     }
 
     @Test
@@ -92,6 +100,7 @@ public class RequestServiceTest {
         List<RequestDTO> result = requestService.searchRequestsByTitle("Meet");
 
         assertEquals(1, result.size());
+        assertEquals("Meeting", result.get(0).getTitle());
     }
 
     @Test
@@ -104,6 +113,7 @@ public class RequestServiceTest {
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
+        assertEquals("Meeting", result.getContent().get(0).getTitle());
     }
 
     @Test
@@ -120,10 +130,10 @@ public class RequestServiceTest {
 
     @Test
     void ***REMOVED***GetRequestById_Found() {
-        when(requestRepository.findById(1)).thenReturn(Optional.of(request));
+        when(requestRepository.findById(1L)).thenReturn(Optional.of(request));
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        RequestDTO result = requestService.getRequestById(1);
+        RequestDTO result = requestService.getRequestById(1L);
 
         assertNotNull(result);
         assertEquals("Meeting", result.getTitle());
@@ -131,9 +141,9 @@ public class RequestServiceTest {
 
     @Test
     void ***REMOVED***GetRequestById_NotFound() {
-        when(requestRepository.findById(1)).thenReturn(Optional.empty());
+        when(requestRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RequestDTO result = requestService.getRequestById(1);
+        RequestDTO result = requestService.getRequestById(1L);
 
         assertNull(result);
     }
@@ -146,15 +156,16 @@ public class RequestServiceTest {
         List<RequestDTO> result = requestService.getAllRequests();
 
         assertEquals(1, result.size());
+        assertEquals("Meeting", result.get(0).getTitle());
     }
 
     @Test
     void ***REMOVED***UpdateRequest_Found() {
-        when(requestRepository.findById(1)).thenReturn(Optional.of(request));
+        when(requestRepository.findById(1L)).thenReturn(Optional.of(request));
         when(requestRepository.save(any(Request.class))).thenReturn(request);
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        RequestDTO result = requestService.updateRequest(1, requestDTO);
+        RequestDTO result = requestService.updateRequest(1L, requestDTO);
 
         assertNotNull(result);
         assertEquals("Meeting", result.getTitle());
@@ -162,26 +173,26 @@ public class RequestServiceTest {
 
     @Test
     void ***REMOVED***UpdateRequest_NotFound() {
-        when(requestRepository.findById(1)).thenReturn(Optional.empty());
+        when(requestRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RequestDTO result = requestService.updateRequest(1, requestDTO);
+        RequestDTO result = requestService.updateRequest(1L, requestDTO);
 
         assertNull(result);
     }
 
     @Test
     void ***REMOVED***DeleteRequest_Success() {
-        when(requestRepository.existsById(1)).thenReturn(true);
-        doNothing().when(requestRepository).deleteById(1);
+        when(requestRepository.existsById(1L)).thenReturn(true);
+        doNothing().when(requestRepository).deleteById(1L);
 
-        assertDoesNotThrow(() -> requestService.deleteRequest(1));
+        assertDoesNotThrow(() -> requestService.deleteRequest(1L));
     }
 
     @Test
     void ***REMOVED***DeleteRequest_NotFound() {
-        when(requestRepository.existsById(1)).thenReturn(false);
+        when(requestRepository.existsById(1L)).thenReturn(false);
 
-        Exception exception = assertThrows(AppEx.class, () -> requestService.deleteRequest(1));
+        Exception exception = assertThrows(AppEx.class, () -> requestService.deleteRequest(1L));
         assertEquals(ErrorCode.RESOURCE_NOT_FOUND, ((AppEx) exception).getErrorCode());
     }
 }

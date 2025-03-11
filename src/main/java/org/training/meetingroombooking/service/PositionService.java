@@ -26,11 +26,10 @@ public class PositionService {
     List<Position> positions = positionRepository.findAll();
     return positions.stream().map(positionMapper::toDTO).toList();
   }
-  public void deletePosition(int positionId) {
-    if (!positionRepository.existsById(positionId)) {
+  public void deletePosition(String positionName) {
+    if (!positionRepository.existsByPositionName(positionName)) {
       throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
     }
-    positionRepository.deleteById(positionId);
+    positionRepository.deleteByPositionName(positionName);
   }
-
 }

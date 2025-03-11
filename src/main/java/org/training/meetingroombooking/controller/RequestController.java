@@ -69,7 +69,7 @@ public class RequestController {
 
   @GetMapping("/{requestId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<RequestDTO> getRequest(@PathVariable("requestId") int requestId) {
+  public ApiResponse<RequestDTO> getRequest(@PathVariable("requestId") Long requestId) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
         .data(requestService.getRequestById(requestId))
@@ -78,7 +78,7 @@ public class RequestController {
 
   @PutMapping("/{requestId}")
   @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
-  public ApiResponse<RequestDTO> updateRequest(@PathVariable int requestId, @RequestBody RequestDTO request) {
+  public ApiResponse<RequestDTO> updateRequest(@PathVariable Long requestId, @RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
         .data(requestService.updateRequest(requestId, request))
@@ -87,7 +87,7 @@ public class RequestController {
 
   @DeleteMapping("/{requestId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<String> deleteRequest(@PathVariable("requestId") int requestId) {
+  public ApiResponse<String> deleteRequest(@PathVariable("requestId") Long requestId) {
     requestService.deleteRequest(requestId);
     return ApiResponse.<String>builder().success(true).data("User has been deleted").build();
   }

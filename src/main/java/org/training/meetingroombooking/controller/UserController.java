@@ -43,7 +43,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<UserResponse> getUser(@PathVariable("userId") int userId) {
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .data(userService.getUserById(userId))
@@ -61,7 +61,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     @PostAuthorize("returnObject.data.userName == authentication.name")
-    ApiResponse<UserResponse> updateUser(@PathVariable int userId, @Valid @RequestBody UserRequest request) {
+    ApiResponse<UserResponse> updateUser(@PathVariable Long userId, @Valid @RequestBody UserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
                 .data(userService.updateUser(userId, request))
@@ -70,7 +70,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<String> deleteUser(@PathVariable int userId) {
+    ApiResponse<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder().success(true).data("User has been deleted").build();
     }

@@ -22,7 +22,7 @@ public class Resource {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int resourceId;
+  private Long resourceId;
 
   private String name;
   private String email;

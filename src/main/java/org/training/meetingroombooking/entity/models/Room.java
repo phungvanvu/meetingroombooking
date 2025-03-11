@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 @Data
@@ -31,8 +30,7 @@ public class Room {
   private String roomName;
 
   @NotBlank
-  @Size(max = 100)
-  @Column(nullable = false, length = 100)
+  @Column(nullable = false, length = 255)
   private String location;
 
   @Column(nullable = false)
