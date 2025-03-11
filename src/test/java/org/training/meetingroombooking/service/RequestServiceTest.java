@@ -8,10 +8,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.training.meetingroombooking.dto.RequestDTO;
-import org.training.meetingroombooking.entity.Request;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.RequestMapper;
+import org.training.meetingroombooking.entity.mapper.RequestMapper;
 import org.training.meetingroombooking.repository.RequestRepository;
 
 import java.time.LocalDate;

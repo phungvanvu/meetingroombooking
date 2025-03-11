@@ -6,11 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.dto.Request.UserRequest;
 import org.training.meetingroombooking.dto.Response.UserResponse;
-import org.training.meetingroombooking.entity.Role;
-import org.training.meetingroombooking.entity.User;
+import org.training.meetingroombooking.entity.models.Position.User;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.UserMapper;
+import org.training.meetingroombooking.entity.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
