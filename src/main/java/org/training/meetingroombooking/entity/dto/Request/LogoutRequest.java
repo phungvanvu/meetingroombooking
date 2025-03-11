@@ -1,22 +1,14 @@
 package org.training.meetingroombooking.entity.dto.Request;
 
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LogoutRequest {
     private String token;
-
-    public LogoutRequest() {
-    }
-
-    public LogoutRequest(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 }

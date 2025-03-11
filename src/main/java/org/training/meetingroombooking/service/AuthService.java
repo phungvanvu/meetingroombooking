@@ -73,7 +73,7 @@ public class AuthService {
         var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
 
         return AuthResponse.builder()
-                .accesstoken(accessToken)
+                .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
     }
@@ -111,11 +111,10 @@ public class AuthService {
         var newAccessToken = generateToken(user, 30);
 
         return AuthResponse.builder()
-                .accesstoken(newAccessToken)
+                .accessToken(newAccessToken)
                 .refreshToken(request.getToken())
                 .build();
     }
-
 
 
     protected SignedJWT verifyToken(String token) throws JOSEException {

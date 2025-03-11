@@ -55,7 +55,7 @@ public class RequestService {
         return requestMapper.toDTO(savedRequest);
     }
 
-    public RequestDTO getRequestById(int id) {
+    public RequestDTO getRequestById(Long id) {
         Optional<Request> request = requestRepository.findById(id);
         return request.map(requestMapper::toDTO).orElse(null);
     }
@@ -67,7 +67,7 @@ public class RequestService {
                 .collect(Collectors.toList());
     }
 
-    public RequestDTO updateRequest(int id, RequestDTO requestDTO) {
+    public RequestDTO updateRequest(Long id, RequestDTO requestDTO) {
         Optional<Request> existingRequest = requestRepository.findById(id);
         if (existingRequest.isPresent()) {
             Request request = existingRequest.get();
@@ -87,7 +87,7 @@ public class RequestService {
         return null;
     }
 
-    public void deleteRequest(int requestId) {
+    public void deleteRequest(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
         }

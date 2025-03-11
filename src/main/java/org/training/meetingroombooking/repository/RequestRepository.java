@@ -7,7 +7,7 @@ import org.training.meetingroombooking.entity.models.Request;
 
 import java.util.List;
 
-public interface RequestRepository extends JpaRepository<Request, Integer> {
+public interface RequestRepository extends JpaRepository<Request, Long> {
     Page<Request> findAll(Pageable pageable);
     List<Request> findByTitle(String title);
     List<Request> findByTitleContainingIgnoreCase(String keyword);

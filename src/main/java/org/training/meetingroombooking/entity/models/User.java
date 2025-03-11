@@ -16,12 +16,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
 @Table(name = "Users")
 public class User {
 
@@ -64,5 +63,4 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_name")
     )
     private Set<Role> roles;
-
 }

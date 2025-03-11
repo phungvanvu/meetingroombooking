@@ -22,22 +22,17 @@ import java.time.LocalDate;
 public class GroupEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long groupId;
-
     @Column(nullable = false, length = 50)
     private String groupName;
 
     @Column(length = 100)
     private String location;
 
-    @Column(length = 100)
+    @Column(length = 50)
     private String division;
 
     @Column(length = 50)
     private String department;
-
-    private boolean status;
 
     @Column(name = "created_date")
     private LocalDate createdDate;

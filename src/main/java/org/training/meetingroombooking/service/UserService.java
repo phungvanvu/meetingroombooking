@@ -55,7 +55,7 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
     }
 
-    public UserResponse getUserById(int userId) {
+    public UserResponse getUserById(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
         return userMapper.toDTO(user);
@@ -70,7 +70,7 @@ public class UserService {
         return userMapper.toDTO(user);
     }
 
-    public UserResponse updateUser(int userId, UserRequest request) {
+    public UserResponse updateUser(Long userId, UserRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
@@ -83,7 +83,7 @@ public class UserService {
         return userMapper.toDTO(userRepository.save(user));
     }
 
-    public void deleteUser(int userId) {
+    public void deleteUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
         }
