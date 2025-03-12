@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
-import org.training.meetingroombooking.entity.models.Position;
 import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.repository.GroupRepository;
@@ -88,7 +87,7 @@ public class UserMapperImpl implements UserMapper {
         }
 
         // Lấy danh sách vai trò
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+        if (user.getRoles() != null) {
             Set<String> roleNames = user.getRoles().stream()
                     .map(Role::getRoleName)
                     .collect(Collectors.toSet());

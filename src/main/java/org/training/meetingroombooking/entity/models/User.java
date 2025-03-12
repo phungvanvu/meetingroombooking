@@ -44,7 +44,7 @@ public class User {
     private String phoneNumber;
 
     @ManyToOne
-    @JoinColumn(name = "positionId", nullable = true)
+    @JoinColumn(name = "positionId")
     private Position position;
 
     @Column(nullable = false)

@@ -29,5 +29,5 @@ public class EquipmentDTO {
     @NotNull(message = "Device status cannot be null")
     private Boolean available;
 
-    private Long roomId;
+    private Long room;
 }

@@ -3,6 +3,7 @@ package org.training.meetingroombooking.entity.enums;
 import org.training.meetingroombooking.exception.ApiError;
 
 public enum ErrorCode {
+    DATABASE_ERROR("database error"),
     USER_ALREADY_EXISTS("User already exists."),
     RESOURCE_NOT_FOUND("Requested resource does not exist."),
     FUNCTION_NOT_FOUND("Requested API function does not exist."),
