@@ -50,7 +50,7 @@ public class Room {
   private boolean active = true;
 
   @ManyToOne
-  @JoinColumn(name = "groupId", nullable = true)
+  @JoinColumn(name = "groupId")
   private GroupEntity group;
 
   @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
