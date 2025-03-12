@@ -37,7 +37,7 @@ public class RoomDTO {
 
   private boolean active;
 
-  private Long groupId;
+  private String groupName;
 
   private List<EquipmentDTO> equipments;
 }

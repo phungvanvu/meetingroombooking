@@ -3,6 +3,9 @@ package org.training.meetingroombooking.entity.enums;
 import org.training.meetingroombooking.exception.ApiError;
 
 public enum ErrorCode {
+    POSITION_NOT_FOUND("Position not found"),
+    PERMISSION_NOT_FOUND("Permission not found"),
+    ROLE_EXISTS("Role already exists"),
     DATABASE_ERROR("database error"),
     USER_ALREADY_EXISTS("User already exists."),
     RESOURCE_NOT_FOUND("Requested resource does not exist."),

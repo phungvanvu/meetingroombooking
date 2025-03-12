@@ -2,12 +2,15 @@ package org.training.meetingroombooking.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.training.meetingroombooking.entity.dto.RoleDTO;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoleMapper;
+import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PermissionRepository;
 import org.training.meetingroombooking.repository.RoleRepository;
 
@@ -24,19 +27,34 @@ public class RoleService {
         this.roleMapper = roleMapper;
     }
 
-    public RoleDTO create(RoleDTO roleDTO) {
-        var role = roleMapper.toEntity(roleDTO);
-        var permissions = permissionRepository.findAllById(roleDTO.getPermissions());
+    public RoleDTO create(RoleDTO request) {
+        if (roleRepository.existsById(request.getRoleName())) {
+            throw new AppEx(ErrorCode.ROLE_EXISTS);
+        }
+        var role = roleMapper.toEntity(request);
+        var permissions = permissionRepository.findAllById(request.getPermissions());
+        var missingPermissions = request.getPermissions().stream()
+                .filter(p -> permissions.stream().noneMatch(dbPermission -> dbPermission.getPermissionName().equals(p)))
+                .collect(Collectors.toSet());
+        if (!missingPermissions.isEmpty()) {
+            throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
+        }
         role.setPermissions(new HashSet<>(permissions));
         role = roleRepository.save(role);
         return roleMapper.toDTO(role);
     }
 
     public List<RoleDTO> getAll() {
-        return roleRepository.findAll().stream().map(roleMapper::toDTO).toList();
+        return roleRepository.findAll()
+                .stream()
+                .map(roleMapper::toDTO)
+                .toList();
     }
 
-    public void delete(String role) {
-        roleRepository.deleteById(role);
+    public void delete(String roleName) {
+        if (!roleRepository.existsById(roleName)) {
+            throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
+        }
+        roleRepository.deleteById(roleName);
     }
 }

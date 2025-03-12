@@ -62,8 +62,8 @@ public class RequestServiceTest {
                 .approval("Approved")
                 .target(LocalDate.now().plusDays(1))
                 .onboard(LocalDate.now().plusDays(7))
-                .createdBy(1L) // Test dữ liệu dạng Long
-                .hrPic(2L) // Test dữ liệu dạng Long
+                .createdBy(1L)
+                .hrPic(2L)
                 .action("Proceed")
                 .build();
     }

@@ -3,6 +3,7 @@ package org.training.meetingroombooking.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.RequestDTO;
@@ -77,7 +78,7 @@ public class RequestController {
   }
 
   @PutMapping("/{requestId}")
-  @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+  @PostAuthorize("hasRole('ADMIN')")
   public ApiResponse<RequestDTO> updateRequest(@PathVariable Long requestId, @RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
