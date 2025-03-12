@@ -18,11 +18,8 @@ public class Permission {
 
     @Id
     @Column(nullable = false, unique = true, length = 50)
-    private String namePermission;
+    private String permissionName;
 
     @Column(length = 255)
     private String description;
-
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Role> roles;
 }

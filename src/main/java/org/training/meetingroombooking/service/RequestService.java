@@ -71,21 +71,15 @@ public class RequestService {
         Optional<Request> existingRequest = requestRepository.findById(id);
         if (existingRequest.isPresent()) {
             Request request = existingRequest.get();
-            request.setTitle(requestDTO.getTitle());
-            request.setLocation(requestDTO.getLocation());
-            request.setDescription(requestDTO.getDescription());
-            request.setJobLevel(requestDTO.getJobLevel());
-            request.setStatus(requestDTO.getStatus());
-            request.setApproval(requestDTO.getApproval());
-            request.setTarget(requestDTO.getTarget());
-            request.setOnboard(requestDTO.getOnboard());
-            request.setAction(requestDTO.getAction());
+
+            requestMapper.updateEntity(request, requestDTO);
 
             Request updatedRequest = requestRepository.save(request);
             return requestMapper.toDTO(updatedRequest);
         }
         return null;
     }
+
 
     public void deleteRequest(Long requestId) {
         if (!requestRepository.existsById(requestId)) {

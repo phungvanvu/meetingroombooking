@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.util.Set;
 
 @Data
@@ -21,5 +22,5 @@ public class RoleDTO {
     @Size(max = 255, message = "Description must not exceed 255 characters")
     private String description;
 
-    private Set<String> permissions; // Danh sách quyền dưới dạng chuỗi
+    private Set<String> permissions;
 }

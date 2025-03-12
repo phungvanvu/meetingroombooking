@@ -48,17 +48,17 @@ public class UserService {
 
         user.setRoles(roles);
         user = userRepository.save(user);
-        return userMapper.toDTO(user);
+        return userMapper.toUserResponse(user);
     }
 
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toDTO).toList();
+        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     public UserResponse getUserById(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
-        return userMapper.toDTO(user);
+        return userMapper.toUserResponse(user);
     }
 
     public UserResponse getMyInfo() {
@@ -67,7 +67,7 @@ public class UserService {
 
         User user = userRepository.findByUserName(name).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
-        return userMapper.toDTO(user);
+        return userMapper.toUserResponse(user);
     }
 
     public UserResponse updateUser(Long userId, UserRequest request) {
@@ -80,7 +80,7 @@ public class UserService {
         var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
 
-        return userMapper.toDTO(userRepository.save(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public void deleteUser(Long userId) {

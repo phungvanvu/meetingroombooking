@@ -41,7 +41,7 @@ class RoleServiceTest {
     @BeforeEach
     void setUp() {
         permission = new Permission();
-        permission.setNamePermission("READ");
+        permission.setPermissionName("READ");
 
         roleDTO = new RoleDTO();
         roleDTO.setRoleName("Admin");
@@ -83,10 +83,12 @@ class RoleServiceTest {
 
     @Test
     void ***REMOVED***DeleteRole() {
+        when(roleRepository.existsById("Admin")).thenReturn(true);
         doNothing().when(roleRepository).deleteById("Admin");
 
         roleService.delete("Admin");
 
         verify(roleRepository).deleteById("Admin");
     }
+
 }

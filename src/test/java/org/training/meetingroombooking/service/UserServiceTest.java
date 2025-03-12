@@ -12,12 +12,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.UserMapper;
+import org.training.meetingroombooking.entity.models.GroupEntity;
+import org.training.meetingroombooking.entity.models.Position;
+import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +44,7 @@ public class UserServiceTest {
   private PasswordEncoder passwordEncoder;
 
   @Mock
-  private Authentication authentication;  // Định nghĩa Authentication
+  private Authentication authentication;
 
   @Mock
   private SecurityContext securityContext;
@@ -55,132 +58,145 @@ public class UserServiceTest {
 
   @BeforeEach
   void setUp() {
-    request = new UserRequest().Builder()
-        .userName("ptlinh")
-        .fullName("Phung Thi Linh")
-        .email("john.doe@example.com")
-        .password("P@ssw0rd")
-        .roles(Set.of("HR"))
-        .build();
+    Position position = new Position();
+    position.setPositionName("Manager");
+
+    GroupEntity group = new GroupEntity();
+    group.setGroupName("Group 1");
+
+    request = new UserRequest();
+    request.setUserName("ptlinh");
+    request.setFullName("Phung Thi Linh");
+    request.setDepartment("Human Resources");
+    request.setEmail("john.doe@example.com");
+    request.setPhoneNumber("0123456789");
+    request.setPassword("P@ssw0rd");
+    request.setEnabled(true);
+    request.setPosition(position);
+    request.setGroup(group);
+    request.setRoles(Set.of("HR"));
 
     user = new User();
     user.setUserName("ptlinh");
     user.setFullName("Phung Thi Linh");
+    user.setDepartment("Human Resources");
     user.setEmail("john.doe@example.com");
+    user.setPhoneNumber("0123456789");
     user.setPassword("hashed_password");
+    user.setEnabled(true);
+    user.setPosition(position);
+    user.setGroup(group);
+    user.setRoles(Set.of(Role.builder().roleName("HR").build()));
+
+    response = new UserResponse();
+    response.setUserId(1L);
+    response.setUserName("ptlinh");
+    response.setFullName("Phung Thi Linh");
+    response.setDepartment("Human Resources");
+    response.setEmail("john.doe@example.com");
+    response.setPhoneNumber("0123456789");
+    response.setPositionName("Manager");
+    response.setGroupName("HR Department");
+    response.setRoles(Set.of("HR"));
+    response.setEnabled(true);
   }
 
-  //unit ***REMOVED*** từng phương thức
   @Test
-
   void createUser_Success() {
-    // Giả lập user chưa tồn tại
-    when(userRepository.existsByUserName(userDTO.getUserName())).thenReturn(false);
-
-    // Chuyển DTO thành entity
-    when(userMapper.toEntity(userDTO)).thenReturn(user);
-
-
-    // Giả lập lấy danh sách role
-    Role role = new Role("USER", "User role description", new HashSet<>());
-    when(roleRepository.findByRoleNameIn(anySet())).thenReturn(Set.of(role));
-
-    // Giả lập lưu user vào database
+    when(userRepository.existsByUserName(request.getUserName())).thenReturn(false);
+    when(roleRepository.findByRoleNameIn(anySet()))
+            .thenReturn(Set.of(Role.builder().roleName("HR").build()));
+    when(userMapper.toEntity(any(UserRequest.class))).thenReturn(user);
     when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    // **Bổ sung mock cho userMapper.toDTO()**
-    when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+    UserResponse result = userService.createUser(request);
 
-    // Gọi hàm service
-    UserDTO result = userService.createUser(userDTO);
-
-    // Kiểm tra kết quả
     assertNotNull(result);
-    assertEquals(userDTO.getUserName(), result.getUserName());
+    assertEquals(response.getUserName(), result.getUserName());
+    verify(userRepository).existsByUserName(request.getUserName());
     verify(userRepository).save(any(User.class));
+    verify(userMapper).toUserResponse(any(User.class));
   }
-
-
 
 
   @Test
   void createUser_UserAlreadyExists_ThrowsException() {
-    when(userRepository.existsByUserName(userDTO.getUserName())).thenReturn(true);
+    when(userRepository.existsByUserName(request.getUserName())).thenReturn(true);
 
-    assertThrows(AppEx.class, () -> userService.createUser(userDTO));
+    assertThrows(AppEx.class, () -> userService.createUser(request));
   }
 
   @Test
   void getAllUsers_Success() {
     when(userRepository.findAll()).thenReturn(List.of(user));
-    when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    List<UserDTO> result = userService.getAllUsers();
+    List<UserResponse> result = userService.getAllUsers();
 
     assertNotNull(result);
     assertFalse(result.isEmpty());
     assertEquals(1, result.size());
   }
 
-
   @Test
   void getUserById_UserExists_ReturnsUser() {
-    when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
-    when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    UserDTO result = userService.getUserById(1);
-
-    assertNotNull(result);
-    assertEquals(userDTO.getUserName(), result.getUserName());
-  }
-
-  @Test
-  void getUserById_UserNotFound_ThrowsException() {
-    when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
-
-    assertThrows(AppEx.class, () -> userService.getUserById(1));
-  }
-
-  @Test
-  void updateUser_Success() {
-    when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
-    when(userRepository.save(any(User.class))).thenReturn(user);
-    when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
-
-    UserDTO updatedUser = new UserDTO.Builder()
-        .userName("ptlinh")
-        .fullName("Updated John Doe")
-        .email("updated@example.com")
-        .build();
-
-    UserDTO result = userService.updateUser(1, updatedUser);
+    UserResponse result = userService.getUserById(1L);
 
     assertNotNull(result);
     assertEquals("ptlinh", result.getUserName());
   }
 
   @Test
-  void updateUser_UserNotFound_ThrowsException() {
-    when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+  void getUserById_UserNotFound_ThrowsException() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    assertThrows(AppEx.class, () -> userService.updateUser(1, userDTO));
+    assertThrows(AppEx.class, () -> userService.getUserById(1L));
+  }
+
+
+  @Test
+  void updateUser_Success() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(roleRepository.findAllById(anySet()))
+            .thenReturn(List.of(Role.builder().roleName("HR").build()));
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
+
+    UserResponse result = userService.updateUser(1L, request);
+
+    assertNotNull(result);
+    assertEquals(response.getUserName(), result.getUserName());
+    verify(userRepository).findById(1L);
+    verify(userRepository).save(any(User.class));
+    verify(userMapper).toUserResponse(any(User.class));
+  }
+
+
+  @Test
+  void updateUser_UserNotFound_ThrowsException() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+    assertThrows(AppEx.class, () -> userService.updateUser(1L, request));
   }
 
   @Test
   void deleteUser_Success() {
-    when(userRepository.existsById(anyInt())).thenReturn(true);
-    doNothing().when(userRepository).deleteById(anyInt());
+    when(userRepository.existsById(anyLong())).thenReturn(true);
+    doNothing().when(userRepository).deleteById(anyLong());
 
-    assertDoesNotThrow(() -> userService.deleteUser(1));
-
-    verify(userRepository).deleteById(1);
+    assertDoesNotThrow(() -> userService.deleteUser(1L));
+    verify(userRepository).deleteById(1L);
   }
 
   @Test
   void deleteUser_UserNotFound_ThrowsException() {
-    when(userRepository.existsById(anyInt())).thenReturn(false);
+    when(userRepository.existsById(anyLong())).thenReturn(false);
 
-    assertThrows(AppEx.class, () -> userService.deleteUser(1));
+    assertThrows(AppEx.class, () -> userService.deleteUser(1L));
   }
 
   @Test
@@ -196,18 +212,18 @@ public class UserServiceTest {
     when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.of(user));
 
     // Giả lập ánh xạ sang DTO
-    UserDTO userDTO = new UserDTO();
-    userDTO.setUserName("***REMOVED***User");
-    when(userMapper.toDTO(user)).thenReturn(userDTO);
+    UserResponse userResponse = new UserResponse();
+    userResponse.setUserName("***REMOVED***User");
+    when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
     // Gọi phương thức service
-    UserDTO result = userService.getMyInfo();
+    UserResponse result = userService.getMyInfo();
 
     // Kiểm tra kết quả
     assertNotNull(result);
     assertEquals("***REMOVED***User", result.getUserName());
     verify(userRepository).findByUserName("***REMOVED***User");
-    verify(userMapper).toDTO(user);
+    verify(userMapper).toUserResponse(user);
   }
 
   @Test

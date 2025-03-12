@@ -34,11 +34,11 @@ class PermissionServiceTest {
     @BeforeEach
     void setUp() {
         permission = new Permission();
-        permission.setNamePermission("READ_PRIVILEGES");
+        permission.setPermissionName("READ_PRIVILEGES");
         permission.setDescription("Allows reading data");
 
         permissionDTO = new PermissionDTO();
-        permissionDTO.setNamePermission("READ_PRIVILEGES");
+        permissionDTO.setPermissionName("READ_PRIVILEGES");
         permissionDTO.setDescription("Allows reading data");
     }
 
@@ -51,7 +51,7 @@ class PermissionServiceTest {
         PermissionDTO createdPermission = permissionService.create(permissionDTO);
 
         assertNotNull(createdPermission);
-        assertEquals("READ_PRIVILEGES", createdPermission.getNamePermission());
+        assertEquals("READ_PRIVILEGES", createdPermission.getPermissionName());
         assertEquals("Allows reading data", createdPermission.getDescription());
 
         verify(permissionRepository, times(1)).save(permission);
@@ -68,7 +68,7 @@ class PermissionServiceTest {
 
         assertNotNull(permissions);
         assertEquals(1, permissions.size());
-        assertEquals("READ_PRIVILEGES", permissions.get(0).getNamePermission());
+        assertEquals("READ_PRIVILEGES", permissions.get(0).getPermissionName());
 
         verify(permissionRepository, times(1)).findAll();
         verify(permissionMapper, times(1)).toDTO(permission);

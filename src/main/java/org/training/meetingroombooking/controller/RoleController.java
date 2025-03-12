@@ -17,6 +17,7 @@ public class RoleController {
     public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {

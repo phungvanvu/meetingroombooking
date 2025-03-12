@@ -60,7 +60,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    @PostAuthorize("returnObject.data.userName == authentication.name")
+    @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
     ApiResponse<UserResponse> updateUser(@PathVariable Long userId, @Valid @RequestBody UserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)

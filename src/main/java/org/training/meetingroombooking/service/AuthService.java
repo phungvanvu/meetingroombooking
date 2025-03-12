@@ -171,7 +171,7 @@ public class AuthService {
                 stringJoiner.add("ROLE_" + role.getRoleName());
                 if (!CollectionUtils.isEmpty(role.getPermissions()))
                     role.getPermissions().forEach(permission
-                            -> stringJoiner.add(permission.getNamePermission()));
+                            -> stringJoiner.add(permission.getPermissionName()));
             });
 
         return stringJoiner.toString();
