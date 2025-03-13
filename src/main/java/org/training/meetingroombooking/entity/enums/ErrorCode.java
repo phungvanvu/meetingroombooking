@@ -3,6 +3,8 @@ package org.training.meetingroombooking.entity.enums;
 import org.training.meetingroombooking.exception.ApiError;
 
 public enum ErrorCode {
+    NOTIFICATION_NOT_FOUND("notification not found"),
+    GROUP_NOT_FOUND("Group not found"),
     POSITION_NOT_FOUND("Position not found"),
     PERMISSION_NOT_FOUND("Permission not found"),
     ROLE_EXISTS("Role already exists"),
