@@ -28,7 +28,7 @@ public class RoleController {
     }
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<List<RoleDTO>> getAll() {
+    ApiResponse<List<RoleDTO>> getRoles() {
         return ApiResponse.<List<RoleDTO>>builder()
                 .success(true)
                 .data(roleService.getAll())
@@ -37,8 +37,11 @@ public class RoleController {
 
     @DeleteMapping("/{role}")
     @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<Void> delete(@PathVariable String role) {
+    ApiResponse<String> delete(@PathVariable String role) {
         roleService.delete(role);
-        return ApiResponse.<Void>builder().success(true).build();
+        return ApiResponse.<String>builder()
+            .success(true)
+            .data("Role has been deleted")
+            .build();
     }
 }

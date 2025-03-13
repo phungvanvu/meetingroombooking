@@ -1,6 +1,5 @@
 package org.training.meetingroombooking.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.NotificationDTO;
@@ -12,6 +11,7 @@ import org.training.meetingroombooking.repository.NotificationRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.training.meetingroombooking.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +25,12 @@ public class NotificationService {
         notification = notificationRepository.save(notification);
         return notificationMapper.toDTO(notification);
     }
+    public List<NotificationDTO> getAllNotifications() {
+        List<Notification> notifications = notificationRepository.findAll();
+        return notifications.stream()
+            .map(notificationMapper::toDTO)
+            .collect(Collectors.toList());
+    }
 
     public List<NotificationDTO> getNotificationsByUserId(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserUserId(userId);
@@ -32,6 +38,8 @@ public class NotificationService {
                 .map(notificationMapper::toDTO)
                 .collect(Collectors.toList());
     }
+//    public List<NotificationDTO> getMyNotifications() {
+//    }
 
     public void deleteNotification(Long id) {
         if (!notificationRepository.existsById(id)) {

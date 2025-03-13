@@ -34,12 +34,6 @@ public class GroupService {
                 .toList();
     }
 
-    public void update(String groupName, GroupDTO dto) {
-        GroupEntity entity = groupRepository.findById(groupName)
-                .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
-        groupMapper.updateEntity(entity, dto);
-        groupRepository.save(entity);
-    }
     public void delete(String groupName) {
         if (!groupRepository.existsById(groupName)) {
             throw new AppEx(ErrorCode.GROUP_NOT_FOUND);

@@ -90,7 +90,10 @@ public class RequestController {
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteRequest(@PathVariable("requestId") Long requestId) {
     requestService.deleteRequest(requestId);
-    return ApiResponse.<String>builder().success(true).data("User has been deleted").build();
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("Request has been deleted")
+        .build();
   }
 
 }
