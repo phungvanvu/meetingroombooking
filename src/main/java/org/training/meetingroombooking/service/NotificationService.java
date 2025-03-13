@@ -4,8 +4,10 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.NotificationDTO;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.NotificationMapper;
 import org.training.meetingroombooking.entity.models.Notification;
+import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.NotificationRepository;
 
 import java.util.List;
@@ -24,7 +26,6 @@ public class NotificationService {
         return notificationMapper.toDTO(notification);
     }
 
-    // ✅ Lấy danh sách thông báo theo userId
     public List<NotificationDTO> getNotificationsByUserId(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserUserId(userId);
         return notifications.stream()
@@ -32,22 +33,10 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-
-//    public NotificationDTO updateNotification(Long id, NotificationDTO dto) {
-//        Notification existingNotification = notificationRepository.findById(id)
-//                .orElseThrow(() -> new EntityNotFoundException("Notification not found with id: " + id));
-//
-//        // Ánh xạ dữ liệu từ DTO vào entity hiện tại
-//        notificationMapper.updateEntity(existingNotification, dto);
-//
-//        existingNotification = notificationRepository.save(existingNotification);
-//        return notificationMapper.toDTO(existingNotification);
-//    }
-
-
     public void deleteNotification(Long id) {
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Notification not found with id: " + id));
-        notificationRepository.delete(notification);
+        if (!notificationRepository.existsById(id)) {
+            throw new AppEx(ErrorCode.NOTIFICATION_NOT_FOUND);
+        }
+        notificationRepository.deleteById(id);
     }
 }

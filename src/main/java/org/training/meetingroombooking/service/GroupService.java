@@ -2,8 +2,10 @@ package org.training.meetingroombooking.service;
 
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.GroupDTO;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.GroupMapper;
 import org.training.meetingroombooking.entity.models.GroupEntity;
+import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.GroupRepository;
 
 import java.util.List;
@@ -34,8 +36,14 @@ public class GroupService {
 
     public void update(String groupName, GroupDTO dto) {
         GroupEntity entity = groupRepository.findById(groupName)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
         groupMapper.updateEntity(entity, dto);
         groupRepository.save(entity);
+    }
+    public void delete(String groupName) {
+        if (!groupRepository.existsById(groupName)) {
+            throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
+        }
+        groupRepository.deleteById(groupName);
     }
 }

@@ -3,8 +3,10 @@ package org.training.meetingroombooking.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.PermissionDTO;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.models.Permission;
 import org.training.meetingroombooking.entity.mapper.PermissionMapper;
+import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PermissionRepository;
 
 import java.util.List;
@@ -28,10 +30,15 @@ public class PermissionService {
 
     public List<PermissionDTO> getAllPermissions() {
         var permissions = permissionRepository.findAll();
-        return permissions.stream().map(permissionMapper::toDTO).toList();
+        return permissions.stream().
+            map(permissionMapper::toDTO)
+            .toList();
     }
 
     public void deletePermission(String permission) {
+        if (!permissionRepository.existsById(permission)) {
+            throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
+        }
         permissionRepository.deleteById(permission);
     }
 }
