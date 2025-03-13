@@ -10,7 +10,7 @@ import org.training.meetingroombooking.service.PermissionService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/permissions")
+@RequestMapping("/permission")
 public class PermissionController {
 
     private final PermissionService permissionService;
@@ -30,7 +30,7 @@ public class PermissionController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<PermissionDTO>> findAll() {
+    public ApiResponse<List<PermissionDTO>> getPermissions() {
         return ApiResponse.<List<PermissionDTO>>builder()
                 .success(true)
                 .data(permissionService.getAllPermissions())
@@ -39,8 +39,11 @@ public class PermissionController {
 
     @DeleteMapping("/{permission}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> delete(@PathVariable String permission) {
+    public ApiResponse<String> delete(@PathVariable String permission) {
         permissionService.deletePermission(permission);
-        return ApiResponse.<Void>builder().success(true).build();
+        return ApiResponse.<String>builder()
+            .success(true)
+            .data("Permission has been deleted")
+            .build();
     }
 }

@@ -10,39 +10,42 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.training.meetingroombooking.entity.dto.PositionDTO;
+import org.training.meetingroombooking.entity.dto.GroupDTO;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
-import org.training.meetingroombooking.service.PositionService;
+import org.training.meetingroombooking.service.GroupService;
 
 @RestController
-@RequestMapping("/position")
-public class PositionController {
-  private final PositionService positionService;
-  public PositionController(PositionService positionService) {
-    this.positionService = positionService;
+@RequestMapping("/group")
+public class GroupController {
+  private final GroupService groupService;
+
+  public GroupController(GroupService groupService) {
+    this.groupService = groupService;
   }
+
   @PostMapping
-  public ApiResponse<PositionDTO> createPosition(@Valid @RequestBody PositionDTO positionDTO) {
-    return ApiResponse.<PositionDTO>builder()
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<GroupDTO> create(@Valid @RequestBody GroupDTO request) {
+    return ApiResponse.<GroupDTO>builder()
         .success(true)
-        .data(positionService.create(positionDTO))
+        .data(groupService.create(request))
         .build();
   }
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<List<PositionDTO>> getPositions() {
-    return ApiResponse.<List<PositionDTO>>builder()
+  public ApiResponse<List<GroupDTO>> getGroups(@Valid @RequestBody GroupDTO request) {
+    return ApiResponse.<List<GroupDTO>>builder()
         .success(true)
-        .data(positionService.getAll())
+        .data(groupService.getAll())
         .build();
   }
-  @DeleteMapping("/{name}")
+  @DeleteMapping("/{groupName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<String> deletePosition(@PathVariable String name) {
-    positionService.deletePosition(name);
+  public ApiResponse<String> delete(@PathVariable("groupName") String groupName) {
+    groupService.delete(groupName);
     return ApiResponse.<String>builder()
         .success(true)
-        .data("Position has been deleted")
+        .data("Group has been deleted")
         .build();
   }
 }

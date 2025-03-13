@@ -72,6 +72,9 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<String> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        return ApiResponse.<String>builder().success(true).data("User has been deleted").build();
+        return ApiResponse.<String>builder()
+            .success(true)
+            .data("User has been deleted")
+            .build();
     }
 }
