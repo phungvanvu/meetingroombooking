@@ -49,10 +49,6 @@ public class Room {
   @Column(nullable = false)
   private boolean active = true;
 
-  @ManyToOne
-  @JoinColumn(name = "groupId")
-  private GroupEntity group;
-
   @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<RoomBooking> bookings;
 }

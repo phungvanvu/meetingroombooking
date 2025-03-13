@@ -13,11 +13,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface RoomMapper {
 
-  @Mapping(target = "groupName", source = "group.groupName") // Sửa groupId → groupName
   @Mapping(target = "equipments", source = "equipments")
   RoomDTO toRoomDTO(Room room);
 
-  @Mapping(target = "group", source = "groupName", qualifiedByName = "mapGroupNameToGroup")
   @Mapping(target = "equipments", source = "equipments")
   Room toEntity(RoomDTO roomDTO);
 
@@ -43,23 +41,6 @@ public interface RoomMapper {
     Room room = new Room();
     room.setRoomId(roomId);
     return room;
-  }
-
-  // Map từ groupName → GroupEntity
-  @Named("mapGroupNameToGroup")
-  default GroupEntity mapGroupNameToGroup(String groupName) {
-    if (groupName == null) {
-      return null;
-    }
-    GroupEntity group = new GroupEntity();
-    group.setGroupName(groupName);
-    return group;
-  }
-
-  // Map từ GroupEntity → groupName
-  @Named("mapGroupToGroupName")
-  default String mapGroupToGroupName(GroupEntity group) {
-    return group != null ? group.getGroupName() : null;
   }
 
   List<EquipmentDTO> mapEquipments(List<Equipment> equipments);
