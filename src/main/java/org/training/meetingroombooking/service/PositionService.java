@@ -9,7 +9,6 @@ import org.training.meetingroombooking.entity.mapper.PositionMapper;
 import org.training.meetingroombooking.entity.models.Position;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PositionRepository;
-
 import java.util.List;
 
 @Service
