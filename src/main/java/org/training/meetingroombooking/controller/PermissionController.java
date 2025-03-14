@@ -33,14 +33,14 @@ public class PermissionController {
     public ApiResponse<List<PermissionDTO>> getPermissions() {
         return ApiResponse.<List<PermissionDTO>>builder()
                 .success(true)
-                .data(permissionService.getAllPermissions())
+                .data(permissionService.getAll())
                 .build();
     }
 
     @DeleteMapping("/{permission}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> delete(@PathVariable String permission) {
-        permissionService.deletePermission(permission);
+        permissionService.delete(permission);
         return ApiResponse.<String>builder()
             .success(true)
             .data("Permission has been deleted")

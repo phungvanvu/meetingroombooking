@@ -34,7 +34,7 @@ public class NotificationService {
             .map(notificationMapper::toDTO)
             .collect(Collectors.toList());
     }
-    public List<NotificationDTO> getByUserId(Long userId) {
+    public List<NotificationDTO> getNotifacationByUserId(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserUserId(userId);
         return notifications.stream()
                 .map(notificationMapper::toDTO)

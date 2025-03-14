@@ -1,6 +1,5 @@
 package org.training.meetingroombooking.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.PermissionDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -11,7 +10,6 @@ import org.training.meetingroombooking.repository.PermissionRepository;
 
 import java.util.List;
 
-@Slf4j
 @Service
 public class PermissionService {
     private final PermissionRepository permissionRepository;
