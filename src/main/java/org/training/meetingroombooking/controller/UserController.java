@@ -36,7 +36,7 @@ public class UserController {
     ApiResponse<List<UserResponse>> getUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .success(true)
-                .data(userService.getAllUsers())
+                .data(userService.getAll())
                 .build();
     }
 
@@ -46,7 +46,7 @@ public class UserController {
     ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
-                .data(userService.getUserById(userId))
+                .data(userService.getById(userId))
                 .build();
     }
 
@@ -64,14 +64,14 @@ public class UserController {
     ApiResponse<UserResponse> updateUser(@PathVariable Long userId, @Valid @RequestBody UserRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .success(true)
-                .data(userService.updateUser(userId, request))
+                .data(userService.update(userId, request))
                 .build();
     }
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     ApiResponse<String> deleteUser(@PathVariable Long userId) {
-        userService.deleteUser(userId);
+        userService.delete(userId);
         return ApiResponse.<String>builder()
             .success(true)
             .data("User has been deleted")

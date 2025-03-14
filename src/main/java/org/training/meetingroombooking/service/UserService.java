@@ -50,14 +50,14 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public List<UserResponse> getAllUsers() {
+    public List<UserResponse> getAll() {
         return userRepository.findAll()
             .stream()
             .map(userMapper::toUserResponse)
             .toList();
     }
 
-    public UserResponse getUserById(long userId) {
+    public UserResponse getById(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
         return userMapper.toUserResponse(user);
@@ -72,7 +72,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse updateUser(Long userId, UserRequest request) {
+    public UserResponse update(Long userId, UserRequest request) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
@@ -85,7 +85,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public void deleteUser(Long userId) {
+    public void delete(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
         }

@@ -132,7 +132,7 @@ public class UserServiceTest {
     when(userRepository.findAll()).thenReturn(List.of(user));
     when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    List<UserResponse> result = userService.getAllUsers();
+    List<UserResponse> result = userService.getAll();
 
     assertNotNull(result);
     assertFalse(result.isEmpty());
@@ -144,7 +144,7 @@ public class UserServiceTest {
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    UserResponse result = userService.getUserById(1L);
+    UserResponse result = userService.getById(1L);
 
     assertNotNull(result);
     assertEquals("ptlinh", result.getUserName());
@@ -154,7 +154,7 @@ public class UserServiceTest {
   void getUserById_UserNotFound_ThrowsException() {
     when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    assertThrows(AppEx.class, () -> userService.getUserById(1L));
+    assertThrows(AppEx.class, () -> userService.getById(1L));
   }
 
 
@@ -166,7 +166,7 @@ public class UserServiceTest {
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    UserResponse result = userService.updateUser(1L, request);
+    UserResponse result = userService.update(1L, request);
 
     assertNotNull(result);
     assertEquals(response.getUserName(), result.getUserName());
@@ -180,7 +180,7 @@ public class UserServiceTest {
   void updateUser_UserNotFound_ThrowsException() {
     when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    assertThrows(AppEx.class, () -> userService.updateUser(1L, request));
+    assertThrows(AppEx.class, () -> userService.update(1L, request));
   }
 
   @Test
@@ -188,7 +188,7 @@ public class UserServiceTest {
     when(userRepository.existsById(anyLong())).thenReturn(true);
     doNothing().when(userRepository).deleteById(anyLong());
 
-    assertDoesNotThrow(() -> userService.deleteUser(1L));
+    assertDoesNotThrow(() -> userService.delete(1L));
     verify(userRepository).deleteById(1L);
   }
 
@@ -196,7 +196,7 @@ public class UserServiceTest {
   void deleteUser_UserNotFound_ThrowsException() {
     when(userRepository.existsById(anyLong())).thenReturn(false);
 
-    assertThrows(AppEx.class, () -> userService.deleteUser(1L));
+    assertThrows(AppEx.class, () -> userService.delete(1L));
   }
 
   @Test
