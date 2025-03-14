@@ -12,20 +12,22 @@ import org.training.meetingroombooking.repository.PositionRepository;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class PositionService {
 
-  private PositionRepository positionRepository;
-  private PositionMapper positionMapper;
+  private final PositionRepository positionRepository;
+  private final PositionMapper positionMapper;
 
-  @Transactional
+  public  PositionService(PositionRepository positionRepository, PositionMapper positionMapper) {
+    this.positionRepository = positionRepository;
+    this.positionMapper = positionMapper;
+  }
+
   public PositionDTO create(PositionDTO dto) {
     Position entity = positionMapper.toEntity(dto);
     entity = positionRepository.save(entity);
     return positionMapper.toDTO(entity);
   }
 
-  @Transactional(readOnly = true)
   public List<PositionDTO> getAll() {
     List<Position> positions = positionRepository.findAll();
     return positions.stream()
@@ -33,7 +35,6 @@ public class PositionService {
             .toList();
   }
 
-  @Transactional
   public void deletePosition(String positionName) {
     if (!positionRepository.existsByPositionName(positionName)) {
       throw new AppEx(ErrorCode.POSITION_NOT_FOUND);

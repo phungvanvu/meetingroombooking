@@ -2,6 +2,7 @@ package org.training.meetingroombooking.entity.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
@@ -14,10 +15,13 @@ import java.util.List;
 public interface RoomMapper {
 
   @Mapping(target = "equipments", source = "equipments")
-  RoomDTO toRoomDTO(Room room);
+  RoomDTO toDTO(Room entity);
 
   @Mapping(target = "equipments", source = "equipments")
-  Room toEntity(RoomDTO roomDTO);
+  Room toEntity(RoomDTO dto);
+
+  @Mapping(target = "equipments", source = "equipments")
+  void updateRoom(@MappingTarget Room entity, RoomDTO dto);
 
   // Map từ Equipment → EquipmentDTO
   @Mapping(target = "room", source = "room", qualifiedByName = "mapRoomToRoomId")

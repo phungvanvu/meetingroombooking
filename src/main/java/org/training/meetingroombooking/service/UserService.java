@@ -13,7 +13,6 @@ import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,7 +51,10 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+        return userRepository.findAll()
+            .stream()
+            .map(userMapper::toUserResponse)
+            .toList();
     }
 
     public UserResponse getUserById(long userId) {
