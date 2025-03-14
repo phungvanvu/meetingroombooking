@@ -28,14 +28,14 @@ public class PermissionService {
         return permissionMapper.toDTO(permission);
     }
 
-    public List<PermissionDTO> getAllPermissions() {
+    public List<PermissionDTO> getAll() {
         var permissions = permissionRepository.findAll();
         return permissions.stream().
             map(permissionMapper::toDTO)
             .toList();
     }
 
-    public void deletePermission(String permission) {
+    public void delete(String permission) {
         if (!permissionRepository.existsById(permission)) {
             throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
         }

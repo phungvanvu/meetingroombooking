@@ -28,7 +28,7 @@ public class NotificationController {
   public ApiResponse<NotificationDTO> create(@RequestBody NotificationDTO request) {
     return ApiResponse.<NotificationDTO>builder()
         .success(true)
-        .data(notificationService.createNotification(request))
+        .data(notificationService.create(request))
         .build();
   }
 
@@ -37,7 +37,7 @@ public class NotificationController {
   public ApiResponse<List<NotificationDTO>> getNotifications(){
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
-        .data(notificationService.getAllNotifications())
+        .data(notificationService.getAll())
         .build();
   }
 
@@ -46,14 +46,14 @@ public class NotificationController {
   public ApiResponse<List<NotificationDTO>> getNotifications(@PathVariable Long userId){
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
-        .data(notificationService.getNotificationsByUserId(userId))
+        .data(notificationService.getByUserId(userId))
         .build();
   }
 
   @DeleteMapping("/{notificationId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteNotification(@PathVariable Long notificationId){
-    notificationService.deleteNotification(notificationId);
+    notificationService.delete(notificationId);
     return ApiResponse.<String>builder()
         .success(true)
         .data("Notification has been deleted")

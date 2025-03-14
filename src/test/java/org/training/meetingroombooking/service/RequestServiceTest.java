@@ -74,7 +74,7 @@ public class RequestServiceTest {
         when(requestRepository.findAll(any(Pageable.class))).thenReturn(mockPage);
         when(requestMapper.toDTO(any(Request.class))).thenReturn(requestDTO);
 
-        Page<RequestDTO> result = requestService.getAllRequestsPaged(0, 10, "title", "asc");
+        Page<RequestDTO> result = requestService.getAllPaged(0, 10, "title", "asc");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -86,7 +86,7 @@ public class RequestServiceTest {
         when(requestRepository.findByTitle("Meeting")).thenReturn(Collections.singletonList(request));
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        List<RequestDTO> result = requestService.getRequestsByExactTitle("Meeting");
+        List<RequestDTO> result = requestService.getByExactTitle("Meeting");
 
         assertEquals(1, result.size());
         assertEquals("Meeting", result.get(0).getTitle());
@@ -97,7 +97,7 @@ public class RequestServiceTest {
         when(requestRepository.findByTitleContainingIgnoreCase("Meet")).thenReturn(Collections.singletonList(request));
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        List<RequestDTO> result = requestService.searchRequestsByTitle("Meet");
+        List<RequestDTO> result = requestService.searchByTitle("Meet");
 
         assertEquals(1, result.size());
         assertEquals("Meeting", result.get(0).getTitle());
@@ -109,7 +109,7 @@ public class RequestServiceTest {
         when(requestRepository.findByTitleContainingIgnoreCase(anyString(), any(Pageable.class))).thenReturn(mockPage);
         when(requestMapper.toDTO(any(Request.class))).thenReturn(requestDTO);
 
-        Page<RequestDTO> result = requestService.searchRequestsByTitlePaged("Meet", 0, 10, "title", "asc");
+        Page<RequestDTO> result = requestService.searchByTitlePaged("Meet", 0, 10, "title", "asc");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
@@ -122,7 +122,7 @@ public class RequestServiceTest {
         when(requestRepository.save(any(Request.class))).thenReturn(request);
         when(requestMapper.toDTO(any(Request.class))).thenReturn(requestDTO);
 
-        RequestDTO result = requestService.createRequest(requestDTO);
+        RequestDTO result = requestService.create(requestDTO);
 
         assertNotNull(result);
         assertEquals("Meeting", result.getTitle());
@@ -133,7 +133,7 @@ public class RequestServiceTest {
         when(requestRepository.findById(1L)).thenReturn(Optional.of(request));
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        RequestDTO result = requestService.getRequestById(1L);
+        RequestDTO result = requestService.getById(1L);
 
         assertNotNull(result);
         assertEquals("Meeting", result.getTitle());
@@ -143,7 +143,7 @@ public class RequestServiceTest {
     void ***REMOVED***GetRequestById_NotFound() {
         when(requestRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RequestDTO result = requestService.getRequestById(1L);
+        RequestDTO result = requestService.getById(1L);
 
         assertNull(result);
     }
@@ -153,7 +153,7 @@ public class RequestServiceTest {
         when(requestRepository.findAll()).thenReturn(Collections.singletonList(request));
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        List<RequestDTO> result = requestService.getAllRequests();
+        List<RequestDTO> result = requestService.getAll();
 
         assertEquals(1, result.size());
         assertEquals("Meeting", result.get(0).getTitle());
@@ -165,7 +165,7 @@ public class RequestServiceTest {
         when(requestRepository.save(any(Request.class))).thenReturn(request);
         when(requestMapper.toDTO(request)).thenReturn(requestDTO);
 
-        RequestDTO result = requestService.updateRequest(1L, requestDTO);
+        RequestDTO result = requestService.update(1L, requestDTO);
 
         assertNotNull(result);
         assertEquals("Meeting", result.getTitle());
@@ -175,7 +175,7 @@ public class RequestServiceTest {
     void ***REMOVED***UpdateRequest_NotFound() {
         when(requestRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RequestDTO result = requestService.updateRequest(1L, requestDTO);
+        RequestDTO result = requestService.update(1L, requestDTO);
 
         assertNull(result);
     }

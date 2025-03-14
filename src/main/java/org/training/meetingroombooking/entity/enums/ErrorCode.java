@@ -3,6 +3,9 @@ package org.training.meetingroombooking.entity.enums;
 import org.training.meetingroombooking.exception.ApiError;
 
 public enum ErrorCode {
+    ROOM_NOT_FOUND("Room not found"),
+    REQUEST_NOT_FOUND("Request not found"),
+    EQUIPMENT_NOT_FOUND("equipment not found"),
     NOTIFICATION_NOT_FOUND("notification not found"),
     GROUP_NOT_FOUND("Group not found"),
     POSITION_NOT_FOUND("Position not found"),

@@ -11,7 +11,7 @@ public interface RequestMapper {
 
     @Mapping(target = "createdBy", source = "createdBy.userId")
     @Mapping(target = "hrPic", source = "hrPic.userId")
-    RequestDTO toDTO(Request request);
+    RequestDTO toDTO(Request entity);
 
     @Mapping(target = "createdBy", source = "createdBy", qualifiedByName = "mapUserIdToUser")
     @Mapping(target = "hrPic", source = "hrPic", qualifiedByName = "mapUserIdToUser")
@@ -19,6 +19,6 @@ public interface RequestMapper {
 
     @Mapping(target = "createdBy", source = "createdBy", qualifiedByName = "mapUserIdToUser")
     @Mapping(target = "hrPic", source = "hrPic", qualifiedByName = "mapUserIdToUser")
-    void updateEntity(@MappingTarget Request request, RequestDTO dto);
+    void updateEntity(@MappingTarget Request entity, RequestDTO dto);
 }
 

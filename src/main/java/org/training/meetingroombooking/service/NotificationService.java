@@ -11,28 +11,30 @@ import org.training.meetingroombooking.repository.NotificationRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.training.meetingroombooking.repository.UserRepository;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final NotificationMapper notificationMapper;
 
-    public NotificationDTO createNotification(NotificationDTO dto) {
+    public NotificationService(NotificationRepository notificationRepository, NotificationMapper notificationMapper) {
+        this.notificationRepository = notificationRepository;
+        this.notificationMapper = notificationMapper;
+    }
+
+    public NotificationDTO create(NotificationDTO dto) {
         Notification notification = notificationMapper.toEntity(dto);
         notification = notificationRepository.save(notification);
         return notificationMapper.toDTO(notification);
     }
-    public List<NotificationDTO> getAllNotifications() {
+    public List<NotificationDTO> getAll() {
         List<Notification> notifications = notificationRepository.findAll();
         return notifications.stream()
             .map(notificationMapper::toDTO)
             .collect(Collectors.toList());
     }
-
-    public List<NotificationDTO> getNotificationsByUserId(Long userId) {
+    public List<NotificationDTO> getByUserId(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserUserId(userId);
         return notifications.stream()
                 .map(notificationMapper::toDTO)
@@ -41,7 +43,7 @@ public class NotificationService {
 //    public List<NotificationDTO> getMyNotifications() {
 //    }
 
-    public void deleteNotification(Long id) {
+    public void delete(Long id) {
         if (!notificationRepository.existsById(id)) {
             throw new AppEx(ErrorCode.NOTIFICATION_NOT_FOUND);
         }

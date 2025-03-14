@@ -26,60 +26,60 @@ public class RequestService {
         this.requestMapper = requestMapper;
     }
 
-    public Page<RequestDTO> getAllRequestsPaged(int page, int size, String sortBy, String sortDirection) {
+    public Page<RequestDTO> getAllPaged(int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Request> requestPage = requestRepository.findAll(pageable);
         return requestPage.map(requestMapper::toDTO);
     }
-    public List<RequestDTO> getRequestsByExactTitle(String title) {
+    public List<RequestDTO> getByExactTitle(String title) {
         List<Request> requests = requestRepository.findByTitle(title);
         return requests.stream().map(requestMapper::toDTO).collect(Collectors.toList());
     }
 
-    public List<RequestDTO> searchRequestsByTitle(String keyword) {
+    public List<RequestDTO> searchByTitle(String keyword) {
         List<Request> requests = requestRepository.findByTitleContainingIgnoreCase(keyword);
         return requests.stream().map(requestMapper::toDTO).collect(Collectors.toList());
     }
 
-    public Page<RequestDTO> searchRequestsByTitlePaged(String keyword, int page, int size, String sortBy, String sortDirection) {
+    public Page<RequestDTO> searchByTitlePaged(String keyword, int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Request> requestPage = requestRepository.findByTitleContainingIgnoreCase(keyword, pageable);
         return requestPage.map(requestMapper::toDTO);
     }
 
-    public RequestDTO createRequest(RequestDTO requestDTO) {
-        Request request = requestMapper.toEntity(requestDTO);
+    public RequestDTO create(RequestDTO dto) {
+        Request request = requestMapper.toEntity(dto);
         Request savedRequest = requestRepository.save(request);
         return requestMapper.toDTO(savedRequest);
     }
 
-    public RequestDTO getRequestById(Long id) {
-        Optional<Request> request = requestRepository.findById(id);
-        return request.map(requestMapper::toDTO).orElse(null);
+    public RequestDTO getById(Long requestId) {
+        Optional<Request> request = requestRepository.findById(requestId);
+        return request.map(requestMapper::toDTO).orElseThrow(
+            () -> new AppEx(ErrorCode.REQUEST_NOT_FOUND));
     }
 
-    public List<RequestDTO> getAllRequests() {
+    public List<RequestDTO> getAll() {
         List<Request> requests = requestRepository.findAll();
         return requests.stream()
                 .map(requestMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public RequestDTO updateRequest(Long id, RequestDTO requestDTO) {
-        Optional<Request> existingRequest = requestRepository.findById(id);
+    public RequestDTO update(Long requestId, RequestDTO dto) {
+        Optional<Request> existingRequest = requestRepository.findById(requestId);
         if (existingRequest.isPresent()) {
             Request request = existingRequest.get();
 
-            requestMapper.updateEntity(request, requestDTO);
+            requestMapper.updateEntity(request, dto);
 
             Request updatedRequest = requestRepository.save(request);
             return requestMapper.toDTO(updatedRequest);
         }
-        return null;
+        throw  new AppEx(ErrorCode.REQUEST_NOT_FOUND);
     }
-
 
     public void deleteRequest(Long requestId) {
         if (!requestRepository.existsById(requestId)) {

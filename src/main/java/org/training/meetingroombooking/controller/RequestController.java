@@ -27,17 +27,17 @@ public class RequestController {
           @RequestParam(defaultValue = "requestId") String sortBy,
           @RequestParam(defaultValue = "asc") String sortDirection
   ) {
-    return requestService.getAllRequestsPaged(page, size, sortBy, sortDirection);
+    return requestService.getAllPaged(page, size, sortBy, sortDirection);
   }
 
   @GetMapping("/search/exact")
   public List<RequestDTO> getRequestsByExactTitle(@RequestParam String title) {
-    return requestService.getRequestsByExactTitle(title);
+    return requestService.getByExactTitle(title);
   }
 
   @GetMapping("/search")
   public List<RequestDTO> searchRequestsByTitle(@RequestParam String keyword) {
-    return requestService.searchRequestsByTitle(keyword);
+    return requestService.searchByTitle(keyword);
   }
 
   @GetMapping("/search/paged")
@@ -47,7 +47,7 @@ public class RequestController {
           @RequestParam(defaultValue = "5") int size,
           @RequestParam(defaultValue = "title") String sortBy,
           @RequestParam(defaultValue = "asc") String sortDirection) {
-    return requestService.searchRequestsByTitlePaged(keyword, page, size, sortBy, sortDirection);
+    return requestService.searchByTitlePaged(keyword, page, size, sortBy, sortDirection);
   }
 
   @GetMapping
@@ -55,16 +55,16 @@ public class RequestController {
   public ApiResponse<List<RequestDTO>> getRequests() {
     return ApiResponse.<List<RequestDTO>>builder()
         .success(true)
-        .data(requestService.getAllRequests())
+        .data(requestService.getAll())
         .build();
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RequestDTO> createRequest(@RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
-        .data(requestService.createRequest(request))
+        .data(requestService.create(request))
         .build();
   }
 
@@ -73,7 +73,7 @@ public class RequestController {
   public ApiResponse<RequestDTO> getRequest(@PathVariable("requestId") Long requestId) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
-        .data(requestService.getRequestById(requestId))
+        .data(requestService.getById(requestId))
         .build();
   }
 
@@ -82,7 +82,7 @@ public class RequestController {
   public ApiResponse<RequestDTO> updateRequest(@PathVariable Long requestId, @RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
-        .data(requestService.updateRequest(requestId, request))
+        .data(requestService.update(requestId, request))
         .build();
   }
 

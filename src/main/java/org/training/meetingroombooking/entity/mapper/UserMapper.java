@@ -8,7 +8,6 @@ import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
