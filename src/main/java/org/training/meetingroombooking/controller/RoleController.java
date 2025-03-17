@@ -10,7 +10,7 @@ import org.training.meetingroombooking.service.RoleService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/role")
 public class RoleController {
     private final RoleService roleService;
 

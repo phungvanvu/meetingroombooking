@@ -16,7 +16,7 @@ public class Equipment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long equipmentId;
 
     @Column(nullable = false, length = 50)
     private String name; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
