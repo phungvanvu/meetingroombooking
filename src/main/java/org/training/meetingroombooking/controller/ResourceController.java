@@ -25,14 +25,14 @@ public class ResourceController {
     this.resourceService = resourceService;
   }
 
-  @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<ResourceDTO> createResource(@Valid @RequestBody ResourceDTO dto) {
-    return ApiResponse.<ResourceDTO>builder()
-        .success(true)
-        .data(resourceService.create(dto))
-        .build();
-  }
+//  @PostMapping
+//  @PreAuthorize("hasRole('ADMIN')")
+//  public ApiResponse<ResourceDTO> createResource(@Valid @RequestBody ResourceDTO dto) {
+//    return ApiResponse.<ResourceDTO>builder()
+//        .success(true)
+//        .data(resourceService.create(dto))
+//        .build();
+//  }
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
@@ -40,6 +40,14 @@ public class ResourceController {
     return ApiResponse.<List<ResourceDTO>>builder()
         .success(true)
         .data(resourceService.getAll())
+        .build();
+  }
+  @GetMapping("/{resourceId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<ResourceDTO> getResource(@PathVariable Long resourceId) {
+    return ApiResponse.<ResourceDTO>builder()
+        .success(true)
+        .data(resourceService.getById(resourceId))
         .build();
   }
 

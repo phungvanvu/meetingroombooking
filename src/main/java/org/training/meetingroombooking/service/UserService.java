@@ -46,8 +46,8 @@ public class UserService {
         }
 
         user.setRoles(roles);
-        user = userRepository.save(user);
-        return userMapper.toUserResponse(user);
+        User savedUser = userRepository.save(user);
+        return userMapper.toUserResponse(savedUser);
     }
 
     public List<UserResponse> getAll() {

@@ -22,8 +22,8 @@ public class PermissionService {
 
     public PermissionDTO create(PermissionDTO permissionDTO) {
         Permission permission = permissionMapper.toEntity(permissionDTO);
-        permission = permissionRepository.save(permission);
-        return permissionMapper.toDTO(permission);
+        Permission savedPermission = permissionRepository.save(permission);
+        return permissionMapper.toDTO(savedPermission);
     }
 
     public List<PermissionDTO> getAll() {

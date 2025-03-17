@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.training.meetingroombooking.entity.dto.RoleDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoleMapper;
+import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PermissionRepository;
 import org.training.meetingroombooking.repository.RoleRepository;
@@ -40,8 +41,8 @@ public class RoleService {
             throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
         }
         role.setPermissions(new HashSet<>(permissions));
-        role = roleRepository.save(role);
-        return roleMapper.toDTO(role);
+        Role savedrole = roleRepository.save(role);
+        return roleMapper.toDTO(savedrole);
     }
 
     public List<RoleDTO> getAll() {

@@ -24,8 +24,8 @@ public class EquipmentService {
 
   public EquipmentDTO create(EquipmentDTO equipmentDTO) {
     Equipment entity = equipmentMapper.toEntity(equipmentDTO);
-    entity = equipmentRepository.save(entity);
-    return equipmentMapper.toDTO(entity);
+    Equipment savedEquipment = equipmentRepository.save(entity);
+    return equipmentMapper.toDTO(savedEquipment);
   }
 
   public List<EquipmentDTO> getAll() {
