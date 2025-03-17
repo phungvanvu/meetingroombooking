@@ -46,7 +46,7 @@ public class NotificationController {
   public ApiResponse<List<NotificationDTO>> getNotifications(@PathVariable Long userId){
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
-        .data(notificationService.getByUserId(userId))
+        .data(notificationService.getNotifacationByUserId(userId))
         .build();
   }
 

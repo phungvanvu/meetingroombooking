@@ -1,8 +1,6 @@
 package org.training.meetingroombooking.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.PositionDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.PositionMapper;
