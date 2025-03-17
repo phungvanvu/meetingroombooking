@@ -21,11 +21,11 @@ public class ResourceService {
     this.resourceMapper = resourceMapper;
   }
 
-  public ResourceDTO create(ResourceDTO dto) {
-    Resource resource = ResourceMapper.toEntity(dto);
-    Resource saveResource = resourceRepository.save(resource);
-    return resourceMapper.toDTO(saveResource);
-  }
+//  public ResourceDTO create(ResourceDTO dto) {
+//    Resource resource = ResourceMapper.toEntity(dto);
+//    Resource saveResource = resourceRepository.save(resource);
+//    return resourceMapper.toDTO(saveResource);
+//  }
 
   public ResourceDTO getById(Long resourceId) {
     Optional<Resource> resource = resourceRepository.findById(resourceId);

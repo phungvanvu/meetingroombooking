@@ -25,8 +25,8 @@ public class NotificationService {
 
     public NotificationDTO create(NotificationDTO dto) {
         Notification notification = notificationMapper.toEntity(dto);
-        notification = notificationRepository.save(notification);
-        return notificationMapper.toDTO(notification);
+        Notification savedNotification = notificationRepository.save(notification);
+        return notificationMapper.toDTO(savedNotification);
     }
     public List<NotificationDTO> getAll() {
         List<Notification> notifications = notificationRepository.findAll();

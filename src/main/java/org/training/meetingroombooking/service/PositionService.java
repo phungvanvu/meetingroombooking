@@ -22,8 +22,8 @@ public class PositionService {
 
   public PositionDTO create(PositionDTO dto) {
     Position entity = positionMapper.toEntity(dto);
-    entity = positionRepository.save(entity);
-    return positionMapper.toDTO(entity);
+    Position savedPosition = positionRepository.save(entity);
+    return positionMapper.toDTO(savedPosition);
   }
 
   public List<PositionDTO> getAll() {

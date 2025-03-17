@@ -23,8 +23,8 @@ public class GroupService {
 
   public GroupDTO create(GroupDTO dto) {
     GroupEntity entity = groupMapper.toEntity(dto);
-    entity = groupRepository.save(entity);
-    return groupMapper.toDTO(entity);
+    GroupEntity savedGroup = groupRepository.save(entity);
+    return groupMapper.toDTO(savedGroup);
   }
 
   public List<GroupDTO> getAll() {
