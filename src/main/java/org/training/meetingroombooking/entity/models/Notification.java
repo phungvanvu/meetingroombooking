@@ -27,7 +27,7 @@ public class Notification {
   @Column(nullable = false)
   private NotificationType type; // Loại thông báo (INFO, WARNING, ERROR)
 
-  private boolean isRead;
+  private boolean hasRead;
 
   @ManyToOne
   @JoinColumn(name = "user_id")

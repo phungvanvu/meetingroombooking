@@ -20,8 +20,12 @@ public class RoomBookingDTO {
     @NotNull(message = "Room cannot be null")
     private Long roomId;
 
+    private String roomName;
+
     @NotNull(message = "The person placing the order cannot be left blank.")
     private Long bookedById;
+
+    private String userName;
 
     @NotNull(message = "Request cannot be left blank")
     private Long requestId;

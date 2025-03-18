@@ -2,6 +2,7 @@ package org.training.meetingroombooking.entity.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.training.meetingroombooking.entity.dto.NotificationDTO;
 import org.training.meetingroombooking.entity.models.Notification;
 
@@ -14,6 +15,7 @@ public interface NotificationMapper {
   @Mapping(source = "user", target = "userId", qualifiedByName = "mapUserToUserId")
   NotificationDTO toDTO(Notification entity);
 
+  void updateEntity(@MappingTarget Notification entity, NotificationDTO dto);
 }
 
 

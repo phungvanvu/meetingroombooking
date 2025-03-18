@@ -1,7 +1,13 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +49,24 @@ public class RoomBookingController {
         .build();
   }
 
+  @GetMapping("/user/{userName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getBookingsByUserName(userName))
+            .build();
+  }
+
+  @GetMapping("/MyBookings")
+  @PreAuthorize("isAuthenticated()")
+  public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getMyBookings())
+            .build();
+  }
+
   @PutMapping("/{bookingId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomBookingDTO> updateRoomBooking(@PathVariable Long bookingId, @Valid @RequestBody RoomBookingDTO dto) {
@@ -59,5 +83,15 @@ public class RoomBookingController {
         .success(true)
         .data("room booking has been deleted")
         .build();
+  }
+
+  @GetMapping("/export-excel")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
+    ByteArrayOutputStream outputStream = roomBookingService.exportBookingsToExcel();
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings.xlsx")
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(outputStream.toByteArray());
   }
 }

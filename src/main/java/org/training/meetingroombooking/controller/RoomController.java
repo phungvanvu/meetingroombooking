@@ -43,6 +43,15 @@ public class RoomController {
         .build();
   }
 
+  @GetMapping("/{roomId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<RoomDTO> getRoomById(@PathVariable Long roomId) {
+    return ApiResponse.<RoomDTO>builder()
+            .success(true)
+            .data(roomService.findById(roomId))
+            .build();
+  }
+
   @PutMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> updateRoom(@PathVariable Long roomId, @Valid @RequestBody RoomDTO dto) {

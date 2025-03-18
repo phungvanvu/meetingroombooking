@@ -43,6 +43,16 @@ public class EquipmentController {
         .build();
   }
 
+  @GetMapping("/{equipmentId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<EquipmentDTO> getEquipmentById(@PathVariable Long equipmentId) {
+    return ApiResponse.<EquipmentDTO>builder()
+            .success(true)
+            .data(equipmentService.getById(equipmentId))
+            .build();
+  }
+
+
   @PutMapping("/{equipmentId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable Long equipmentId, @Valid @RequestBody EquipmentDTO dto) {
@@ -55,6 +65,7 @@ public class EquipmentController {
   @DeleteMapping("/{equipmentId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteEquipment(@PathVariable Long equipmentId) {
+    equipmentService.delete(equipmentId);
     return ApiResponse.<String>builder()
         .success(true)
         .data("equipment has been deleted")
