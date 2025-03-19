@@ -29,7 +29,6 @@ public class Equipment {
 
     @Column(nullable = false)
     private boolean available = true; // Trạng thái của thiết bị
-
     // Mỗi thiết bị thuộc về một phòng cụ thể
     @ManyToOne
     @JoinColumn(name = "roomId", nullable = true)
