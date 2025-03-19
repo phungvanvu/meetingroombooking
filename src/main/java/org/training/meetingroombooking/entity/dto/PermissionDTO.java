@@ -19,5 +19,4 @@ public class PermissionDTO {
 
     @Size(max = 255, message = "description cannot exceed 255 characters")
     private String description;
-
 }
