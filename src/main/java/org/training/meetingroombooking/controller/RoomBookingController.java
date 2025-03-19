@@ -94,4 +94,23 @@ public class RoomBookingController {
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .body(outputStream.toByteArray());
   }
+
+  @GetMapping("/monthly-bookings/{month}/{year}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Long> getMonthlyBookingCount(@PathVariable int month, @PathVariable int year) {
+    return ApiResponse.<Long>builder()
+            .success(true)
+            .data(roomBookingService.getMonthlyBookingCount(month, year))
+            .build();
+  }
+
+  @GetMapping("/current-month-bookings")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Long> getCurrentMonthBookingCount() {
+    return ApiResponse.<Long>builder()
+            .success(true)
+            .data(roomBookingService.getCurrentMonthBookingCount())
+            .build();
+  }
+
 }

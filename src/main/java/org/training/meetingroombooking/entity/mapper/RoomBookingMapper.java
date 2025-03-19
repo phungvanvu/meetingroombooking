@@ -16,6 +16,7 @@ public interface RoomBookingMapper {
   @Mapping(target = "userName", source = "bookedBy.userName")
   @Mapping(target = "roomId", source = "room.roomId")
   @Mapping(target = "roomName", source = "room.roomName")
+  @Mapping(target = "userEmail", source = "bookedBy.email")
   RoomBookingDTO toDTO(RoomBooking entity);
 
   @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")
