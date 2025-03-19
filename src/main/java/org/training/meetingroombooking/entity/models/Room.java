@@ -49,6 +49,9 @@ public class Room {
   @Column(nullable = false)
   private boolean active = true;
 
+  @Column(length = 255)
+  private String imageUrl;
+
   @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<RoomBooking> bookings;
 }

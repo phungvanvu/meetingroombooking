@@ -37,6 +37,8 @@ public class RoomDTO {
 
   private boolean active;
 
-  private List<EquipmentDTO> equipments;
+  private String imageUrl;
+
+  private List<String> equipments;
 }
 
