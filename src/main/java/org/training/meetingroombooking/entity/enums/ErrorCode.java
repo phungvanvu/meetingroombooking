@@ -3,6 +3,7 @@ package org.training.meetingroombooking.entity.enums;
 import org.training.meetingroombooking.exception.ApiError;
 
 public enum ErrorCode {
+    INVALID_FILE_TYPE("Invalid file type. Only PNG, JPG, and JPEG are allowed."),
     ROOMBOOKING_NOT_FOUND("Room booking not found"),
     ROOM_NOT_FOUND("Room not found"),
     REQUEST_NOT_FOUND("Request not found"),
