@@ -22,6 +22,8 @@ public class RoomBookingDTO {
 
     private String roomName;
 
+    private String userEmail;
+
     @NotNull(message = "The person placing the order cannot be left blank.")
     private Long bookedById;
 

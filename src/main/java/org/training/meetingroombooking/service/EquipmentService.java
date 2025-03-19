@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
@@ -57,5 +58,24 @@ public class EquipmentService {
       throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
     }
     equipmentRepository.deleteById(id);
+  }
+
+  // Lấy danh sách thiết bị không khả dụng
+  public List<EquipmentDTO> getUnavailableEquipments() {
+    return equipmentRepository.findByAvailableFalse()
+            .stream()
+            .map(equipmentMapper::toDTO)
+            .toList();
+  }
+
+  // Thống kê thiết bị theo trạng thái
+  public Map<String, Long> getEquipmentStatistics() {
+    long availableCount = equipmentRepository.countByAvailableTrue();
+    long unavailableCount = equipmentRepository.countByAvailableFalse();
+
+    return Map.of(
+            "available", availableCount,
+            "unavailable", unavailableCount
+    );
   }
 }

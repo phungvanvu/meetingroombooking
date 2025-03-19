@@ -2,15 +2,23 @@ package org.training.meetingroombooking.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import jakarta.mail.MessagingException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
+import org.training.meetingroombooking.entity.dto.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
 import org.training.meetingroombooking.entity.models.RoomBooking;
@@ -22,17 +30,53 @@ public class RoomBookingService {
 
   private final RoomBookingRepository roomBookingRepository;
   private final RoomBookingMapper roomBookingMapper;
+  private final EmailService emailService;
 
-  public RoomBookingService(RoomBookingRepository roomBookingRepository, RoomBookingMapper roomBookingMapper) {
+  public RoomBookingService(RoomBookingRepository roomBookingRepository,
+                            RoomBookingMapper roomBookingMapper,
+                            EmailService emailService) {
     this.roomBookingRepository = roomBookingRepository;
     this.roomBookingMapper = roomBookingMapper;
+    this.emailService = emailService;
+  }
+
+  public RoomSummaryDTO getMostBookedRoomOfMonth() {
+    LocalDate currentDate = LocalDate.now();
+    int month = currentDate.getMonthValue();
+    int year = currentDate.getYear();
+
+    Optional<Object[]> result = roomBookingRepository.findMostBookedRoomOfMonth(month, year);
+
+    if (result.isPresent()) {
+      Long roomId = (Long) result.get()[0];
+      long count = (Long) result.get()[1];
+
+      return new RoomSummaryDTO(roomId, "Most booked room of the month", count);
+    }
+    throw new AppEx(ErrorCode.ROOMBOOKING_NOT_FOUND);
+  }
+
+  public long getMonthlyBookingCount(int month, int year) {
+    return roomBookingRepository.countBookingsByMonth(month, year);
+  }
+
+  public long getCurrentMonthBookingCount() {
+    LocalDate currentDate = LocalDate.now();
+    return getMonthlyBookingCount(currentDate.getMonthValue(), currentDate.getYear());
   }
 
   public RoomBookingDTO create(RoomBookingDTO dto) {
     RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
     RoomBooking savedRoomBooking = roomBookingRepository.save(roomBooking);
+    // Gửi email sau khi tạo thành công
+    try {
+      emailService.sendRoomBookingConfirmationEmail(dto);
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    }
     return roomBookingMapper.toDTO(savedRoomBooking);
   }
+
   public List<RoomBookingDTO> getAll() {
     List<RoomBooking> roomBookings = roomBookingRepository.findAll();
     return roomBookings.stream()
@@ -117,4 +161,28 @@ public class RoomBookingService {
     style.setFont(font);
     return style;
   }
+
+  @Scheduled(fixedRate = 3600000) // Chạy mỗi 1 giờ
+  @Transactional
+  public void sendMeetingReminderEmails() {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime twoHoursLater = now.plus(2, ChronoUnit.HOURS);
+
+    List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now, twoHoursLater);
+
+    for (RoomBooking booking : upcomingMeetings) {
+      try {
+        emailService.sendMeetingReminderEmail(
+                booking.getBookedBy().getEmail(),
+                booking.getBookedBy().getUserName(),
+                booking.getRoom().getRoomName(),
+                booking.getStartTime().toString(),
+                booking.getEndTime().toString()
+        );
+      } catch (MessagingException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
 }

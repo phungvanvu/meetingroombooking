@@ -2,6 +2,8 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,4 +73,22 @@ public class EquipmentController {
         .data("equipment has been deleted")
         .build();
   }
+  @GetMapping("/unavailable")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<List<EquipmentDTO>> getUnavailableEquipments() {
+    return ApiResponse.<List<EquipmentDTO>>builder()
+            .success(true)
+            .data(equipmentService.getUnavailableEquipments())
+            .build();
+  }
+
+  @GetMapping("/statistics")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Map<String, Long>> getEquipmentStatistics() {
+    return ApiResponse.<Map<String, Long>>builder()
+            .success(true)
+            .data(equipmentService.getEquipmentStatistics())
+            .build();
+  }
+
 }
