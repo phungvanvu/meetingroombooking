@@ -38,7 +38,7 @@ public class RoomService {
       }
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-      String uploadDir = "uploads/";
+      String uploadDir = "uploads/rooms";
       File uploadPath = new File(uploadDir);
       if (!uploadPath.exists()) {
         uploadPath.mkdirs();
