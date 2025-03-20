@@ -64,7 +64,7 @@ class PermissionServiceTest {
         when(permissionRepository.findAll()).thenReturn(List.of(permission));
         when(permissionMapper.toDTO(permission)).thenReturn(permissionDTO);
 
-        List<PermissionDTO> permissions = permissionService.getAllPermissions();
+        List<PermissionDTO> permissions = permissionService.getAll();
 
         assertNotNull(permissions);
         assertEquals(1, permissions.size());
@@ -78,7 +78,7 @@ class PermissionServiceTest {
     void ***REMOVED***DeletePermission() {
         doNothing().when(permissionRepository).deleteById("READ_PRIVILEGES");
 
-        permissionService.deletePermission("READ_PRIVILEGES");
+        permissionService.delete("READ_PRIVILEGES");
 
         verify(permissionRepository, times(1)).deleteById("READ_PRIVILEGES");
     }

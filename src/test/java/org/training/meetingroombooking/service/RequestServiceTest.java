@@ -192,7 +192,7 @@ public class RequestServiceTest {
     void ***REMOVED***DeleteRequest_NotFound() {
         when(requestRepository.existsById(1L)).thenReturn(false);
 
-        Exception exception = assertThrows(AppEx.class, () -> requestService.deleteRequest(1L));
-        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, ((AppEx) exception).getErrorCode());
+        AppEx exception = assertThrows(AppEx.class, () -> requestService.deleteRequest(1L));
+        assertEquals(ErrorCode.RESOURCE_NOT_FOUND, exception.getErrorCode());
     }
 }
