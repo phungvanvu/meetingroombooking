@@ -1,10 +1,12 @@
 package org.training.meetingroombooking.entity.enums;
 
+import lombok.Getter;
 import org.training.meetingroombooking.exception.ApiError;
 
+@Getter
 public enum ErrorCode {
     INVALID_FILE_TYPE("Invalid file type. Only PNG, JPG, and JPEG are allowed."),
-    ROOMBOOKING_NOT_FOUND("Room booking not found"),
+    ROOM_BOOKING_NOT_FOUND("Room booking not found"),
     ROOM_NOT_FOUND("Room not found"),
     REQUEST_NOT_FOUND("Request not found"),
     EQUIPMENT_NOT_FOUND("equipment not found"),
@@ -37,10 +39,6 @@ public enum ErrorCode {
 
     ErrorCode(String message) {
         this.message = message;
-    }
-
-    public String getMessage() {
-        return message;
     }
 
     public ApiError toApiError(String customMessage) {

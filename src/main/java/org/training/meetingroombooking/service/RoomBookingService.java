@@ -53,7 +53,7 @@ public class RoomBookingService {
 
       return new RoomSummaryDTO(roomId, "Most booked room of the month", count);
     }
-    throw new AppEx(ErrorCode.ROOMBOOKING_NOT_FOUND);
+    throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
   }
 
   public long getMonthlyBookingCount(int month, int year) {
@@ -103,11 +103,11 @@ public class RoomBookingService {
       RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
       return roomBookingMapper.toDTO(updatedRoomBooking);
     }
-    throw new AppEx(ErrorCode.ROOMBOOKING_NOT_FOUND);
+    throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
   }
   public void delete(Long bookingId) {
     if (roomBookingRepository.existsById(bookingId)) {
-      throw new AppEx(ErrorCode.ROOMBOOKING_NOT_FOUND);
+      throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
     }
     roomBookingRepository.deleteById(bookingId);
   }
