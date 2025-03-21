@@ -19,7 +19,7 @@ public class RequestController {
 
     this.requestService = requestService;
   }
-  @PreAuthorize("hasRole('ADMIN')")
+
   @GetMapping("/paged")
   public Page<RequestDTO> getRequestsPaged(
           @RequestParam(defaultValue = "0") int page,
@@ -51,7 +51,7 @@ public class RequestController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
+  @PostAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RequestDTO>> getRequests() {
     return ApiResponse.<List<RequestDTO>>builder()
         .success(true)
@@ -60,7 +60,6 @@ public class RequestController {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RequestDTO> createRequest(@RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -69,7 +68,7 @@ public class RequestController {
   }
 
   @GetMapping("/{requestId}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<RequestDTO> getRequest(@PathVariable("requestId") Long requestId) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -78,7 +77,7 @@ public class RequestController {
   }
 
   @PutMapping("/{requestId}")
-  @PostAuthorize("hasRole('ADMIN')")
+  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<RequestDTO> updateRequest(@PathVariable Long requestId, @RequestBody RequestDTO request) {
     return ApiResponse.<RequestDTO>builder()
         .success(true)
@@ -87,7 +86,7 @@ public class RequestController {
   }
 
   @DeleteMapping("/{requestId}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<String> deleteRequest(@PathVariable("requestId") Long requestId) {
     requestService.deleteRequest(requestId);
     return ApiResponse.<String>builder()

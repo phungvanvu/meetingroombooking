@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.entity.dto;
 
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -29,8 +30,9 @@ public class RoomBookingDTO {
 
     private String userName;
 
-    @NotNull(message = "Request cannot be left blank")
+    @NotNull(message = "Request cannot be Null")
     private Long requestId;
+
 
     @FutureOrPresent(message = "The start time must be present or in the future.")
     @NotNull(message = "Start time cannot be null")

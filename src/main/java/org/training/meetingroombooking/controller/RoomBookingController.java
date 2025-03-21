@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +34,7 @@ public class RoomBookingController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<RoomBookingDTO> createRoom(@Valid @RequestBody RoomBookingDTO dto) {
+  public ApiResponse<RoomBookingDTO> createRoomBooking(@Valid @RequestBody RoomBookingDTO dto) {
     return ApiResponse.<RoomBookingDTO>builder()
         .success(true)
         .data(roomBookingService.create(dto))
@@ -41,7 +42,6 @@ public class RoomBookingController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getRoomBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -50,7 +50,6 @@ public class RoomBookingController {
   }
 
   @GetMapping("/user/{userName}")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
             .success(true)
@@ -59,7 +58,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/MyBookings")
-  @PreAuthorize("isAuthenticated()")
+  @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
             .success(true)

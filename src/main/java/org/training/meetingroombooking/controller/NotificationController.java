@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -21,7 +22,7 @@ public class NotificationController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<NotificationDTO> create(@RequestBody NotificationDTO request) {
+  public ApiResponse<NotificationDTO> create(@Valid @RequestBody NotificationDTO request) {
     return ApiResponse.<NotificationDTO>builder()
         .success(true)
         .data(notificationService.create(request))
@@ -46,8 +47,8 @@ public class NotificationController {
   }
 
   @GetMapping("/{userName}")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<List<NotificationDTO>> getNotifications(@PathVariable String userName) {
+  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
+  public ApiResponse<List<NotificationDTO>> getNotifications(@Valid @PathVariable String userName) {
     return ApiResponse.<List<NotificationDTO>>builder()
             .success(true)
             .data(notificationService.getNotificationsByUserName(userName))

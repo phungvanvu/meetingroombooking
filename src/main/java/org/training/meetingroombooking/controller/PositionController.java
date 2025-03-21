@@ -36,10 +36,10 @@ public class PositionController {
         .data(positionService.getAll())
         .build();
   }
-  @DeleteMapping("/{name}")
+  @DeleteMapping("/{positionName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<String> deletePosition(@PathVariable String name) {
-    positionService.deletePosition(name);
+  public ApiResponse<String> deletePosition(@PathVariable String positionName) {
+    positionService.deletePosition(positionName);
     return ApiResponse.<String>builder()
         .success(true)
         .data("Position has been deleted")

@@ -36,7 +36,6 @@ public class RoomController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomDTO>> getRooms() {
     return ApiResponse.<List<RoomDTO>>builder()
         .success(true)
@@ -45,7 +44,6 @@ public class RoomController {
   }
 
   @GetMapping("/{roomId}")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> getRoomById(@PathVariable Long roomId) {
     return ApiResponse.<RoomDTO>builder()
             .success(true)

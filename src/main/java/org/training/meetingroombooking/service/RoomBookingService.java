@@ -162,7 +162,7 @@ public class RoomBookingService {
     return style;
   }
 
-  @Scheduled(fixedRate = 3600000) // Chạy mỗi 1 giờ
+  @Scheduled(fixedRate = 1800000) // tự động thực hiện mỗi 30 phút
   @Transactional
   public void sendMeetingReminderEmails() {
     LocalDateTime now = LocalDateTime.now();
