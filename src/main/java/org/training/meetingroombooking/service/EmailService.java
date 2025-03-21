@@ -51,7 +51,7 @@ public class EmailService {
         System.out.println("Sending email to: " + userEmail);
 
         String subject = "Meeting room booking confirmation successful";
-        String htmlBody = "<h3>Greet " + user.getUserName() + ",</h3>"
+        String htmlBody = "<h3>Greet " + user.getFullName() + ",</h3>"
             + "<p>You have successfully booked a meeting room!</p>"
             + "<ul>"
             + "<li><b>Room:</b> " + room.getRoomName() + "</li>"
