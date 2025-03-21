@@ -6,10 +6,11 @@ import org.mapstruct.MappingTarget;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, RoomMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class, RoomMapper.class, RequestMapper.class})
 public interface RoomBookingMapper {
   @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")
   @Mapping(target = "room", source = "roomId",qualifiedByName = "mapRoomIdToRoom")
+  @Mapping(target = "request", source = "requestId", qualifiedByName = "mapRequestIdToRequest")
   RoomBooking toEntity(RoomBookingDTO dto);
 
   @Mapping(target = "bookedById", source = "bookedBy.userId")
@@ -17,6 +18,7 @@ public interface RoomBookingMapper {
   @Mapping(target = "roomId", source = "room.roomId")
   @Mapping(target = "roomName", source = "room.roomName")
   @Mapping(target = "userEmail", source = "bookedBy.email")
+  @Mapping(target = "requestId", source = "request.requestId")
   RoomBookingDTO toDTO(RoomBooking entity);
 
   @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")

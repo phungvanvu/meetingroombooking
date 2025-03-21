@@ -5,7 +5,5 @@ import org.springframework.stereotype.Repository;
 import org.training.meetingroombooking.entity.models.Position;
 
 @Repository
-public interface PositionRepository extends JpaRepository<Position, Long> {
-    boolean existsByPositionName(String positionName);
-    void deleteByPositionName(String positionName);
+public interface PositionRepository extends JpaRepository<Position, String> {
 }

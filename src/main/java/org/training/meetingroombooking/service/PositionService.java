@@ -34,9 +34,9 @@ public class PositionService {
   }
 
   public void deletePosition(String positionName) {
-    if (!positionRepository.existsByPositionName(positionName)) {
+    if (!positionRepository.existsById(positionName)) {
       throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
     }
-    positionRepository.deleteByPositionName(positionName);
+    positionRepository.deleteById(positionName);
   }
 }
