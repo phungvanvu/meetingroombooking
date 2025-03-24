@@ -62,13 +62,13 @@ public class AuthService {
 
   public AuthResponse authenticate(AuthRequest request) {
     var user = userRepository.findByUserName(request.getUsername())
-        .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> new AppEx(ErrorCode.INVALID_LOGIN));
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
     boolean auth = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
     if (!auth) {
-      throw new AppEx(ErrorCode.UNAUTHENTICATED);
+      throw new AppEx(ErrorCode.INVALID_LOGIN);
     }
 
     var accessToken = generateToken(user, 30);  // Access Token sống 30 phút

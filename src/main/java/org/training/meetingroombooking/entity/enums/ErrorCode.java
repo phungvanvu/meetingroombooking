@@ -33,7 +33,8 @@ public enum ErrorCode {
     TIME_FRAME_TOO_LONG("The time frame exceeds 365 days."),
     VALIDATION_ERROR("Validation error occurred."),
     INTERNAL_SERVER_ERROR("Internal Server Error"),
-    UNAUTHENTICATED("User is not authenticated.");
+    UNAUTHENTICATED("User is not authenticated."),
+    INVALID_LOGIN("Incorrect username or password.");
 
     private final String message;
 

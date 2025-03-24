@@ -8,8 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.RequestStatus;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -38,10 +37,10 @@ public class RequestDTO {
     private String approval;
 
     @FutureOrPresent(message = "Target date must be present or in the future.")
-    private LocalDate target;
+    private LocalDateTime target;
 
     @FutureOrPresent(message = "Onboard date must be present or in the future.")
-    private LocalDate onboard;
+    private LocalDateTime onboard;
 
     @NotNull(message = "Creator cannot be null")
     private Long createdBy;
