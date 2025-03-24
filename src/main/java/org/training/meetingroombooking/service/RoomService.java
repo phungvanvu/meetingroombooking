@@ -45,7 +45,7 @@ public class RoomService {
       }
       Path filePath = Paths.get(uploadDir, fileName);
       Files.write(filePath, file.getBytes());
-      room.setImageUrl("/uploads/rooms" + fileName);
+      room.setImageUrl("/uploads/rooms/" + fileName);
     }
     Room savedRoom = roomRepository.save(room);
     return roomMapper.toDTO(savedRoom);
