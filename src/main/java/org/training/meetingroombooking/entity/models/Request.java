@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.RequestStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -33,10 +34,10 @@ public class Request {
   private String approval; // Ghi chú về quyết định phê duyệt hoặc lý do từ chối
 
   @Column(name = "target_date")
-  private LocalDate target;
+  private LocalDateTime target;
 
   @Column(name = "onboard_date")
-  private LocalDate onboard;
+  private LocalDateTime onboard;
 
   @ManyToOne
   @JoinColumn(name = "created_by")

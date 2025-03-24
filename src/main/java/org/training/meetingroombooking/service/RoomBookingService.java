@@ -21,9 +21,11 @@ import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.dto.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
+import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
+import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
 public class RoomBookingService {
@@ -31,13 +33,16 @@ public class RoomBookingService {
   private final RoomBookingRepository roomBookingRepository;
   private final RoomBookingMapper roomBookingMapper;
   private final EmailService emailService;
+  private final RoomRepository roomRepository;
 
   public RoomBookingService(RoomBookingRepository roomBookingRepository,
                             RoomBookingMapper roomBookingMapper,
-                            EmailService emailService) {
+                            EmailService emailService,
+                            RoomRepository roomRepository) {
     this.roomBookingRepository = roomBookingRepository;
     this.roomBookingMapper = roomBookingMapper;
     this.emailService = emailService;
+    this.roomRepository = roomRepository;
   }
 
   public RoomSummaryDTO getMostBookedRoomOfMonth() {
@@ -106,7 +111,7 @@ public class RoomBookingService {
     throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
   }
   public void delete(Long bookingId) {
-    if (roomBookingRepository.existsById(bookingId)) {
+    if (!roomBookingRepository.existsById(bookingId)) {
       throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
     }
     roomBookingRepository.deleteById(bookingId);
@@ -185,4 +190,17 @@ public class RoomBookingService {
     }
   }
 
+  public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
+    Room room = roomRepository.findByRoomName(roomName)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+
+    List<RoomBooking> roomBookings = room.getBookings();
+    if (roomBookings.isEmpty()) {
+      throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
+    }
+
+    return roomBookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
 }

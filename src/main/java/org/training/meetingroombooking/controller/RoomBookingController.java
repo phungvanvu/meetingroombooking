@@ -10,14 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.service.RoomBookingService;
@@ -49,6 +42,12 @@ public class RoomBookingController {
         .build();
   }
 
+  @GetMapping("/bookings/by-room-name")
+  public ResponseEntity<List<RoomBookingDTO>> getBookingsByRoomName(@RequestParam String roomName) {
+    List<RoomBookingDTO> bookings = roomBookingService.getBookingsByRoomName(roomName);
+    return ResponseEntity.ok(bookings);
+  }
+
   @GetMapping("/user/{userName}")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
@@ -78,6 +77,7 @@ public class RoomBookingController {
   @DeleteMapping("/{bookingId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteRoomBooking(@PathVariable Long bookingId) {
+    roomBookingService.delete(bookingId);
     return ApiResponse.<String>builder()
         .success(true)
         .data("room booking has been deleted")

@@ -33,7 +33,6 @@ public class RoomBookingDTO {
     @NotNull(message = "Request cannot be Null")
     private Long requestId;
 
-
     @FutureOrPresent(message = "The start time must be present or in the future.")
     @NotNull(message = "Start time cannot be null")
     private LocalDateTime startTime;
