@@ -69,6 +69,7 @@ public class RoomController {
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteRoom(
           @PathVariable Long roomId) {
+    roomService.delete(roomId);
     return ApiResponse.<String>builder()
         .success(true)
         .data("Room has been deleted")
