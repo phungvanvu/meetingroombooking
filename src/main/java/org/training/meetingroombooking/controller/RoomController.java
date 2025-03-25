@@ -34,13 +34,20 @@ public class RoomController {
             .data(roomService.create(dto, file))
             .build();
   }
+  @GetMapping("/name/{roomName}")
+  public ApiResponse<RoomDTO> getRoomByName(@PathVariable String roomName) {
+    return ApiResponse.<RoomDTO>builder()
+            .success(true)
+            .data(roomService.findByRoomName(roomName))
+            .build();
+  }
 
   @GetMapping
   public ApiResponse<List<RoomDTO>> getRooms() {
     return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.getAll())
-        .build();
+            .success(true)
+            .data(roomService.getAll())
+            .build();
   }
 
   @GetMapping("/{roomId}")
@@ -71,8 +78,8 @@ public class RoomController {
           @PathVariable Long roomId) {
     roomService.delete(roomId);
     return ApiResponse.<String>builder()
-        .success(true)
-        .data("Room has been deleted")
-        .build();
+            .success(true)
+            .data("Room has been deleted")
+            .build();
   }
 }

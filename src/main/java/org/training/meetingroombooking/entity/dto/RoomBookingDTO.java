@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @Builder
 public class RoomBookingDTO {
 
+    private Long bookingId;
+
     @NotNull(message = "Room cannot be null")
     private Long roomId;
 
@@ -30,8 +32,8 @@ public class RoomBookingDTO {
 
     private String userName;
 
-    @NotNull(message = "Request cannot be Null")
-    private Long requestId;
+//    @NotNull(message = "Request cannot be Null")
+//    private Long requestId;
 
     @FutureOrPresent(message = "The start time must be present or in the future.")
     @NotNull(message = "Start time cannot be null")
@@ -47,7 +49,7 @@ public class RoomBookingDTO {
     @NotNull(message = "Status cannot be null")
     private BookingStatus status;
 
-    @Size(max = 255, message = "Notes cannot exceed 255 characters")
+    @Size(max = 255, message = "Description must not exceed 255 characters")
     private String note;
 
     private LocalDateTime createdAt;

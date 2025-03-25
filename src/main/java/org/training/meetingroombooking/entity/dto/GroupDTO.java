@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -28,5 +29,5 @@ public class GroupDTO {
     @Size(max = 50, message = "Department must not exceed 50 characters")
     private String department;
 
-    private LocalDate createdDate;
+    private LocalDateTime createdDate;
 }
