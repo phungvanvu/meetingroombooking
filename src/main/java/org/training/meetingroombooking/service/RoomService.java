@@ -95,4 +95,10 @@ public class RoomService {
     }
     roomRepository.deleteById(roomId);
   }
+  public RoomDTO findByRoomName(String roomName) {
+    Room room = roomRepository.findByRoomName(roomName)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    return roomMapper.toDTO(room);
+  }
+
 }

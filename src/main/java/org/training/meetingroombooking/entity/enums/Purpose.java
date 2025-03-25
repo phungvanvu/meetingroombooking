@@ -4,5 +4,5 @@ public enum Purpose {
     INTERVIEW,           // Phỏng vấn
     MEETING,             // Họp
     TRAINING,            // Đào tạo
-    CLIENT_MEETING,      // Gặp khách hàng
+    CLIENT_MEETING,      // Gặp khách hàng/đối tác
 }

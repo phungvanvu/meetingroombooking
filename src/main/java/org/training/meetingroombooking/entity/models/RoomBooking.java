@@ -32,9 +32,9 @@ public class RoomBooking {
     @JoinColumn(name = "bookedBy", nullable = false)
     private User bookedBy;
 
-    @ManyToOne
-    @JoinColumn(name = "request_id", nullable = false)
-    private Request request;
+//    @ManyToOne
+//    @JoinColumn(name = "request_id", nullable = false)
+//    private Request request;
 
     @FutureOrPresent
     @Column(nullable = false)
@@ -57,7 +57,6 @@ public class RoomBooking {
     private String note;
 
     @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdAt;
 
     @PrePersist

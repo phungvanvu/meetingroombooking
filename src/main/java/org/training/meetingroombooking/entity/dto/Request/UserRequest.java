@@ -47,9 +47,9 @@ public class UserRequest {
 
   private boolean enabled = true;
 
-  private Position position;
+  private String position;
 
-  private GroupEntity group;
+  private String group;
 
   private Set<String> roles;
 }

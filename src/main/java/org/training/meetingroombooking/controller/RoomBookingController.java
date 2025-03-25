@@ -26,7 +26,6 @@ public class RoomBookingController {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomBookingDTO> createRoomBooking(@Valid @RequestBody RoomBookingDTO dto) {
     return ApiResponse.<RoomBookingDTO>builder()
         .success(true)

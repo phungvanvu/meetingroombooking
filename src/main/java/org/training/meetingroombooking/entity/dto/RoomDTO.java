@@ -18,6 +18,8 @@ import java.util.List;
 @Builder
 public class RoomDTO {
 
+  private Long roomId;
+
   @NotBlank(message = "Room name cannot be left blank")
   @Size(max = 100, message = "Room name cannot exceed 100 characters")
   private String roomName;

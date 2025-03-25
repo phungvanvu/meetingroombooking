@@ -19,6 +19,7 @@ public interface RoomMapper {
   @Mapping(target = "equipments", source = "equipments", qualifiedByName = "mapEquipmentListToStringList")
   RoomDTO toDTO(Room entity);
 
+  @Mapping(target = "roomId", source = "roomId")
   @Mapping(target = "equipments", source = "equipments", qualifiedByName = "mapStringListToEquipmentList")
   Room toEntity(RoomDTO dto);
 
