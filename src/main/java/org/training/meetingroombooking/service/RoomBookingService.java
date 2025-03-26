@@ -148,7 +148,7 @@ public class RoomBookingService {
         row.createCell(3).setCellValue(booking.getStartTime().toString());
         row.createCell(4).setCellValue(booking.getEndTime().toString());
         row.createCell(5).setCellValue(booking.getStatus().toString());
-        row.createCell(6).setCellValue(booking.getNote() != null ? booking.getNote() : "");
+        row.createCell(6).setCellValue(booking.getDescription() != null ? booking.getDescription() : "");
       }
       // Tự động điều chỉnh độ rộng của cột
       for (int i = 0; i < headers.length; i++) {

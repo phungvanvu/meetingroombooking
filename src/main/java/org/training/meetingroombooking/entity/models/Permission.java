@@ -20,6 +20,6 @@ public class Permission {
     @Column(nullable = false, unique = true, length = 50)
     private String permissionName;
 
-    @Column(length = 255)
+    @Column(columnDefinition = "TEXT", length = 255)
     private String description;
 }

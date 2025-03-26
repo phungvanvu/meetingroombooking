@@ -52,9 +52,8 @@ public class RoomBooking {
     @Column(nullable = false, length = 20)
     private BookingStatus status;
 
-    @Size(max = 255)
-    @Column(length = 255)
-    private String note;
+    @Column(columnDefinition = "TEXT", length = 255)
+    private String description;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
