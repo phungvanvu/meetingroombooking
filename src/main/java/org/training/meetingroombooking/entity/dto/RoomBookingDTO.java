@@ -50,7 +50,7 @@ public class RoomBookingDTO {
     private BookingStatus status;
 
     @Size(max = 255, message = "Description must not exceed 255 characters")
-    private String note;
+    private String description;
 
     private LocalDateTime createdAt;
 }

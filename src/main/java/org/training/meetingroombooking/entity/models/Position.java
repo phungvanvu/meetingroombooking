@@ -21,6 +21,6 @@ public class Position {
   @Column(length = 75, nullable = false, unique = true)
   private String positionName;
 
-  @Column(columnDefinition = "TEXT")
+  @Column(columnDefinition = "TEXT", length = 255)
   private String description;
 }
