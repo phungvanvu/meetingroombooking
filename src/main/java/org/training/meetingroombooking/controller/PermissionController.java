@@ -37,6 +37,19 @@ public class PermissionController {
         .build();
   }
 
+  @PutMapping("/{permissionName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<PermissionDTO> update(
+          @PathVariable String permissionName,
+          @Valid @RequestBody PermissionDTO permissionDTO
+  ) {
+    PermissionDTO updatedPermission = permissionService.update(permissionName, permissionDTO);
+    return ApiResponse.<PermissionDTO>builder()
+            .success(true)
+            .data(updatedPermission)
+            .build();
+  }
+
   @DeleteMapping("/{permission}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> delete(@PathVariable String permission) {

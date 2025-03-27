@@ -41,7 +41,7 @@ public class RoomBookingController {
         .build();
   }
 
-  @GetMapping("/bookings/by-room-name")
+  @GetMapping("/by-room-name")
   public ResponseEntity<List<RoomBookingDTO>> getBookingsByRoomName(@RequestParam String roomName) {
     List<RoomBookingDTO> bookings = roomBookingService.getBookingsByRoomName(roomName);
     return ResponseEntity.ok(bookings);

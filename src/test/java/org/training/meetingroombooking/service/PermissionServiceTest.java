@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.training.meetingroombooking.entity.dto.PermissionDTO;
 import org.training.meetingroombooking.entity.models.Permission;
 import org.training.meetingroombooking.entity.mapper.PermissionMapper;
+import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PermissionRepository;
 
 import java.util.List;
@@ -59,6 +60,7 @@ class PermissionServiceTest {
         verify(permissionMapper, times(1)).toDTO(permission);
     }
 
+
     @Test
     void ***REMOVED***GetAllPermissions() {
         when(permissionRepository.findAll()).thenReturn(List.of(permission));
@@ -75,11 +77,47 @@ class PermissionServiceTest {
     }
 
     @Test
+    void ***REMOVED***UpdatePermission() {
+        when(permissionRepository.findById("READ_PRIVILEGES")).thenReturn(java.util.Optional.of(permission));
+        doNothing().when(permissionMapper).updateEntity(permission, permissionDTO);
+        when(permissionRepository.save(permission)).thenReturn(permission);
+        when(permissionMapper.toDTO(permission)).thenReturn(permissionDTO);
+
+        PermissionDTO updatedPermission = permissionService.update("READ_PRIVILEGES", permissionDTO);
+
+        assertNotNull(updatedPermission);
+        assertEquals("READ_PRIVILEGES", updatedPermission.getPermissionName());
+        assertEquals("Allows reading data", updatedPermission.getDescription());
+
+        verify(permissionRepository, times(1)).findById("READ_PRIVILEGES");
+        verify(permissionMapper, times(1)).updateEntity(permission, permissionDTO);
+        verify(permissionRepository, times(1)).save(permission);
+        verify(permissionMapper, times(1)).toDTO(permission);
+    }
+
+
+    @Test
     void ***REMOVED***DeletePermission() {
+        when(permissionRepository.existsById("READ_PRIVILEGES")).thenReturn(true);
         doNothing().when(permissionRepository).deleteById("READ_PRIVILEGES");
 
         permissionService.delete("READ_PRIVILEGES");
 
         verify(permissionRepository, times(1)).deleteById("READ_PRIVILEGES");
     }
+
+
+    @Test
+    void ***REMOVED***UpdatePermissionNotFound() {
+        when(permissionRepository.findById("READ_PRIVILEGES")).thenReturn(java.util.Optional.empty());
+        assertThrows(AppEx.class, () -> permissionService.update("READ_PRIVILEGES", permissionDTO));
+    }
+
+    @Test
+    void ***REMOVED***DeletePermissionNotFound() {
+        when(permissionRepository.existsById("READ_PRIVILEGES")).thenReturn(false);
+        assertThrows(AppEx.class, () -> permissionService.delete("READ_PRIVILEGES"));
+    }
+
+
 }

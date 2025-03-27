@@ -168,11 +168,6 @@ class AuthServiceTest {
 
         assertThrows(AppEx.class, () -> authService.refreshToken(request));
     }
-
-
-
-
-
 }
 
 

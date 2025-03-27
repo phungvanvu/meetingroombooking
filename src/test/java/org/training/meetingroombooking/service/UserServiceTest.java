@@ -72,8 +72,8 @@ public class UserServiceTest {
     request.setPhoneNumber("0123456789");
     request.setPassword("P@ssw0rd");
     request.setEnabled(true);
-    request.setPosition(position);
-    request.setGroup(group);
+    request.setPosition(user.getPosition().getPositionName());
+    request.setGroup(user.getGroup().getGroupName());
     request.setRoles(Set.of("HR"));
 
     user = new User();

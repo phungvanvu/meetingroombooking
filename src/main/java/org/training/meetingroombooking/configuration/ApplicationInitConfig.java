@@ -9,6 +9,7 @@ import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
+
 import java.util.Set;
 
 @Slf4j
@@ -34,11 +35,15 @@ public class ApplicationInitConfig {
                 newRole.setDescription("Administrator role with full access");
                 return roleRepository.save(newRole);
             });
-
             if (userRepository.findByUserName("admin").isEmpty()) {
                 User user = new User();
                 user.setUserName("admin");
+                user.setFullName("Phung Van Vu");
+                user.setDepartment("Software Development");
+                user.setPhoneNumber("***REMOVED***");
+                user.setEmail("***REMOVED***");
                 user.setPassword(passwordEncoder.encode("***REMOVED***"));
+                user.setEnabled(true);
                 user.setRoles(Set.of(adminRole));
                 userRepository.save(user);
                 log.warn("Admin has been created with default password, please change password");

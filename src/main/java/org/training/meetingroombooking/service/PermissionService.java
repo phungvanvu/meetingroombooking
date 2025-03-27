@@ -37,10 +37,10 @@ public class PermissionService {
 
   public PermissionDTO update(String permissionName, PermissionDTO dto) {
     Permission permission = permissionRepository.findById(permissionName)
-        .orElseThrow(() -> new AppEx(ErrorCode.PERMISSION_NOT_FOUND));
-    permissionMapper.updateEntity(permissionName, dto);
-    Permission updatedNotification = permissionRepository.save(permission);
-    return permissionMapper.toDTO(updatedNotification);
+            .orElseThrow(() -> new AppEx(ErrorCode.PERMISSION_NOT_FOUND));
+    permissionMapper.updateEntity(permission, dto);
+    Permission updatedPermission = permissionRepository.save(permission);
+    return permissionMapper.toDTO(updatedPermission);
   }
 
   public void delete(String permission) {

@@ -43,7 +43,6 @@ public class RoomBookingDTO {
     @NotNull(message = "Purpose cannot be null")
     private Purpose purpose;
 
-    @NotNull(message = "Status cannot be null")
     private BookingStatus status;
 
     @Size(max = 255, message = "Description must not exceed 255 characters")

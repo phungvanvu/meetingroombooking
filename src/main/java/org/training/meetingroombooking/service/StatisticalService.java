@@ -1,12 +1,14 @@
 package org.training.meetingroombooking.service;
 
 import org.springframework.stereotype.Service;
+import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
+import org.training.meetingroombooking.repository.RoomRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,14 +16,15 @@ import java.util.Optional;
 
 @Service
 public class StatisticalService {
-
+    private final RoomRepository roomRepository;
     private final RoomBookingRepository roomBookingRepository;
     private final RoomBookingMapper roomBookingMapper;
 
     public StatisticalService(RoomBookingRepository roomBookingRepository,
-                              RoomBookingMapper roomBookingMapper) {
+                              RoomBookingMapper roomBookingMapper, RoomRepository roomRepository) {
         this.roomBookingRepository = roomBookingRepository;
         this.roomBookingMapper = roomBookingMapper;
+        this.roomRepository = roomRepository;
     }
 
     public RoomSummaryDTO getMostBookedRoomOfMonth() {
@@ -65,5 +68,12 @@ public class StatisticalService {
                         (Long) result[2]) // bookingCount
                 )
                 .toList();
+    }
+
+    public RoomStatisticsDTO getRoomStatistics() {
+        long totalRooms = roomRepository.count();  // Tổng số phòng
+        long availableRooms = roomRepository.countByAvailable(true);  // Tổng số phòng có sẵn
+        long unavailableRooms = roomRepository.countByAvailable(false);  // Tổng số phòng không có sẵn
+        return new RoomStatisticsDTO(totalRooms, availableRooms, unavailableRooms);
     }
 }

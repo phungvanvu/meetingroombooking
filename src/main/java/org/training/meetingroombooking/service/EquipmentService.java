@@ -3,6 +3,9 @@ package org.training.meetingroombooking.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -40,6 +43,13 @@ public class EquipmentService {
     Optional<Equipment> equipment = equipmentRepository.findById(id);
     return equipment.map(equipmentMapper::toDTO).orElseThrow(
         () -> new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND));
+  }
+
+  public Set<EquipmentDTO> getAllDistinctEquipments() {
+    return equipmentRepository.findAll()
+            .stream()
+            .map(equipmentMapper::toDTO)
+            .collect(Collectors.toSet());
   }
 
   public EquipmentDTO update(Long id, EquipmentDTO equipmentDTO) {
