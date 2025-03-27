@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -41,40 +42,34 @@ public class EmailService {
     mailSender.send(message);
   }
 
-  public void sendRoomBookingConfirmationEmail(RoomBookingDTO dto) throws MessagingException {
-    Room room = roomRepository.findById(dto.getRoomId())
-        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-    User user = userRepository.findById(dto.getBookedById())
-        .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+  @Async
+  public void sendRoomBookingConfirmationEmail(RoomBookingDTO dto) {
+    try {
+      Room room = roomRepository.findById(dto.getRoomId())
+              .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+      User user = userRepository.findById(dto.getBookedById())
+              .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
 
-    String userEmail = user.getEmail();
-    System.out.println("Sending email to: " + userEmail);
+      String userEmail = user.getEmail();
+      System.out.println("Sending email to: " + userEmail);
 
-    String subject = "Meeting room booking confirmation successful";
-    String htmlBody =
-        "<h3>Greet " + user.getFullName() != null ? user.getFullName() : "N/A" + ",</h3>"
-            + "<p>You have successfully booked a meeting room!</p>"
-            + "<ul>"
-            + "<li><b>Room:</b> " + room.getRoomName() != null ? room.getRoomName()
-            : "N/A" + "</li>"
-                + "<li><b>Time:</b> " + dto.getStartTime() != null ? String.valueOf(
-                dto.getStartTime())
-                : "N/A"
-                    + " - " + dto.getEndTime() != null ? String.valueOf(dto.getEndTime())
-                    : "N/A" + "</li>"
-                        + "<li><b>Status:</b> " + dto.getStatus() != null ? String.valueOf(
-                        dto.getStatus())
-                        : "N/A" + "</li>"
-                            + "<li><b>Description:</b> " + dto.getDescription() != null
-                            ? dto.getDescription()
-                            : "N/A" + "</li>"
-                                + "<li><b>Created at:</b> " + dto.getCreatedAt() != null
-                                ? String.valueOf(
-                                dto.getCreatedAt()) : "N/A" + "</li>"
-                                + "</ul>"
-                                + "<p>Thank you for using our service!</p>";
+      String subject = "Meeting room booking confirmation successful";
+      String htmlBody = "<h3>Greet " + (user.getFullName() != null ? user.getFullName() : "N/A") + ",</h3>"
+              + "<p>You have successfully booked a meeting room!</p>"
+              + "<ul>"
+              + "<li><b>Room:</b> " + (room.getRoomName() != null ? room.getRoomName() : "N/A") + "</li>"
+              + "<li><b>Time:</b> " + (dto.getStartTime() != null ? dto.getStartTime().toString() : "N/A")
+              + " - " + (dto.getEndTime() != null ? dto.getEndTime().toString() : "N/A") + "</li>"
+              + "<li><b>Status:</b> " + (dto.getStatus() != null ? dto.getStatus().toString() : "N/A") + "</li>"
+              + "<li><b>Description:</b> " + (dto.getDescription() != null ? dto.getDescription() : "N/A") + "</li>"
+              + "<li><b>Created at:</b> " + (dto.getCreatedAt() != null ? dto.getCreatedAt().toString() : "N/A") + "</li>"
+              + "</ul>"
+              + "<p>Thank you for using our service!</p>";
 
-    sendHtmlEmail(userEmail, subject, htmlBody);
+      sendHtmlEmail(userEmail, subject, htmlBody);
+    } catch (MessagingException e) {
+      System.err.println("Failed to send email: " + e.getMessage());
+    }
   }
 
   public void sendMeetingReminderEmail(String to, String userName,

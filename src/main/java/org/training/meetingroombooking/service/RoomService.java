@@ -51,64 +51,6 @@ public class RoomService {
     return roomMapper.toDTO(savedRoom);
   }
 
-  public List<RoomDTO> findByNames(List<String> roomNames) {
-    List<Room> rooms = roomRepository.findByRoomNameIn(roomNames);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByCapacity(List<Integer> capacity) {
-    List<Room> rooms = roomRepository.findByCapacity(capacity);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByLocation(List<String> location) {
-    List<Room> rooms = roomRepository.findByLocationIn(location);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByNameAndLocation(List<String> roomName, List<String> location) {
-    List<Room> rooms = roomRepository.findByRoomNameInAndLocationIn(roomName, location);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByNameAndCapacity(List<String> roomName, List<Integer> capacity) {
-    List<Room> rooms = roomRepository.findByRoomNameInAndCapacity(roomName, capacity);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByCapacityAndLocation(List<Integer> capacity, List<String> location) {
-    List<Room> rooms = roomRepository.findByCapacityAndLocationIn(capacity, location);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public List<RoomDTO> findByNameAndCapacityAndLocation(List<String> roomName,
-      List<Integer> capacity, List<String> location) {
-    List<Room> rooms = roomRepository.findByRoomNameInAndCapacityAndLocationIn(roomName, capacity,
-        location);
-    if (rooms.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
-    }
-    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
-  }
-
   public RoomDTO findById(Long roomId) {
     Optional<Room> room = roomRepository.findById(roomId);
     return room.map(roomMapper::toDTO).orElseThrow(

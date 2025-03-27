@@ -1,0 +1,69 @@
+package org.training.meetingroombooking.service;
+
+import org.springframework.stereotype.Service;
+import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
+import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
+import org.training.meetingroombooking.exception.AppEx;
+import org.training.meetingroombooking.repository.RoomBookingRepository;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class StatisticalService {
+
+    private final RoomBookingRepository roomBookingRepository;
+    private final RoomBookingMapper roomBookingMapper;
+
+    public StatisticalService(RoomBookingRepository roomBookingRepository,
+                              RoomBookingMapper roomBookingMapper) {
+        this.roomBookingRepository = roomBookingRepository;
+        this.roomBookingMapper = roomBookingMapper;
+    }
+
+    public RoomSummaryDTO getMostBookedRoomOfMonth() {
+        LocalDate currentDate = LocalDate.now();
+        int month = currentDate.getMonthValue();
+        int year = currentDate.getYear();
+
+        Optional<Object[]> result = roomBookingRepository.findMostBookedRoomOfMonth(month, year);
+        if (result.isPresent()) {
+            Long roomId = (Long) result.get()[0];
+            long count = (Long) result.get()[1];
+            return new RoomSummaryDTO(roomId, "Most booked room of the month", count);
+        }
+        throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
+    }
+
+    public long getMonthlyBookingCount(int month, int year) {
+        return roomBookingRepository.countBookingsByMonth(month, year);
+    }
+
+    public long getCurrentMonthBookingCount() {
+        LocalDate currentDate = LocalDate.now();
+        return getMonthlyBookingCount(currentDate.getMonthValue(), currentDate.getYear());
+    }
+    // Tổng lượt đặt phòng theo tuần
+    public long getWeeklyBookingCount(int week, int year) {
+        return roomBookingRepository.countBookingsByWeek(week, year);
+    }
+
+    // Tổng lượt đặt phòng theo quý
+    public long getQuarterlyBookingCount(int quarter, int year) {
+        return roomBookingRepository.countBookingsByQuarter(quarter, year);
+    }
+
+    // Top người dùng đặt phòng nhiều nhất
+    public List<UserSummaryDTO> getTopUsers(int limit) {
+        return roomBookingRepository.findTopUsers(limit).stream()
+                .map(result -> new UserSummaryDTO(
+                        (Long) result[0], // userId
+                        (String) result[1], // username
+                        (Long) result[2]) // bookingCount
+                )
+                .toList();
+    }
+}
