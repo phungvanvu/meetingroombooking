@@ -137,7 +137,6 @@ public class AuthService {
     }
   }
 
-
   protected String generateToken(User user, int expirationMinutes) {
     try {
       JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
