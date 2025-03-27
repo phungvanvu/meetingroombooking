@@ -26,60 +26,116 @@ public class RoomController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> createRoom(
-          @RequestPart("room") @Valid RoomDTO dto,
-          @RequestPart(value = "file", required = false) MultipartFile file
+      @RequestPart("room") @Valid RoomDTO dto,
+      @RequestPart(value = "file", required = false) MultipartFile file
   ) throws IOException {
     return ApiResponse.<RoomDTO>builder()
-            .success(true)
-            .data(roomService.create(dto, file))
-            .build();
+        .success(true)
+        .data(roomService.create(dto, file))
+        .build();
   }
+
   @GetMapping("/name/{roomName}")
   public ApiResponse<RoomDTO> getRoomByName(@PathVariable String roomName) {
     return ApiResponse.<RoomDTO>builder()
-            .success(true)
-            .data(roomService.findByRoomName(roomName))
-            .build();
+        .success(true)
+        .data(roomService.findByRoomName(roomName))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByRoomName(@PathVariable List<String> roomNames) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByNames(roomNames))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByLocation(@PathVariable List<String> location) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByLocation(location))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByLocationAndRoomName(
+      @PathVariable List<String> roomName, @PathVariable List<String> location) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByNameAndLocation(roomName, location))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByCapacity(@PathVariable List<Integer> capacity) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByCapacity(capacity))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByRoomNameAndCapacity(
+      @PathVariable List<String> roomName, @PathVariable List<Integer> capacity) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByNameAndCapacity(roomName, capacity))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByRoomNameAndCapacityAndLocation(
+      @PathVariable List<String> roomName, @PathVariable List<Integer> capacity,
+      @PathVariable List<String> location) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByNameAndCapacityAndLocation(roomName, capacity, location))
+        .build();
+  }
+
+  public ApiResponse<List<RoomDTO>> getRoomsByCapacityAndLocation(
+      @PathVariable List<Integer> capacity, @PathVariable List<String> location
+  ) {
+    return ApiResponse.<List<RoomDTO>>builder()
+        .success(true)
+        .data(roomService.findByCapacityAndLocation(capacity, location))
+        .build();
   }
 
   @GetMapping
   public ApiResponse<List<RoomDTO>> getRooms() {
     return ApiResponse.<List<RoomDTO>>builder()
-            .success(true)
-            .data(roomService.getAll())
-            .build();
+        .success(true)
+        .data(roomService.getAll())
+        .build();
   }
 
   @GetMapping("/{roomId}")
   public ApiResponse<RoomDTO> getRoomById(@PathVariable Long roomId) {
     return ApiResponse.<RoomDTO>builder()
-            .success(true)
-            .data(roomService.findById(roomId))
-            .build();
+        .success(true)
+        .data(roomService.findById(roomId))
+        .build();
   }
 
   @PutMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> updateRoom(
-          @PathVariable Long roomId,
-          @RequestPart("room") @Valid RoomDTO dto,
-          @RequestPart(value = "file", required = false) MultipartFile file
+      @PathVariable Long roomId,
+      @RequestPart("room") @Valid RoomDTO dto,
+      @RequestPart(value = "file", required = false) MultipartFile file
   ) throws IOException {
     return ApiResponse.<RoomDTO>builder()
-            .success(true)
-            .data(roomService.update(roomId, dto, file))
-            .build();
+        .success(true)
+        .data(roomService.update(roomId, dto, file))
+        .build();
   }
 
 
   @DeleteMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteRoom(
-          @PathVariable Long roomId) {
+      @PathVariable Long roomId) {
     roomService.delete(roomId);
     return ApiResponse.<String>builder()
-            .success(true)
-            .data("Room has been deleted")
-            .build();
+        .success(true)
+        .data("Room has been deleted")
+        .build();
   }
 }

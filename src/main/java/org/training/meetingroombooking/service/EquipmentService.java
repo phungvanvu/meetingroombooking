@@ -63,19 +63,18 @@ public class EquipmentService {
   // Lấy danh sách thiết bị không khả dụng
   public List<EquipmentDTO> getUnavailableEquipments() {
     return equipmentRepository.findByAvailableFalse()
-            .stream()
-            .map(equipmentMapper::toDTO)
-            .toList();
+        .stream()
+        .map(equipmentMapper::toDTO)
+        .toList();
   }
 
   // Thống kê thiết bị theo trạng thái
   public Map<String, Long> getEquipmentStatistics() {
     long availableCount = equipmentRepository.countByAvailableTrue();
     long unavailableCount = equipmentRepository.countByAvailableFalse();
-
     return Map.of(
-            "available", availableCount,
-            "unavailable", unavailableCount
+        "available", availableCount,
+        "unavailable", unavailableCount
     );
   }
 }

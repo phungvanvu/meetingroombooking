@@ -30,19 +30,19 @@ public class GroupService {
   public List<GroupDTO> getAll() {
     List<GroupEntity> groups = groupRepository.findAll();
     return groups.stream()
-            .map(groupMapper::toDTO)
-            .toList();
+        .map(groupMapper::toDTO)
+        .toList();
   }
 
   public GroupDTO getById(String groupName) {
     GroupEntity entity = groupRepository.findById(groupName)
-            .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
+        .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
     return groupMapper.toDTO(entity);
   }
 
   public GroupDTO update(String groupName, GroupDTO dto) {
     GroupEntity existingGroup = groupRepository.findById(groupName)
-            .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
+        .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
     groupMapper.updateEntity(existingGroup, dto);
     GroupEntity updatedGroup = groupRepository.save(existingGroup);
     return groupMapper.toDTO(updatedGroup);

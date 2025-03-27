@@ -12,31 +12,41 @@ import java.util.List;
 
 @Service
 public class PermissionService {
-    private final PermissionRepository permissionRepository;
-    private final PermissionMapper permissionMapper;
 
-    public PermissionService(PermissionRepository permissionRepository, PermissionMapper permissionMapper) {
-        this.permissionRepository = permissionRepository;
-        this.permissionMapper = permissionMapper;
-    }
+  private final PermissionRepository permissionRepository;
+  private final PermissionMapper permissionMapper;
 
-    public PermissionDTO create(PermissionDTO permissionDTO) {
-        Permission permission = permissionMapper.toEntity(permissionDTO);
-        Permission savedPermission = permissionRepository.save(permission);
-        return permissionMapper.toDTO(savedPermission);
-    }
+  public PermissionService(PermissionRepository permissionRepository,
+      PermissionMapper permissionMapper) {
+    this.permissionRepository = permissionRepository;
+    this.permissionMapper = permissionMapper;
+  }
 
-    public List<PermissionDTO> getAll() {
-        var permissions = permissionRepository.findAll();
-        return permissions.stream().
-            map(permissionMapper::toDTO)
-            .toList();
-    }
+  public PermissionDTO create(PermissionDTO permissionDTO) {
+    Permission permission = permissionMapper.toEntity(permissionDTO);
+    Permission savedPermission = permissionRepository.save(permission);
+    return permissionMapper.toDTO(savedPermission);
+  }
 
-    public void delete(String permission) {
-        if (!permissionRepository.existsById(permission)) {
-            throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
-        }
-        permissionRepository.deleteById(permission);
+  public List<PermissionDTO> getAll() {
+    var permissions = permissionRepository.findAll();
+    return permissions.stream().
+        map(permissionMapper::toDTO)
+        .toList();
+  }
+
+  public PermissionDTO update(String permissionName, PermissionDTO dto) {
+    Permission permission = permissionRepository.findById(permissionName)
+        .orElseThrow(() -> new AppEx(ErrorCode.PERMISSION_NOT_FOUND));
+    permissionMapper.updateEntity(permissionName, dto);
+    Permission updatedNotification = permissionRepository.save(permission);
+    return permissionMapper.toDTO(updatedNotification);
+  }
+
+  public void delete(String permission) {
+    if (!permissionRepository.existsById(permission)) {
+      throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
     }
+    permissionRepository.deleteById(permission);
+  }
 }

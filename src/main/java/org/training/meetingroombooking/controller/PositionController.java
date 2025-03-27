@@ -17,10 +17,13 @@ import org.training.meetingroombooking.service.PositionService;
 @RestController
 @RequestMapping("/position")
 public class PositionController {
+
   private final PositionService positionService;
+
   public PositionController(PositionService positionService) {
     this.positionService = positionService;
   }
+
   @PostMapping
   public ApiResponse<PositionDTO> createPosition(@Valid @RequestBody PositionDTO positionDTO) {
     return ApiResponse.<PositionDTO>builder()
@@ -28,6 +31,7 @@ public class PositionController {
         .data(positionService.create(positionDTO))
         .build();
   }
+
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<PositionDTO>> getPositions() {
@@ -36,6 +40,7 @@ public class PositionController {
         .data(positionService.getAll())
         .build();
   }
+
   @DeleteMapping("/{positionName}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deletePosition(@PathVariable String positionName) {

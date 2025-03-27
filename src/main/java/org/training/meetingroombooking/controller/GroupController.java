@@ -11,6 +11,7 @@ import org.training.meetingroombooking.service.GroupService;
 @RestController
 @RequestMapping("/group")
 public class GroupController {
+
   private final GroupService groupService;
 
   public GroupController(GroupService groupService) {
@@ -21,37 +22,37 @@ public class GroupController {
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<GroupDTO> create(@Valid @RequestBody GroupDTO request) {
     return ApiResponse.<GroupDTO>builder()
-            .success(true)
-            .data(groupService.create(request))
-            .build();
+        .success(true)
+        .data(groupService.create(request))
+        .build();
   }
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<GroupDTO>> getGroups() {
     return ApiResponse.<List<GroupDTO>>builder()
-            .success(true)
-            .data(groupService.getAll())
-            .build();
+        .success(true)
+        .data(groupService.getAll())
+        .build();
   }
 
   @GetMapping("/{groupName}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<GroupDTO> getById(@PathVariable("groupName") String groupName) {
     return ApiResponse.<GroupDTO>builder()
-            .success(true)
-            .data(groupService.getById(groupName))
-            .build();
+        .success(true)
+        .data(groupService.getById(groupName))
+        .build();
   }
 
   @PutMapping("/{groupName}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<GroupDTO> update(@PathVariable("groupName") String groupName,
-                                      @Valid @RequestBody GroupDTO request) {
+      @Valid @RequestBody GroupDTO request) {
     return ApiResponse.<GroupDTO>builder()
-            .success(true)
-            .data(groupService.update(groupName, request))
-            .build();
+        .success(true)
+        .data(groupService.update(groupName, request))
+        .build();
   }
 
   @DeleteMapping("/{groupName}")
@@ -59,8 +60,8 @@ public class GroupController {
   public ApiResponse<String> delete(@PathVariable("groupName") String groupName) {
     groupService.delete(groupName);
     return ApiResponse.<String>builder()
-            .success(true)
-            .data("Group has been deleted")
-            .build();
+        .success(true)
+        .data("Group has been deleted")
+        .build();
   }
 }
