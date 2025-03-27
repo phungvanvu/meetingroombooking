@@ -14,18 +14,20 @@ import java.nio.file.Paths;
 @RequestMapping("/uploads")
 public class FileController {
 
-    private final Path root = Paths.get("uploads");
+  private final Path root = Paths.get("uploads");
 
-    @GetMapping("/rooms/{filename:.+}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) throws MalformedURLException {
-        Path file = root.resolve("rooms").resolve(filename);
-        Resource resource = new UrlResource(file.toUri());
-        if (resource.exists() || resource.isReadable()) {
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                    .body(resource);
-        } else {
-            throw new RuntimeException("File not found: " + filename);
-        }
+  @GetMapping("/rooms/{filename:.+}")
+  public ResponseEntity<Resource> getFile(
+      @PathVariable String filename) throws MalformedURLException {
+    Path file = root.resolve("rooms").resolve(filename);
+    Resource resource = new UrlResource(file.toUri());
+    if (resource.exists() || resource.isReadable()) {
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION,
+              "inline; filename=\"" + filename + "\"")
+          .body(resource);
+    } else {
+      throw new RuntimeException("File not found: " + filename);
     }
+  }
 }

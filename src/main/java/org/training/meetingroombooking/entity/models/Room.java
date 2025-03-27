@@ -46,9 +46,6 @@ public class Room {
   @Column(length = 255)
   private String note;
 
-  @Column(nullable = false)
-  private boolean active = true;
-
   @Column(length = 255)
   private String imageUrl;
 

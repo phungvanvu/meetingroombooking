@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.entity.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.training.meetingroombooking.entity.dto.PermissionDTO;
 import org.training.meetingroombooking.entity.models.Permission;
 
@@ -8,4 +9,5 @@ import org.training.meetingroombooking.entity.models.Permission;
 public interface PermissionMapper {
     Permission toEntity(PermissionDTO request);
     PermissionDTO toDTO(Permission permission);
+    void updateEntity(String permissionName, @MappingTarget PermissionDTO dto);
 }

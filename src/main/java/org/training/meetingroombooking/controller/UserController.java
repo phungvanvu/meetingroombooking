@@ -16,65 +16,67 @@ import java.util.List;
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+  private final UserService userService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                        .success(true)
-                        .data(userService.createUser(request))
-                        .build();
-    }
+  public UserController(UserService userService) {
+    this.userService = userService;
+  }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<List<UserResponse>> getUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .success(true)
-                .data(userService.getAll())
-                .build();
-    }
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+    return ApiResponse.<UserResponse>builder()
+        .success(true)
+        .data(userService.createUser(request))
+        .build();
+  }
+
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<List<UserResponse>> getUsers() {
+    return ApiResponse.<List<UserResponse>>builder()
+        .success(true)
+        .data(userService.getAll())
+        .build();
+  }
 
 
-    @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
-        return ApiResponse.<UserResponse>builder()
-                .success(true)
-                .data(userService.getById(userId))
-                .build();
-    }
+  @GetMapping("/{userId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
+    return ApiResponse.<UserResponse>builder()
+        .success(true)
+        .data(userService.getById(userId))
+        .build();
+  }
 
-    @GetMapping("/my-info")
-    @PostAuthorize("returnObject.data.userName == authentication.name")
-    public ApiResponse<UserResponse> getMyInfo() {
-        return ApiResponse.<UserResponse>builder()
-                .success(true)
-                .data(userService.getMyInfo())
-                .build();
-    }
+  @GetMapping("/my-info")
+  @PostAuthorize("returnObject.data.userName == authentication.name")
+  public ApiResponse<UserResponse> getMyInfo() {
+    return ApiResponse.<UserResponse>builder()
+        .success(true)
+        .data(userService.getMyInfo())
+        .build();
+  }
 
-    @PutMapping("/{userId}")
-    @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
-    ApiResponse<UserResponse> updateUser(@PathVariable Long userId, @Valid @RequestBody UserRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .success(true)
-                .data(userService.update(userId, request))
-                .build();
-    }
+  @PutMapping("/{userId}")
+  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
+  ApiResponse<UserResponse> updateUser(@PathVariable Long userId,
+      @Valid @RequestBody UserRequest request) {
+    return ApiResponse.<UserResponse>builder()
+        .success(true)
+        .data(userService.update(userId, request))
+        .build();
+  }
 
-    @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<String> deleteUser(@PathVariable Long userId) {
-        userService.delete(userId);
-        return ApiResponse.<String>builder()
-            .success(true)
-            .data("User has been deleted")
-            .build();
-    }
+  @DeleteMapping("/{userId}")
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<String> deleteUser(@PathVariable Long userId) {
+    userService.delete(userId);
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("User has been deleted")
+        .build();
+  }
 }

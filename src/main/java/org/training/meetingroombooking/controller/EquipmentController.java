@@ -38,7 +38,7 @@ public class EquipmentController {
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<List<EquipmentDTO>> getEquipments(){
+  public ApiResponse<List<EquipmentDTO>> getEquipments() {
     return ApiResponse.<List<EquipmentDTO>>builder()
         .success(true)
         .data(equipmentService.getAll())
@@ -49,15 +49,16 @@ public class EquipmentController {
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<EquipmentDTO> getEquipmentById(@PathVariable Long equipmentId) {
     return ApiResponse.<EquipmentDTO>builder()
-            .success(true)
-            .data(equipmentService.getById(equipmentId))
-            .build();
+        .success(true)
+        .data(equipmentService.getById(equipmentId))
+        .build();
   }
 
 
   @PutMapping("/{equipmentId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable Long equipmentId, @Valid @RequestBody EquipmentDTO dto) {
+  public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable Long equipmentId,
+      @Valid @RequestBody EquipmentDTO dto) {
     return ApiResponse.<EquipmentDTO>builder()
         .success(true)
         .data(equipmentService.update(equipmentId, dto))
@@ -73,22 +74,23 @@ public class EquipmentController {
         .data("equipment has been deleted")
         .build();
   }
+
   @GetMapping("/unavailable")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<EquipmentDTO>> getUnavailableEquipments() {
     return ApiResponse.<List<EquipmentDTO>>builder()
-            .success(true)
-            .data(equipmentService.getUnavailableEquipments())
-            .build();
+        .success(true)
+        .data(equipmentService.getUnavailableEquipments())
+        .build();
   }
 
   @GetMapping("/statistics")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Map<String, Long>> getEquipmentStatistics() {
     return ApiResponse.<Map<String, Long>>builder()
-            .success(true)
-            .data(equipmentService.getEquipmentStatistics())
-            .build();
+        .success(true)
+        .data(equipmentService.getEquipmentStatistics())
+        .build();
   }
 
 }

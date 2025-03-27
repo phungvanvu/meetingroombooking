@@ -50,23 +50,24 @@ public class RoomBookingController {
   @GetMapping("/user/{userName}")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
-            .success(true)
-            .data(roomBookingService.getBookingsByUserName(userName))
-            .build();
+        .success(true)
+        .data(roomBookingService.getBookingsByUserName(userName))
+        .build();
   }
 
   @GetMapping("/MyBookings")
   @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
-            .success(true)
-            .data(roomBookingService.getMyBookings())
-            .build();
+        .success(true)
+        .data(roomBookingService.getMyBookings())
+        .build();
   }
 
   @PutMapping("/{bookingId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<RoomBookingDTO> updateRoomBooking(@PathVariable Long bookingId, @Valid @RequestBody RoomBookingDTO dto) {
+  public ApiResponse<RoomBookingDTO> updateRoomBooking(@PathVariable Long bookingId,
+      @Valid @RequestBody RoomBookingDTO dto) {
     return ApiResponse.<RoomBookingDTO>builder()
         .success(true)
         .data(roomBookingService.update(bookingId, dto))
@@ -88,27 +89,27 @@ public class RoomBookingController {
   public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
     ByteArrayOutputStream outputStream = roomBookingService.exportBookingsToExcel();
     return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings.xlsx")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(outputStream.toByteArray());
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings.xlsx")
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(outputStream.toByteArray());
   }
 
   @GetMapping("/monthly-bookings/{month}/{year}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Long> getMonthlyBookingCount(@PathVariable int month, @PathVariable int year) {
     return ApiResponse.<Long>builder()
-            .success(true)
-            .data(roomBookingService.getMonthlyBookingCount(month, year))
-            .build();
+        .success(true)
+        .data(roomBookingService.getMonthlyBookingCount(month, year))
+        .build();
   }
 
   @GetMapping("/current-month-bookings")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Long> getCurrentMonthBookingCount() {
     return ApiResponse.<Long>builder()
-            .success(true)
-            .data(roomBookingService.getCurrentMonthBookingCount())
-            .build();
+        .success(true)
+        .data(roomBookingService.getCurrentMonthBookingCount())
+        .build();
   }
 
 }

@@ -31,43 +31,44 @@ public class NotificationController {
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<List<NotificationDTO>> getNotifications(){
+  public ApiResponse<List<NotificationDTO>> getNotifications() {
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
         .data(notificationService.getAll())
         .build();
   }
+
   @GetMapping("/MyNotification")
   @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<NotificationDTO>> getMyNotifications() {
     return ApiResponse.<List<NotificationDTO>>builder()
-            .success(true)
-            .data(notificationService.getMyNotifications())
-            .build();
+        .success(true)
+        .data(notificationService.getMyNotifications())
+        .build();
   }
 
   @GetMapping("/{userName}")
   @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<List<NotificationDTO>> getNotifications(@Valid @PathVariable String userName) {
     return ApiResponse.<List<NotificationDTO>>builder()
-            .success(true)
-            .data(notificationService.getNotificationsByUserName(userName))
-            .build();
+        .success(true)
+        .data(notificationService.getNotificationsByUserName(userName))
+        .build();
   }
 
   @PutMapping("/{notificationId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<NotificationDTO> updateNotification(@PathVariable Long notificationId,
-                                                         @RequestBody NotificationDTO request) {
+      @RequestBody NotificationDTO request) {
     return ApiResponse.<NotificationDTO>builder()
-            .success(true)
-            .data(notificationService.update(notificationId, request))
-            .build();
+        .success(true)
+        .data(notificationService.update(notificationId, request))
+        .build();
   }
 
   @DeleteMapping("/{notificationId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<String> deleteNotification(@PathVariable Long notificationId){
+  public ApiResponse<String> deleteNotification(@PathVariable Long notificationId) {
     notificationService.delete(notificationId);
     return ApiResponse.<String>builder()
         .success(true)

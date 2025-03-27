@@ -36,9 +36,9 @@ public class RoomBookingService {
   private final RoomRepository roomRepository;
 
   public RoomBookingService(RoomBookingRepository roomBookingRepository,
-                            RoomBookingMapper roomBookingMapper,
-                            EmailService emailService,
-                            RoomRepository roomRepository) {
+      RoomBookingMapper roomBookingMapper,
+      EmailService emailService,
+      RoomRepository roomRepository) {
     this.roomBookingRepository = roomBookingRepository;
     this.roomBookingMapper = roomBookingMapper;
     this.emailService = emailService;
@@ -88,11 +88,12 @@ public class RoomBookingService {
         .map(roomBookingMapper::toDTO)
         .collect(Collectors.toList());
   }
+
   public List<RoomBookingDTO> getBookingsByUserName(String userName) {
     List<RoomBooking> roomBookings = roomBookingRepository.findByBookedBy_UserName(userName);
     return roomBookings.stream()
-            .map(roomBookingMapper::toDTO)
-            .collect(Collectors.toList());
+        .map(roomBookingMapper::toDTO)
+        .collect(Collectors.toList());
   }
 
   public List<RoomBookingDTO> getMyBookings() {
@@ -110,6 +111,7 @@ public class RoomBookingService {
     }
     throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
   }
+
   public void delete(Long bookingId) {
     if (!roomBookingRepository.existsById(bookingId)) {
       throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
@@ -121,12 +123,12 @@ public class RoomBookingService {
     List<RoomBookingDTO> bookings = getAll();
 
     try (Workbook workbook = new XSSFWorkbook();
-         ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
       Sheet sheet = workbook.createSheet("Bookings");
-
       // Tạo hàng tiêu đề
       Row headerRow = sheet.createRow(0);
-      String[] headers = {"Room ID", "Room Name", "Booked By", "Start Time", "End Time", "Status", "Note"};
+      String[] headers = {"Room ID", "Room Name", "Booked By",
+          "Start Time", "End Time", "Status", "Description"};
 
       for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
@@ -137,18 +139,20 @@ public class RoomBookingService {
         style.setFont(font);
         cell.setCellStyle(style);
       }
-
       // Điền dữ liệu vào sheet
       int rowNum = 1;
       for (RoomBookingDTO booking : bookings) {
         Row row = sheet.createRow(rowNum++);
         row.createCell(0).setCellValue(booking.getRoomId());
-        row.createCell(1).setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
-        row.createCell(2).setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
+        row.createCell(1)
+            .setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
+        row.createCell(2)
+            .setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
         row.createCell(3).setCellValue(booking.getStartTime().toString());
         row.createCell(4).setCellValue(booking.getEndTime().toString());
         row.createCell(5).setCellValue(booking.getStatus().toString());
-        row.createCell(6).setCellValue(booking.getDescription() != null ? booking.getDescription() : "");
+        row.createCell(6)
+            .setCellValue(booking.getDescription() != null ? booking.getDescription() : "");
       }
       // Tự động điều chỉnh độ rộng của cột
       for (int i = 0; i < headers.length; i++) {
@@ -173,16 +177,17 @@ public class RoomBookingService {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime twoHoursLater = now.plus(2, ChronoUnit.HOURS);
 
-    List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now, twoHoursLater);
+    List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now,
+        twoHoursLater);
 
     for (RoomBooking booking : upcomingMeetings) {
       try {
         emailService.sendMeetingReminderEmail(
-                booking.getBookedBy().getEmail(),
-                booking.getBookedBy().getUserName(),
-                booking.getRoom().getRoomName(),
-                booking.getStartTime().toString(),
-                booking.getEndTime().toString()
+            booking.getBookedBy().getEmail(),
+            booking.getBookedBy().getUserName(),
+            booking.getRoom().getRoomName(),
+            booking.getStartTime().toString(),
+            booking.getEndTime().toString()
         );
       } catch (MessagingException e) {
         e.printStackTrace();
@@ -192,7 +197,7 @@ public class RoomBookingService {
 
   public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
     Room room = roomRepository.findByRoomName(roomName)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
 
     List<RoomBooking> roomBookings = room.getBookings();
     if (roomBookings.isEmpty()) {
@@ -200,7 +205,7 @@ public class RoomBookingService {
     }
 
     return roomBookings.stream()
-            .map(roomBookingMapper::toDTO)
-            .collect(Collectors.toList());
+        .map(roomBookingMapper::toDTO)
+        .collect(Collectors.toList());
   }
 }

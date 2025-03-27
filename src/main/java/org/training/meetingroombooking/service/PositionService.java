@@ -15,7 +15,7 @@ public class PositionService {
   private final PositionRepository positionRepository;
   private final PositionMapper positionMapper;
 
-  public  PositionService(PositionRepository positionRepository, PositionMapper positionMapper) {
+  public PositionService(PositionRepository positionRepository, PositionMapper positionMapper) {
     this.positionRepository = positionRepository;
     this.positionMapper = positionMapper;
   }
@@ -29,8 +29,8 @@ public class PositionService {
   public List<PositionDTO> getAll() {
     List<Position> positions = positionRepository.findAll();
     return positions.stream()
-            .map(positionMapper::toDTO)
-            .toList();
+        .map(positionMapper::toDTO)
+        .toList();
   }
 
   public void deletePosition(String positionName) {

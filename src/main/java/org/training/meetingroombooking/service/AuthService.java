@@ -56,8 +56,7 @@ public class AuthService {
     var token = request.getToken();
 
     verifyToken(token);
-    return IntrospectResponse.builder()
-        .valid(true).build();
+    return IntrospectResponse.builder().valid(true).build();
   }
 
   public AuthResponse authenticate(AuthRequest request) {
@@ -74,10 +73,7 @@ public class AuthService {
     var accessToken = generateToken(user, 30);  // Access Token sống 30 phút
     var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
 
-    return AuthResponse.builder()
-        .accessToken(accessToken)
-        .refreshToken(refreshToken)
-        .build();
+    return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
 
@@ -88,8 +84,8 @@ public class AuthService {
       String jit = signToken.getJWTClaimsSet().getJWTID();
       Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
-      InvalidatedToken invalidatedToken =
-          InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+      InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime)
+          .build();
 
       invalidatedTokenRepository.save(invalidatedToken);
     } catch (AppEx exception) {
@@ -112,9 +108,7 @@ public class AuthService {
 
     var newAccessToken = generateToken(user, 30);
 
-    return AuthResponse.builder()
-        .accessToken(newAccessToken)
-        .refreshToken(request.getToken())
+    return AuthResponse.builder().accessToken(newAccessToken).refreshToken(request.getToken())
         .build();
   }
 
@@ -129,13 +123,13 @@ public class AuthService {
 
       var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expiryTime.after(new Date()))) {
-            throw new AppEx(ErrorCode.UNAUTHENTICATED);
-        }
+      if (!(verified && expiryTime.after(new Date()))) {
+        throw new AppEx(ErrorCode.UNAUTHENTICATED);
+      }
 
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
-            throw new AppEx(ErrorCode.UNAUTHENTICATED);
-        }
+      if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+        throw new AppEx(ErrorCode.UNAUTHENTICATED);
+      }
 
       return signedJWT;
     } catch (ParseException e) {
@@ -147,14 +141,10 @@ public class AuthService {
   protected String generateToken(User user, int expirationMinutes) {
     try {
       JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
-      JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-          .subject(user.getUserName())
-          .issuer("meeting-room-booking")
-          .issueTime(new Date())
+      JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().subject(user.getUserName())
+          .issuer("meeting-room-booking").issueTime(new Date())
           .expirationTime(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))
-          .jwtID(UUID.randomUUID().toString())
-          .claim("scope", buildScope(user))
-          .build();
+          .jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user)).build();
 
       JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaimsSet.toJSONObject()));
       jwsObject.sign(new MACSigner(SECRETKEY.getBytes()));
@@ -169,15 +159,15 @@ public class AuthService {
   private String buildScope(User user) {
     StringJoiner stringJoiner = new StringJoiner(" ");
 
-      if (!CollectionUtils.isEmpty(user.getRoles())) {
-          user.getRoles().forEach(role -> {
-              stringJoiner.add("ROLE_" + role.getRoleName());
-              if (!CollectionUtils.isEmpty(role.getPermissions())) {
-                  role.getPermissions().forEach(permission
-                      -> stringJoiner.add(permission.getPermissionName()));
-              }
-          });
-      }
+    if (!CollectionUtils.isEmpty(user.getRoles())) {
+      user.getRoles().forEach(role -> {
+        stringJoiner.add("ROLE_" + role.getRoleName());
+        if (!CollectionUtils.isEmpty(role.getPermissions())) {
+          role.getPermissions()
+              .forEach(permission -> stringJoiner.add(permission.getPermissionName()));
+        }
+      });
+    }
 
     return stringJoiner.toString();
   }
