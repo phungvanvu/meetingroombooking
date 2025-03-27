@@ -43,67 +43,6 @@ public class RoomController {
         .build();
   }
 
-  @GetMapping("/rooms/by-name/{roomNames}")
-  public ApiResponse<List<RoomDTO>> getRoomsByRoomName(@PathVariable List<String> roomNames) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByNames(roomNames))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-location/{location}")
-  public ApiResponse<List<RoomDTO>> getRoomsByLocation(@PathVariable List<String> location) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByLocation(location))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-name-and-location/{roomName}/{location}")
-  public ApiResponse<List<RoomDTO>> getRoomsByLocationAndRoomName(
-      @PathVariable List<String> roomName, @PathVariable List<String> location) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByNameAndLocation(roomName, location))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-capacity/{capacity}")
-  public ApiResponse<List<RoomDTO>> getRoomsByCapacity(@PathVariable List<Integer> capacity) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByCapacity(capacity))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-name-and-capacity/{roomName}/{capacity}")
-  public ApiResponse<List<RoomDTO>> getRoomsByRoomNameAndCapacity(
-      @PathVariable List<String> roomName, @PathVariable List<Integer> capacity) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByNameAndCapacity(roomName, capacity))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-name-capacity-location/{roomName}/{capacity}/{location}")
-  public ApiResponse<List<RoomDTO>> getRoomsByRoomNameAndCapacityAndLocation(
-      @PathVariable List<String> roomName, @PathVariable List<Integer> capacity,
-      @PathVariable List<String> location) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByNameAndCapacityAndLocation(roomName, capacity, location))
-        .build();
-  }
-
-  @GetMapping("/rooms/by-capacity-location/{capacity}/{location}")
-  public ApiResponse<List<RoomDTO>> getRoomsByCapacityAndLocation(
-      @PathVariable List<Integer> capacity, @PathVariable List<String> location) {
-    return ApiResponse.<List<RoomDTO>>builder()
-        .success(true)
-        .data(roomService.findByCapacityAndLocation(capacity, location))
-        .build();
-  }
-
   @GetMapping
   public ApiResponse<List<RoomDTO>> getRooms() {
     return ApiResponse.<List<RoomDTO>>builder()

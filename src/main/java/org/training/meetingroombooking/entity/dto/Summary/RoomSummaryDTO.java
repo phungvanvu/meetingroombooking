@@ -1,4 +1,4 @@
-package org.training.meetingroombooking.entity.dto;
+package org.training.meetingroombooking.entity.dto.Summary;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

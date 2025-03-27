@@ -2,13 +2,11 @@ package org.training.meetingroombooking.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import jakarta.mail.MessagingException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -18,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
-import org.training.meetingroombooking.entity.dto.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
 import org.training.meetingroombooking.entity.models.Room;
@@ -45,40 +42,17 @@ public class RoomBookingService {
     this.roomRepository = roomRepository;
   }
 
-  public RoomSummaryDTO getMostBookedRoomOfMonth() {
-    LocalDate currentDate = LocalDate.now();
-    int month = currentDate.getMonthValue();
-    int year = currentDate.getYear();
-
-    Optional<Object[]> result = roomBookingRepository.findMostBookedRoomOfMonth(month, year);
-
-    if (result.isPresent()) {
-      Long roomId = (Long) result.get()[0];
-      long count = (Long) result.get()[1];
-
-      return new RoomSummaryDTO(roomId, "Most booked room of the month", count);
-    }
-    throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
-  }
-
-  public long getMonthlyBookingCount(int month, int year) {
-    return roomBookingRepository.countBookingsByMonth(month, year);
-  }
-
-  public long getCurrentMonthBookingCount() {
-    LocalDate currentDate = LocalDate.now();
-    return getMonthlyBookingCount(currentDate.getMonthValue(), currentDate.getYear());
-  }
-
   public RoomBookingDTO create(RoomBookingDTO dto) {
+    boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlap(
+            dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
+    if (isOverlap) {
+      throw new IllegalArgumentException("This room is already booked for the selected time.");
+    }
     RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
     RoomBooking savedRoomBooking = roomBookingRepository.save(roomBooking);
-    // Gửi email sau khi tạo thành công
-    try {
-      emailService.sendRoomBookingConfirmationEmail(dto);
-    } catch (MessagingException e) {
-      e.printStackTrace();
-    }
+    // Gửi email
+    emailService.sendRoomBookingConfirmationEmail(dto);
+
     return roomBookingMapper.toDTO(savedRoomBooking);
   }
 
@@ -129,7 +103,6 @@ public class RoomBookingService {
       Row headerRow = sheet.createRow(0);
       String[] headers = {"Room ID", "Room Name", "Booked By",
           "Start Time", "End Time", "Status", "Description"};
-
       for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
@@ -139,7 +112,6 @@ public class RoomBookingService {
         style.setFont(font);
         cell.setCellStyle(style);
       }
-      // Điền dữ liệu vào sheet
       int rowNum = 1;
       for (RoomBookingDTO booking : bookings) {
         Row row = sheet.createRow(rowNum++);
@@ -157,7 +129,6 @@ public class RoomBookingService {
         row.createCell(6)
             .setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
       }
-      // Tự động điều chỉnh độ rộng của cột
       for (int i = 0; i < headers.length; i++) {
         sheet.autoSizeColumn(i);
       }
@@ -201,12 +172,10 @@ public class RoomBookingService {
   public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
     Room room = roomRepository.findByRoomName(roomName)
         .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-
     List<RoomBooking> roomBookings = room.getBookings();
     if (roomBookings.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
     }
-
     return roomBookings.stream()
         .map(roomBookingMapper::toDTO)
         .collect(Collectors.toList());

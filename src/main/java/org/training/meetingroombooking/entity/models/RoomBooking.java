@@ -32,10 +32,6 @@ public class RoomBooking {
     @JoinColumn(name = "bookedBy", nullable = false)
     private User bookedBy;
 
-//    @ManyToOne
-//    @JoinColumn(name = "request_id", nullable = false)
-//    private Request request;
-
     @FutureOrPresent
     @Column(nullable = false)
     private LocalDateTime startTime;
