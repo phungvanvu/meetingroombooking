@@ -148,11 +148,14 @@ public class RoomBookingService {
             .setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
         row.createCell(2)
             .setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
-        row.createCell(3).setCellValue(booking.getStartTime().toString());
-        row.createCell(4).setCellValue(booking.getEndTime().toString());
-        row.createCell(5).setCellValue(booking.getStatus().toString());
+        row.createCell(3).setCellValue(
+            booking.getStartTime().toString() != null ? booking.getStartTime().toString() : "N/A");
+        row.createCell(4).setCellValue(
+            booking.getEndTime().toString() != null ? booking.getEndTime().toString() : "N/A");
+        row.createCell(5).setCellValue(
+            booking.getStatus().toString() != null ? booking.getStatus().toString() : "N/A");
         row.createCell(6)
-            .setCellValue(booking.getDescription() != null ? booking.getDescription() : "");
+            .setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
       }
       // Tự động điều chỉnh độ rộng của cột
       for (int i = 0; i < headers.length; i++) {

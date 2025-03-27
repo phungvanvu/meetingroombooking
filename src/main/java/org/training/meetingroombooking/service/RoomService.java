@@ -52,7 +52,7 @@ public class RoomService {
   }
 
   public List<RoomDTO> findByNames(List<String> roomNames) {
-    List<Room> rooms = roomRepository.findByRoomNames(roomNames);
+    List<Room> rooms = roomRepository.findByRoomNameIn(roomNames);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
@@ -68,7 +68,7 @@ public class RoomService {
   }
 
   public List<RoomDTO> findByLocation(List<String> location) {
-    List<Room> rooms = roomRepository.findByLocation(location);
+    List<Room> rooms = roomRepository.findByLocationIn(location);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
@@ -76,7 +76,7 @@ public class RoomService {
   }
 
   public List<RoomDTO> findByNameAndLocation(List<String> roomName, List<String> location) {
-    List<Room> rooms = roomRepository.findByRoomNameAndLocation(roomName, location);
+    List<Room> rooms = roomRepository.findByRoomNameInAndLocationIn(roomName, location);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
@@ -84,7 +84,7 @@ public class RoomService {
   }
 
   public List<RoomDTO> findByNameAndCapacity(List<String> roomName, List<Integer> capacity) {
-    List<Room> rooms = roomRepository.findByRoomNameAndCapacity(roomName, capacity);
+    List<Room> rooms = roomRepository.findByRoomNameInAndCapacity(roomName, capacity);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
@@ -92,7 +92,7 @@ public class RoomService {
   }
 
   public List<RoomDTO> findByCapacityAndLocation(List<Integer> capacity, List<String> location) {
-    List<Room> rooms = roomRepository.findByCapacityAndLocation(capacity, location);
+    List<Room> rooms = roomRepository.findByCapacityAndLocationIn(capacity, location);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
@@ -101,7 +101,7 @@ public class RoomService {
 
   public List<RoomDTO> findByNameAndCapacityAndLocation(List<String> roomName,
       List<Integer> capacity, List<String> location) {
-    List<Room> rooms = roomRepository.findByRoomNameAndCapacityAndLocation(roomName, capacity,
+    List<Room> rooms = roomRepository.findByRoomNameInAndCapacityAndLocationIn(roomName, capacity,
         location);
     if (rooms.isEmpty()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
