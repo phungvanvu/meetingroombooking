@@ -5,6 +5,7 @@ import org.training.meetingroombooking.exception.ApiError;
 
 @Getter
 public enum ErrorCode {
+    ALERADY_BOOKED("This room is already booked for the selected time."),
     INVALID_FILE_TYPE("Invalid file type. Only PNG, JPG, and JPEG are allowed."),
     ROOM_BOOKING_NOT_FOUND("Room booking not found"),
     ROOM_NOT_FOUND("Room not found"),

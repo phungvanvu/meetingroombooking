@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,14 +47,14 @@ public class RoomBookingService {
     boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlap(
             dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
     if (isOverlap) {
-      throw new IllegalArgumentException("This room is already booked for the selected time.");
+      throw new AppEx(ErrorCode.ALERADY_BOOKED);
     }
     RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
     RoomBooking savedRoomBooking = roomBookingRepository.save(roomBooking);
+    RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
     // Gửi email
-    emailService.sendRoomBookingConfirmationEmail(dto);
-
-    return roomBookingMapper.toDTO(savedRoomBooking);
+    emailService.sendRoomBookingConfirmationEmail(savedDTO);
+    return savedDTO;
   }
 
   public List<RoomBookingDTO> getAll() {
@@ -115,20 +116,22 @@ public class RoomBookingService {
       int rowNum = 1;
       for (RoomBookingDTO booking : bookings) {
         Row row = sheet.createRow(rowNum++);
-        row.createCell(0).setCellValue(booking.getRoomId());
-        row.createCell(1)
-            .setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
-        row.createCell(2)
-            .setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
+        if (booking.getRoomId() != null) {
+          row.createCell(0).setCellValue(booking.getRoomId());
+        } else {
+          row.createCell(0).setCellValue("N/A"); // hoặc giá trị mặc định
+        }
+        row.createCell(1).setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
+        row.createCell(2).setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
         row.createCell(3).setCellValue(
-            booking.getStartTime().toString() != null ? booking.getStartTime().toString() : "N/A");
+                booking.getStartTime() != null ? booking.getStartTime().toString() : "N/A");
         row.createCell(4).setCellValue(
-            booking.getEndTime().toString() != null ? booking.getEndTime().toString() : "N/A");
+                booking.getEndTime() != null ? booking.getEndTime().toString() : "N/A");
         row.createCell(5).setCellValue(
-            booking.getStatus().toString() != null ? booking.getStatus().toString() : "N/A");
-        row.createCell(6)
-            .setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
+                booking.getStatus() != null ? booking.getStatus().toString() : "N/A");
+        row.createCell(6).setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
       }
+
       for (int i = 0; i < headers.length; i++) {
         sheet.autoSizeColumn(i);
       }
@@ -145,7 +148,8 @@ public class RoomBookingService {
     return style;
   }
 
-  @Scheduled(fixedRate = 900000) // tự động thực hiện mỗi 15 phút
+//  @Scheduled(fixedRate = 30000)//30s
+  @Scheduled(fixedRate = 1800000)//30p
   @Transactional
   public void sendMeetingReminderEmails() {
     LocalDateTime now = LocalDateTime.now();
@@ -171,13 +175,14 @@ public class RoomBookingService {
 
   public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
     Room room = roomRepository.findByRoomName(roomName)
-        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     List<RoomBooking> roomBookings = room.getBookings();
     if (roomBookings.isEmpty()) {
-      throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
+      return Collections.emptyList();
     }
     return roomBookings.stream()
-        .map(roomBookingMapper::toDTO)
-        .collect(Collectors.toList());
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
   }
+
 }

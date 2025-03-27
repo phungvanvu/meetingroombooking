@@ -33,6 +33,14 @@ public class PositionService {
         .toList();
   }
 
+  public PositionDTO update(String positionName, PositionDTO dto) {
+    Position position = positionRepository.findById(positionName)
+            .orElseThrow(() -> new AppEx(ErrorCode.POSITION_NOT_FOUND));
+    positionMapper.updatePosition(position, dto);
+    Position updatedPosition = positionRepository.save(position);
+    return positionMapper.toDTO(updatedPosition);
+  }
+
   public void deletePosition(String positionName) {
     if (!positionRepository.existsById(positionName)) {
       throw new AppEx(ErrorCode.POSITION_NOT_FOUND);

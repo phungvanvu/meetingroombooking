@@ -47,8 +47,10 @@ public class UserRequest {
 
   private boolean enabled = true;
 
+  @NotNull(message = "Position cannot be null")
   private String position;
 
+  @NotNull(message = "Group cannot be null")
   private String group;
 
   private Set<String> roles;

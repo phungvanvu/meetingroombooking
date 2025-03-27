@@ -76,13 +76,10 @@ public class UserService {
   public UserResponse update(Long userId, UserRequest request) {
     User user = userRepository.findById(userId).orElseThrow(
         () -> new AppEx(ErrorCode.USER_NOT_FOUND));
-
     userMapper.updateEntity(user, request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
-
     var roles = roleRepository.findAllById(request.getRoles());
     user.setRoles(new HashSet<>(roles));
-
     return userMapper.toUserResponse(userRepository.save(user));
   }
 

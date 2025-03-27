@@ -9,5 +9,5 @@ import org.training.meetingroombooking.entity.models.Permission;
 public interface PermissionMapper {
     Permission toEntity(PermissionDTO request);
     PermissionDTO toDTO(Permission permission);
-    void updateEntity(String permissionName, @MappingTarget PermissionDTO dto);
+    void updateEntity(@MappingTarget Permission entity, PermissionDTO dto);
 }

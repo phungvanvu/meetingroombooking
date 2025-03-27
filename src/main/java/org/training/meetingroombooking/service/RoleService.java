@@ -55,6 +55,24 @@ public class RoleService {
         .toList();
   }
 
+  public RoleDTO update(String roleName, RoleDTO request) {
+    Role role = roleRepository.findById(roleName)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROLE_NOT_FOUND));
+    var permissions = permissionRepository.findAllById(request.getPermissions());
+    var missingPermissions = request.getPermissions().stream()
+            .filter(p -> permissions.stream()
+                    .noneMatch(dbPermission -> dbPermission.getPermissionName().equals(p)))
+            .collect(Collectors.toSet());
+    if (!missingPermissions.isEmpty()) {
+      throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);
+    }
+    role.setPermissions(new HashSet<>(permissions));
+    role.setRoleName(request.getRoleName());
+    Role updatedRole = roleRepository.save(role);
+    return roleMapper.toDTO(updatedRole);
+  }
+
+
   public void delete(String roleName) {
     if (!roleRepository.existsById(roleName)) {
       throw new AppEx(ErrorCode.ROLE_NOT_FOUND);

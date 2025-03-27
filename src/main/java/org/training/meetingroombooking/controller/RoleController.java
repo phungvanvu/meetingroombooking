@@ -13,37 +13,50 @@ import java.util.List;
 @RequestMapping("/role")
 public class RoleController {
 
-  private final RoleService roleService;
+    private final RoleService roleService;
 
-  public RoleController(RoleService roleService) {
-    this.roleService = roleService;
-  }
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
 
-  @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {
-    return ApiResponse.<RoleDTO>builder()
-        .success(true)
-        .data(roleService.create(request))
-        .build();
-  }
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {
+        return ApiResponse.<RoleDTO>builder()
+                .success(true)
+                .data(roleService.create(request))
+                .build();
+    }
 
-  @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<List<RoleDTO>> getRoles() {
-    return ApiResponse.<List<RoleDTO>>builder()
-        .success(true)
-        .data(roleService.getAll())
-        .build();
-  }
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<List<RoleDTO>> getRoles() {
+        return ApiResponse.<List<RoleDTO>>builder()
+                .success(true)
+                .data(roleService.getAll())
+                .build();
+    }
 
-  @DeleteMapping("/{role}")
-  @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> delete(@PathVariable String role) {
-    roleService.delete(role);
-    return ApiResponse.<String>builder()
-        .success(true)
-        .data("Role has been deleted")
-        .build();
-  }
+    @PutMapping("/{roleName}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<RoleDTO> update(
+            @PathVariable String roleName,
+            @Valid @RequestBody RoleDTO request) {
+        RoleDTO updatedRole = roleService.update(roleName, request);
+        return ApiResponse.<RoleDTO>builder()
+                .success(true)
+                .data(updatedRole)
+                .build();
+    }
+
+
+    @DeleteMapping("/{role}")
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<String> delete(@PathVariable String role) {
+        roleService.delete(role);
+        return ApiResponse.<String>builder()
+                .success(true)
+                .data("Role has been deleted")
+                .build();
+    }
 }

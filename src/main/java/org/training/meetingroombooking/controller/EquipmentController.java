@@ -3,6 +3,7 @@ package org.training.meetingroombooking.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,6 +44,15 @@ public class EquipmentController {
         .success(true)
         .data(equipmentService.getAll())
         .build();
+  }
+
+  @GetMapping("/distinct")
+  public ApiResponse<Set<EquipmentDTO>> getAllDistinctEquipments() {
+    Set<EquipmentDTO> distinctEquipments = equipmentService.getAllDistinctEquipments();
+    return ApiResponse.<Set<EquipmentDTO>>builder()
+            .success(true)
+            .data(distinctEquipments)
+            .build();
   }
 
   @GetMapping("/{equipmentId}")

@@ -46,7 +46,7 @@ public class RoomBooking {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private BookingStatus status;
+    private BookingStatus status = BookingStatus.CONFIRMED;
 
     @Column(columnDefinition = "TEXT", length = 255)
     private String description;
@@ -57,5 +57,8 @@ public class RoomBooking {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = BookingStatus.CONFIRMED;
+        }
     }
 }

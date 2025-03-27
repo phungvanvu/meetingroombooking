@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
+import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
 import org.training.meetingroombooking.entity.models.Room;
@@ -102,4 +104,16 @@ public class RoomService {
     return roomMapper.toDTO(room);
   }
 
+  public Set<String> getAllRoomNames() {
+    return roomRepository.findAll()
+            .stream()
+            .map(Room::getRoomName)
+            .collect(Collectors.toSet());
+  }
+  public Set<String> getAllRoomLocations() {
+    return roomRepository.findAll()
+            .stream()
+            .map(Room::getLocation)
+            .collect(Collectors.toSet());
+  }
 }

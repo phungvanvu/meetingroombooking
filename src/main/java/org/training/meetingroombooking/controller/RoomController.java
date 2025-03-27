@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
+import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.service.RoomService;
 
 @RestController
@@ -83,4 +85,22 @@ public class RoomController {
         .data("Room has been deleted")
         .build();
   }
+
+  @GetMapping("/names")
+  public ApiResponse<Set<String>> getAllRoomNames() {
+    return ApiResponse.<Set<String>>builder()
+            .success(true)
+            .data(roomService.getAllRoomNames())
+            .build();
+  }
+
+  @GetMapping("/locations")
+  public ApiResponse<Set<String>> getAllRoomLocations() {
+    return ApiResponse.<Set<String>>builder()
+            .success(true)
+            .data(roomService.getAllRoomLocations())
+            .build();
+  }
+
+
 }

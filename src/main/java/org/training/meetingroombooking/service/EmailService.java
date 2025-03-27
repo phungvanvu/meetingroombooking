@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.models.Room;
-import org.training.meetingroombooking.entity.models.RoomBooking;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.repository.RoomBookingRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
@@ -53,10 +51,13 @@ public class EmailService {
       String userEmail = user.getEmail();
       System.out.println("Sending email to: " + userEmail);
 
+      System.out.println("DTO: " + dto);
+
       String subject = "Meeting room booking confirmation successful";
       String htmlBody = "<h3>Greet " + (user.getFullName() != null ? user.getFullName() : "N/A") + ",</h3>"
               + "<p>You have successfully booked a meeting room!</p>"
               + "<ul>"
+              + "<li><b>Title:</b> " + (dto.getPurpose() != null ? dto.getPurpose().toString() : "N/A") + "</li>"
               + "<li><b>Room:</b> " + (room.getRoomName() != null ? room.getRoomName() : "N/A") + "</li>"
               + "<li><b>Time:</b> " + (dto.getStartTime() != null ? dto.getStartTime().toString() : "N/A")
               + " - " + (dto.getEndTime() != null ? dto.getEndTime().toString() : "N/A") + "</li>"
