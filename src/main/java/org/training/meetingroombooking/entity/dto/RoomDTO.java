@@ -37,8 +37,6 @@ public class RoomDTO {
   @Size(max = 255, message = "Notes cannot exceed 255 characters")
   private String note;
 
-  private boolean active;
-
   private String imageUrl;
 
   private List<String> equipments;

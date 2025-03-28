@@ -1,5 +1,8 @@
 package org.training.meetingroombooking.service;
 
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
@@ -75,5 +78,12 @@ public class StatisticalService {
         long availableRooms = roomRepository.countByAvailable(true);  // Tổng số phòng có sẵn
         long unavailableRooms = roomRepository.countByAvailable(false);  // Tổng số phòng không có sẵn
         return new RoomStatisticsDTO(totalRooms, availableRooms, unavailableRooms);
+    }
+    public CellStyle getHeaderCellStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        return style;
     }
 }

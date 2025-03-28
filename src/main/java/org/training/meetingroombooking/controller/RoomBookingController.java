@@ -84,13 +84,4 @@ public class RoomBookingController {
         .build();
   }
 
-  @GetMapping("/export-excel")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
-    ByteArrayOutputStream outputStream = roomBookingService.exportBookingsToExcel();
-    return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings.xlsx")
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(outputStream.toByteArray());
-  }
 }

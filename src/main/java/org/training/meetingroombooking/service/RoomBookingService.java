@@ -119,7 +119,7 @@ public class RoomBookingService {
         if (booking.getRoomId() != null) {
           row.createCell(0).setCellValue(booking.getRoomId());
         } else {
-          row.createCell(0).setCellValue("N/A"); // hoặc giá trị mặc định
+          row.createCell(0).setCellValue("N/A");
         }
         row.createCell(1).setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
         row.createCell(2).setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
@@ -138,14 +138,6 @@ public class RoomBookingService {
       workbook.write(outputStream);
       return outputStream;
     }
-  }
-
-  private CellStyle getHeaderCellStyle(Workbook workbook) {
-    CellStyle style = workbook.createCellStyle();
-    Font font = workbook.createFont();
-    font.setBold(true);
-    style.setFont(font);
-    return style;
   }
 
 //  @Scheduled(fixedRate = 30000)//30s

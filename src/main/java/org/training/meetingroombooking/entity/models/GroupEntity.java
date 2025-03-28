@@ -27,9 +27,6 @@ public class GroupEntity {
     @Column(length = 50)
     private String division;
 
-    @Column(length = 50)
-    private String department;
-
     @Column(name = "created_date")
     private LocalDateTime createdDate;
 

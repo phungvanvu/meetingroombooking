@@ -145,7 +145,6 @@ class EmailServiceTest {
 
     @Test
     void ***REMOVED***SendMeetingReminderEmail() throws MessagingException {
-        // Tạo đối tượng MimeMessage mock
         MimeMessage mimeMessage = Mockito.mock(MimeMessage.class);
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
@@ -155,13 +154,10 @@ class EmailServiceTest {
         String startTime = "2025-03-28T10:00:00";
         String endTime = "2025-03-28T12:00:00";
 
-        // Mock hành động của mailSender
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
-        // Gọi phương thức gửi email
         emailService.sendMeetingReminderEmail(to, userName, roomName, startTime, endTime);
 
-        // Kiểm tra xem phương thức send của mailSender đã được gọi với mimeMessage hay chưa
         verify(mailSender, times(1)).send(mimeMessage);
     }
 }

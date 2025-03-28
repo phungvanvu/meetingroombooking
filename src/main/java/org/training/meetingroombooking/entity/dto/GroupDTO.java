@@ -26,8 +26,5 @@ public class GroupDTO {
     @Size(max = 50, message = "Division must not exceed 100 characters.")
     private String division;
 
-    @Size(max = 50, message = "Department must not exceed 50 characters")
-    private String department;
-
     private LocalDateTime createdDate;
 }
