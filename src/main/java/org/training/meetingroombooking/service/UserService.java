@@ -133,14 +133,18 @@ public class UserService {
   }
 
   public UserResponse update(Long userId, UserRequest request) {
-    User user = userRepository.findById(userId).orElseThrow(
-        () -> new AppEx(ErrorCode.USER_NOT_FOUND));
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
     userMapper.updateEntity(user, request);
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    // Chỉ cập nhật mật khẩu nếu có giá trị mới
+    if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+    }
     var roles = roleRepository.findAllById(request.getRoles());
     user.setRoles(new HashSet<>(roles));
     return userMapper.toUserResponse(userRepository.save(user));
   }
+
 
   public void delete(Long userId) {
     if (!userRepository.existsById(userId)) {

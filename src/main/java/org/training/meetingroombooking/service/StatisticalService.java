@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
+import org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
@@ -13,53 +14,21 @@ import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StatisticalService {
     private final RoomRepository roomRepository;
     private final RoomBookingRepository roomBookingRepository;
-    private final RoomBookingMapper roomBookingMapper;
 
     public StatisticalService(RoomBookingRepository roomBookingRepository,
                               RoomBookingMapper roomBookingMapper, RoomRepository roomRepository) {
         this.roomBookingRepository = roomBookingRepository;
-        this.roomBookingMapper = roomBookingMapper;
         this.roomRepository = roomRepository;
-    }
-
-    public RoomSummaryDTO getMostBookedRoomOfMonth() {
-        LocalDate currentDate = LocalDate.now();
-        int month = currentDate.getMonthValue();
-        int year = currentDate.getYear();
-
-        Optional<Object[]> result = roomBookingRepository.findMostBookedRoomOfMonth(month, year);
-        if (result.isPresent()) {
-            Long roomId = (Long) result.get()[0];
-            long count = (Long) result.get()[1];
-            return new RoomSummaryDTO(roomId, "Most booked room of the month", count);
-        }
-        throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
-    }
-
-    public long getMonthlyBookingCount(int month, int year) {
-        return roomBookingRepository.countBookingsByMonth(month, year);
-    }
-
-    public long getCurrentMonthBookingCount() {
-        LocalDate currentDate = LocalDate.now();
-        return getMonthlyBookingCount(currentDate.getMonthValue(), currentDate.getYear());
-    }
-    // Tổng lượt đặt phòng theo tuần
-    public long getWeeklyBookingCount(int week, int year) {
-        return roomBookingRepository.countBookingsByWeek(week, year);
-    }
-
-    // Tổng lượt đặt phòng theo quý
-    public long getQuarterlyBookingCount(int quarter, int year) {
-        return roomBookingRepository.countBookingsByQuarter(quarter, year);
     }
 
     // Top người dùng đặt phòng nhiều nhất
@@ -74,11 +43,70 @@ public class StatisticalService {
     }
 
     public RoomStatisticsDTO getRoomStatistics() {
-        long totalRooms = roomRepository.count();  // Tổng số phòng
-        long availableRooms = roomRepository.countByAvailable(true);  // Tổng số phòng có sẵn
-        long unavailableRooms = roomRepository.countByAvailable(false);  // Tổng số phòng không có sẵn
-        return new RoomStatisticsDTO(totalRooms, availableRooms, unavailableRooms);
+        long totalRooms = roomRepository.count(); // Tổng số phòng
+        long availableRooms = roomRepository.countByAvailable(true); // Phòng có sẵn
+        long unavailableRooms = roomRepository.countByAvailable(false); // Phòng không có sẵn
+        // Đếm tổng số lượng đặt phòng
+        long totalBookings = roomBookingRepository.count();
+        // Đếm số lượng đặt phòng hôm nay
+        long todayBookings = roomBookingRepository.countByBookingDate(LocalDate.now());
+        return new RoomStatisticsDTO(
+                totalRooms,
+                availableRooms,
+                unavailableRooms,
+                totalBookings,
+                todayBookings
+        );
     }
+
+    public List<BookingSummaryDTO> getWeeklyBookings() {
+        List<Object[]> results = roomBookingRepository.findWeeklyBookings();
+        return results.stream()
+                .map(arr -> new BookingSummaryDTO(
+                        ((Number) arr[0]).intValue(),
+                        ((Number) arr[1]).intValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookingSummaryDTO> getMonthlyBookings() {
+        List<Object[]> results = roomBookingRepository.findMonthlyBookings();
+        return results.stream()
+                .map(arr -> new BookingSummaryDTO(
+                        ((Number) arr[0]).intValue(),
+                        ((Number) arr[1]).intValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookingSummaryDTO> getQuarterlyBookings() {
+        List<Object[]> results = roomBookingRepository.findQuarterlyBookings();
+        return results.stream()
+                .map(arr -> new BookingSummaryDTO(
+                        ((Number) arr[0]).intValue(),
+                        ((Number) arr[1]).intValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+    public BookingSummaryDTO getCurrentMonthBookings() {
+        int currentMonth = LocalDate.now().getMonthValue();
+        long count = roomBookingRepository.countByMonth(currentMonth);
+        return new BookingSummaryDTO(currentMonth, (int) count);
+    }
+
+    public RoomSummaryDTO getMostBookedRoom() {
+        Object[] result = roomBookingRepository.findMostBookedRoom();
+        if (result != null && result.length >= 3) {
+            Long roomId = ((Number) result[0]).longValue();
+            String roomName = (String) result[1];
+            long bookingCount = ((Number) result[2]).longValue();
+            return new RoomSummaryDTO(roomId, roomName, bookingCount);
+        }
+        return null;
+    }
+
     public CellStyle getHeaderCellStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
