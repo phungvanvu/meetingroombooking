@@ -5,5 +5,6 @@ import java.util.Optional;
 
 public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Room> findByRoomName(String roomName);
+    // Phòng có khả dụng
     long countByAvailable(boolean available);
 }

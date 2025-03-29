@@ -9,10 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoomStatisticsDTO {
-    private long totalRooms;
-    private long availableRooms;
-    private long unavailableRooms;
-    private long totalBookings;
-    private long todayBookings;
+public class BookingSummaryDTO {
+    private int period;
+    private int bookings;
 }

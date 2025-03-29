@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
@@ -39,53 +40,6 @@ public class StatisticalController {
         this.userService = userService;
     }
 
-    @GetMapping("/monthly-bookings/{month}/{year}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Long> getMonthlyBookingCount(@PathVariable int month, @PathVariable int year) {
-        return ApiResponse.<Long>builder()
-                .success(true)
-                .data(statisticalService.getMonthlyBookingCount(month, year))
-                .build();
-    }
-
-    @GetMapping("/current-month-bookings")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Long> getCurrentMonthBookingCount() {
-        return ApiResponse.<Long>builder()
-                .success(true)
-                .data(statisticalService.getCurrentMonthBookingCount())
-                .build();
-    }
-
-    @GetMapping("/most-booked-room")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<RoomSummaryDTO> getMostBookedRoomOfMonth() {
-        return ApiResponse.<RoomSummaryDTO>builder()
-                .success(true)
-                .data(statisticalService.getMostBookedRoomOfMonth())
-                .build();
-    }
-
-    // Tổng lượt đặt phòng theo tuần
-    @GetMapping("/weekly-bookings/{week}/{year}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Long> getWeeklyBookingCount(@PathVariable int week, @PathVariable int year) {
-        return ApiResponse.<Long>builder()
-                .success(true)
-                .data(statisticalService.getWeeklyBookingCount(week, year))
-                .build();
-    }
-
-    // Tổng lượt đặt phòng theo quý
-    @GetMapping("/quarterly-bookings/{quarter}/{year}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Long> getQuarterlyBookingCount(@PathVariable int quarter, @PathVariable int year) {
-        return ApiResponse.<Long>builder()
-                .success(true)
-                .data(statisticalService.getQuarterlyBookingCount(quarter, year))
-                .build();
-    }
-
     // Top người dùng đặt phòng nhiều nhất
     @GetMapping("/top-users/{limit}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -95,7 +49,6 @@ public class StatisticalController {
                 .data(statisticalService.getTopUsers(limit))
                 .build();
     }
-
     @GetMapping("/statistics")
     public ApiResponse<RoomStatisticsDTO> getRoomStatistics() {
         return ApiResponse.<RoomStatisticsDTO>builder()
@@ -103,6 +56,7 @@ public class StatisticalController {
                 .data(statisticalService.getRoomStatistics())
                 .build();
     }
+
     @GetMapping("/export-bookings-excel")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
@@ -131,5 +85,48 @@ public class StatisticalController {
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.xlsx")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
             .body(outputStream.toByteArray());
+    }
+    // Endpoint: Lấy phòng được đặt nhiều nhất
+    @GetMapping("/most-booked-room")
+    public ApiResponse<RoomSummaryDTO> getMostBookedRoom() {
+        return ApiResponse.<RoomSummaryDTO>builder()
+                .success(true)
+                .data(statisticalService.getMostBookedRoom())
+                .build();
+    }
+
+    // Endpoint: Lấy số lượt đặt phòng theo quý
+    @GetMapping("/quarterly-bookings")
+    public ApiResponse<List<BookingSummaryDTO>> getQuarterlyBookings() {
+        return ApiResponse.<List<BookingSummaryDTO>>builder()
+                .success(true)
+                .data(statisticalService.getQuarterlyBookings())
+                .build();
+    }
+
+    // Endpoint: Lấy số lượt đặt phòng theo tuần
+    @GetMapping("/weekly-bookings")
+    public ApiResponse<List<BookingSummaryDTO>> getWeeklyBookings() {
+        return ApiResponse.<List<BookingSummaryDTO>>builder()
+                .success(true)
+                .data(statisticalService.getWeeklyBookings())
+                .build();
+    }
+    // Endpoint: Lấy số lượt đặt phòng theo tháng
+    @GetMapping("/monthly-bookings")
+    public ApiResponse<List<BookingSummaryDTO>> getMonthlyBookings() {
+        return ApiResponse.<List<BookingSummaryDTO>>builder()
+                .success(true)
+                .data(statisticalService.getMonthlyBookings())
+                .build();
+    }
+
+    // Endpoint: Lấy số lượt đặt phòng trong tháng hiện tại
+    @GetMapping("/current-month-bookings")
+    public ApiResponse<BookingSummaryDTO> getCurrentMonthBookings() {
+        return ApiResponse.<BookingSummaryDTO>builder()
+                .success(true)
+                .data(statisticalService.getCurrentMonthBookings())
+                .build();
     }
 }
