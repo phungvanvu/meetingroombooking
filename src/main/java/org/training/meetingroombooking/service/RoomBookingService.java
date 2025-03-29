@@ -177,4 +177,16 @@ public class RoomBookingService {
             .collect(Collectors.toList());
   }
 
+  public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
+    Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    List<RoomBooking> roomBookings = room.getBookings();
+    if (roomBookings.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return roomBookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
 }
