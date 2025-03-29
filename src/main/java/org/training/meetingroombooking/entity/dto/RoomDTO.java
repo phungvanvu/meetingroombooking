@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -39,6 +40,6 @@ public class RoomDTO {
 
   private String imageUrl;
 
-  private List<String> equipments;
+  private Set<String> equipments;
 }
 

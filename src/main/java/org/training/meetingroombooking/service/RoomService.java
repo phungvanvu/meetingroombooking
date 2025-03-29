@@ -49,7 +49,7 @@ public class RoomService {
       }
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-      String uploadDir = "uploads/rooms";
+      String uploadDir = "uploads/rooms/";
       File uploadPath = new File(uploadDir);
       if (!uploadPath.exists()) {
         uploadPath.mkdirs();
@@ -131,14 +131,14 @@ public class RoomService {
       }
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-      String uploadDir = "uploads/rooms";
+      String uploadDir = "uploads/rooms/";
       File uploadPath = new File(uploadDir);
       if (!uploadPath.exists()) {
         uploadPath.mkdirs();
       }
       Path filePath = Paths.get(uploadDir, fileName);
       Files.write(filePath, file.getBytes());
-      room.setImageUrl("/uploads/rooms" + fileName);
+      room.setImageUrl("/uploads/rooms/" + fileName);
     }
     Room updatedRoom = roomRepository.save(room);
     return roomMapper.toDTO(updatedRoom);

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -15,22 +16,13 @@ import lombok.NoArgsConstructor;
 public class Equipment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long equipmentId;
-
     @Column(nullable = false, length = 50)
-    private String name; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
+    private String equipmentName; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
 
     @Column(length = 255)
     private String description; // Mô tả thiết bị (VD: Máy chiếu 4K)
 
     @Column(nullable = false)
-    private int quantity; // Số lượng thiết bị trong phòng
-
-    @Column(nullable = false)
     private boolean available = true; // Trạng thái của thiết bị
-    // Mỗi thiết bị thuộc về một phòng cụ thể
-    @ManyToOne
-    @JoinColumn(name = "roomId", nullable = true)
-    private Room room;
+
 }

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -39,8 +40,13 @@ public class Room {
   @Column(nullable = false)
   private boolean available = true;
 
-  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-  private List<Equipment> equipments;
+  @ManyToMany
+  @JoinTable(
+          name = "Room_Equipment",
+          joinColumns = @JoinColumn(name = "roomId"),
+          inverseJoinColumns = @JoinColumn(name = "equipmentId")
+  )
+  private Set<Equipment> equipments;
 
   @Size(max = 255)
   @Column(length = 255)
