@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
+import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
 import org.training.meetingroombooking.entity.models.Room;
@@ -80,12 +81,17 @@ public class RoomBookingService {
     Optional<RoomBooking> existingRoomBooking = roomBookingRepository.findById(bookingId);
     if (existingRoomBooking.isPresent()) {
       RoomBooking roomBooking = existingRoomBooking.get();
+      BookingStatus oldStatus = roomBooking.getStatus();
       roomBookingMapper.updateEntity(roomBooking, dto);
+      if (dto.getStatus() == null) {
+        roomBooking.setStatus(oldStatus);
+      }
       RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
       return roomBookingMapper.toDTO(updatedRoomBooking);
     }
     throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
   }
+
 
   public void delete(Long bookingId) {
     if (!roomBookingRepository.existsById(bookingId)) {
@@ -187,6 +193,56 @@ public class RoomBookingService {
     return roomBookings.stream()
             .map(roomBookingMapper::toDTO)
             .collect(Collectors.toList());
+  }
+
+  public List<RoomBookingDTO> getUpcomingBookings() {
+    LocalDateTime now = LocalDateTime.now();
+    List<RoomBooking> upcomingBookings = roomBookingRepository
+            .findByStatusAndStartTimeAfter(BookingStatus.CONFIRMED, now);
+    return upcomingBookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
+  public List<RoomBookingDTO> getUpcomingBookingsByUserName(String userName) {
+    LocalDateTime now = LocalDateTime.now();
+    List<RoomBooking> upcomingBookings = roomBookingRepository
+            .findByBookedBy_UserNameAndStatusAndStartTimeAfter(
+                    userName, BookingStatus.CONFIRMED, now);
+    return upcomingBookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
+  public List<RoomBookingDTO> getUpcomingBookingsByRoomId(Long roomId) {
+    LocalDateTime now = LocalDateTime.now();
+    List<RoomBooking> upcomingBookings = roomBookingRepository
+            .findByRoom_roomIdAndStatusAndStartTimeAfter(
+                    roomId, BookingStatus.CONFIRMED, now);
+    return upcomingBookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
+  public List<RoomBookingDTO> getMyUpcomingBookings() {
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    LocalDateTime now = LocalDateTime.now();
+    List<RoomBooking> bookings = roomBookingRepository
+            .findByBookedBy_UserNameAndStatusAndStartTimeAfter(userName, BookingStatus.CONFIRMED, now);
+    return bookings.stream()
+            .map(roomBookingMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
+  public RoomBookingDTO cancelBooking(Long bookingId) {
+    RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+    if (roomBooking.getStatus() == BookingStatus.CANCELLED) {
+      return roomBookingMapper.toDTO(roomBooking);
+    }
+    roomBooking.setStatus(BookingStatus.CANCELLED);
+    RoomBooking cancelledBooking = roomBookingRepository.save(roomBooking);
+    return roomBookingMapper.toDTO(cancelledBooking);
   }
 
 }

@@ -65,7 +65,6 @@ public class RoomBookingController {
   }
 
   @GetMapping("/MyBookings")
-  @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -74,7 +73,6 @@ public class RoomBookingController {
   }
 
   @PutMapping("/{bookingId}")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomBookingDTO> updateRoomBooking(@PathVariable Long bookingId,
       @Valid @RequestBody RoomBookingDTO dto) {
     return ApiResponse.<RoomBookingDTO>builder()
@@ -93,4 +91,45 @@ public class RoomBookingController {
         .build();
   }
 
+  @GetMapping("/upcoming")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookings() {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookings())
+            .build();
+  }
+
+  @GetMapping("/upcoming/user/{userName}")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByUserName(@PathVariable String userName) {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookingsByUserName(userName))
+            .build();
+  }
+
+  @GetMapping("/upcoming/room/{roomId}")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByRoomId(@PathVariable Long roomId) {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookingsByRoomId(roomId))
+            .build();
+  }
+
+  @GetMapping("/upcoming/my")
+  public ApiResponse<List<RoomBookingDTO>> getMyUpcomingBookings() {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getMyUpcomingBookings())
+            .build();
+  }
+
+  // Endpoint hủy đặt phòng: đổi trạng thái booking thành CANCELLED
+  @PutMapping("/cancel/{bookingId}")
+  public ApiResponse<RoomBookingDTO> cancelRoomBooking(@PathVariable Long bookingId) {
+    RoomBookingDTO cancelledBooking = roomBookingService.cancelBooking(bookingId);
+    return ApiResponse.<RoomBookingDTO>builder()
+            .success(true)
+            .data(cancelledBooking)
+            .build();
+  }
 }
