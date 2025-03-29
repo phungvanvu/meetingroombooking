@@ -3,12 +3,17 @@ package org.training.meetingroombooking.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RoomBookingRepository extends JpaRepository<RoomBooking,Long> {
+    List<RoomBooking> findByStatusAndStartTimeAfter(BookingStatus status, LocalDateTime time);
+    List<RoomBooking> findByBookedBy_UserNameAndStatusAndStartTimeAfter(String userName, BookingStatus status, LocalDateTime time);
+    List<RoomBooking> findByRoom_roomIdAndStatusAndStartTimeAfter(Long roomId, BookingStatus status, LocalDateTime time);
+
     List<RoomBooking> findByBookedBy_UserName(String userName);
 
     @Query("SELECT r FROM RoomBooking r WHERE r.startTime BETWEEN :start AND :end")
@@ -26,8 +31,8 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking,Long> {
 
     //kiểm tra xem có bản ghi đặt phòng nào đã tồn tại cho cùng khoảng thời gian/phòng không
     @Query("""
-        SELECT COUNT(rb) > 0 FROM RoomBooking rb 
-        WHERE rb.room.roomId = :roomId 
+        SELECT COUNT(rb) > 0 FROM RoomBooking rb
+        WHERE rb.room.roomId = :roomId
         AND (
             (rb.startTime < :endTime AND rb.endTime > :startTime)
         )
