@@ -4,7 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.training.meetingroombooking.dto.response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+
+import java.util.Objects;
 
 @ControllerAdvice
 public class GbExceptionHandler {
@@ -16,7 +19,9 @@ public class GbExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleValidationException(MethodArgumentNotValidException ex) {
-        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.toApiError(ex.getFieldError().getDefaultMessage())));
+        return ResponseEntity.badRequest().body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.toApiError(
+            Objects.requireNonNull(ex.getFieldError())
+            .getDefaultMessage())));
     }
 
     @ExceptionHandler(value = Exception.class)

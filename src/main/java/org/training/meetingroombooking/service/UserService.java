@@ -1,129 +1,146 @@
 package org.training.meetingroombooking.service;
 
-import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.training.meetingroombooking.dto.UserDTO;
-import org.training.meetingroombooking.entity.Role;
-import org.training.meetingroombooking.entity.User;
+import org.training.meetingroombooking.entity.dto.Request.UserRequest;
+import org.training.meetingroombooking.entity.dto.Response.UserResponse;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.UserMapper;
+import org.training.meetingroombooking.entity.models.Role;
+import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 @Service
 public class UserService {
-    private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository,
-                       UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.userMapper = userMapper;
-        this.passwordEncoder = new BCryptPasswordEncoder(10);
+  private final RoleRepository roleRepository;
+  private final UserRepository userRepository;
+  private final UserMapper userMapper;
+  private final PasswordEncoder passwordEncoder;
+
+  public UserService(UserRepository userRepository, RoleRepository roleRepository,
+      UserMapper userMapper) {
+    this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
+    this.userMapper = userMapper;
+    this.passwordEncoder = new BCryptPasswordEncoder(10);
+  }
+
+  public UserResponse createUser(UserRequest request) {
+    if (userRepository.existsByUserName(request.getUserName())) {
+      throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
     }
 
+    User user = userMapper.toEntity(request);
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-    public UserDTO createUser(UserDTO userDTO) {
-        if (userRepository.existsByUserName(userDTO.getUserName())) {
-            throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
-        }
-
-
-
-        User user = userMapper.toEntity(userDTO);
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Mã hóa mật khẩu
-
-        Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(userDTO.getRoles()));
-        if (roles.isEmpty()) {
-            throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
-        }
-
-        user.setRoles(roles);
-        user = userRepository.save(user);
-
-        // Ẩn mật khẩu trước khi trả về DTO
-        UserDTO responseDTO = userMapper.toDTO(user);
-        responseDTO.setPassword(null);  // Đảm bảo không trả về mật khẩu
-
-        return responseDTO;
+    Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(request.getRoles()));
+    if (roles.isEmpty()) {
+      throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
     }
 
+    user.setRoles(roles);
+    User savedUser = userRepository.save(user);
+    return userMapper.toUserResponse(savedUser);
+  }
 
+  public List<UserResponse> getAll() {
+    return userRepository.findAll()
+        .stream()
+        .map(userMapper::toUserResponse)
+        .toList();
+  }
 
+  public ByteArrayOutputStream exportUserToExcel() throws IOException {
+    List<UserResponse> userResponses = getAll();
 
-
-    public List<UserDTO> getAllUsers() {
-        log.info("In method getAllUsers");
-        return userRepository.findAll().stream().map(userMapper::toDTO).toList();
-    }
-
-
-    public UserDTO getUserById(int userId) {
-        log.info("In method getUserById");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
-        return userMapper.toDTO(user);
-    }
-
-    public UserDTO getMyInfo() {
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
-
-        User user = userRepository.findByUserName(name).orElseThrow(
-                () -> new AppEx(ErrorCode.USER_NOT_FOUND));
-        return userMapper.toDTO(user);
-    }
-
-
-
-    //@PostAuthorize("returnObject.userName == authentication.name")
-    public UserDTO updateUser(int userId,  @Valid  UserDTO userDTO) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new AppEx(ErrorCode.USER_NOT_FOUND));
-
-        // update các trường trừ roles và password
-        if (userDTO.getUserName() != null) {
-            user.setUserName(userDTO.getUserName());
+    try (Workbook workbook = new XSSFWorkbook();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+      Sheet sheet = workbook.createSheet("Users");
+      // Tạo hàng tiêu đề
+      Row headerRow = sheet.createRow(0);
+      String[] headers = {"User ID", "UserName", "FullName",
+          "Email", "Phone", "Department", "Roles", "Group", "Position", "isEnabled"};
+      for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        cell.setCellStyle(style);
+      }
+      int rowNum = 1;
+      for (UserResponse user : userResponses) {
+        Row row = sheet.createRow(rowNum++);
+        if (user.getUserId() != null) {
+          row.createCell(0).setCellValue(user.getUserId());
+        } else {
+          row.createCell(0).setCellValue("N/A");
         }
-        if (userDTO.getFullName() != null) {
-            user.setFullName(userDTO.getFullName());
-        }
-        if (userDTO.getEmail() != null) {
-            user.setEmail(userDTO.getEmail());
-        }
-
-        // Nếu có password, thì mã hóa và thay đổi password
-        if (userDTO.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        }
-
-        // Save the updated user entity and return DTO
-        user = userRepository.save(user);
-        return userMapper.toDTO(user);
+        row.createCell(1).setCellValue(user.getUserName() != null ? user.getUserName() : "N/A");
+        row.createCell(2).setCellValue(user.getFullName() != null ? user.getFullName() : "N/A");
+        row.createCell(3).setCellValue(user.getEmail() != null ? user.getEmail() : "N/A");
+        row.createCell(4).setCellValue(
+            user.getPhoneNumber() != null ? user.getPhoneNumber() : "N/A");
+        row.createCell(5).setCellValue(
+            user.getDepartment() != null ? user.getDepartment(): "N/A");
+        Set<String> roles = user.getRoles();
+        String rolesString = (roles != null && !roles.isEmpty()) ? String.join(", ", roles) : "N/A";
+        row.createCell(6).setCellValue(rolesString);
+        row.createCell(7).setCellValue(user.getGroupName() != null ? user.getGroupName() : "N/A");
+        row.createCell(8).setCellValue(user.getPositionName() != null ? user.getPositionName() : "N/A");
+        row.createCell(9).setCellValue(user.isEnabled());
+      }
+      for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+      }
+      workbook.write(outputStream);
+      return outputStream;
     }
+  }
 
+  public UserResponse getById(long userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
+    return userMapper.toUserResponse(user);
+  }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('HR')")
-    public void deleteUser(int userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
-        }
-        userRepository.deleteById(userId);
+  public UserResponse getMyInfo() {
+    var context = SecurityContextHolder.getContext();
+    String name = context.getAuthentication().getName();
+
+    User user = userRepository.findByUserName(name).orElseThrow(
+        () -> new AppEx(ErrorCode.USER_NOT_FOUND));
+    return userMapper.toUserResponse(user);
+  }
+
+  public UserResponse update(Long userId, UserRequest request) {
+    User user = userRepository.findById(userId).orElseThrow(
+        () -> new AppEx(ErrorCode.USER_NOT_FOUND));
+    userMapper.updateEntity(user, request);
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    var roles = roleRepository.findAllById(request.getRoles());
+    user.setRoles(new HashSet<>(roles));
+    return userMapper.toUserResponse(userRepository.save(user));
+  }
+
+  public void delete(Long userId) {
+    if (!userRepository.existsById(userId)) {
+      throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
     }
+    userRepository.deleteById(userId);
+  }
 }
