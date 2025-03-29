@@ -1,38 +1,62 @@
 package org.training.meetingroombooking.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.response.ApiResponse;
-import org.training.meetingroombooking.dto.RoleDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.RoleDTO;
 import org.training.meetingroombooking.service.RoleService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/role")
 public class RoleController {
+
     private final RoleService roleService;
 
     public RoleController(RoleService roleService) {
         this.roleService = roleService;
     }
+
     @PostMapping
-    ApiResponse<RoleDTO> create(@RequestBody RoleDTO request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<RoleDTO> create(@Valid @RequestBody RoleDTO request) {
         return ApiResponse.<RoleDTO>builder()
                 .success(true)
                 .data(roleService.create(request))
                 .build();
     }
+
     @GetMapping
-    ApiResponse<List<RoleDTO>> getAll() {
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<List<RoleDTO>> getRoles() {
         return ApiResponse.<List<RoleDTO>>builder()
                 .success(true)
                 .data(roleService.getAll())
                 .build();
     }
 
+    @PutMapping("/{roleName}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<RoleDTO> update(
+            @PathVariable String roleName,
+            @Valid @RequestBody RoleDTO request) {
+        RoleDTO updatedRole = roleService.update(roleName, request);
+        return ApiResponse.<RoleDTO>builder()
+                .success(true)
+                .data(updatedRole)
+                .build();
+    }
+
+
     @DeleteMapping("/{role}")
-    ApiResponse<Void> delete(@PathVariable String role) {
+    @PreAuthorize("hasRole('ADMIN')")
+    ApiResponse<String> delete(@PathVariable String role) {
         roleService.delete(role);
-        return ApiResponse.<Void>builder().success(true).build();
+        return ApiResponse.<String>builder()
+                .success(true)
+                .data("Role has been deleted")
+                .build();
     }
 }

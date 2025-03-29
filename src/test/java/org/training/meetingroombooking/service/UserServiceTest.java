@@ -10,16 +10,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.training.meetingroombooking.dto.UserDTO;
-import org.training.meetingroombooking.entity.Role;
-import org.training.meetingroombooking.entity.User;
+import org.training.meetingroombooking.entity.dto.Request.UserRequest;
+import org.training.meetingroombooking.entity.dto.Response.UserResponse;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.UserMapper;
+import org.training.meetingroombooking.entity.models.GroupEntity;
+import org.training.meetingroombooking.entity.models.Position;
+import org.training.meetingroombooking.entity.models.Role;
+import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
-import org.training.meetingroombooking.exception.ErrorCode;
-import org.training.meetingroombooking.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -27,206 +29,215 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-    @Mock
-    private UserRepository userRepository;
+  @Mock
+  private UserRepository userRepository;
 
-    @Mock
-    private RoleRepository roleRepository;
+  @Mock
+  private RoleRepository roleRepository;
 
-    @Mock
-    private UserMapper userMapper;
+  @Mock
+  private UserMapper userMapper;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+  @Mock
+  private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private Authentication authentication;  // Định nghĩa Authentication
+  @Mock
+  private Authentication authentication;
 
-    @Mock
-    private SecurityContext securityContext;
+  @Mock
+  private SecurityContext securityContext;
 
-    @InjectMocks
-    private UserService userService;
+  @InjectMocks
+  private UserService userService;
 
-    private User user;
-    private UserDTO userDTO;
+  private User user;
+  private UserRequest request;
+  private UserResponse response;
 
-    @BeforeEach
-    void setUp() {
-        userDTO = new UserDTO.Builder()
-                .userName("ptlinh")
-                .fullName("John Doe")
-                .email("john.doe@example.com")
-                .password("P@ssw0rd")
-                .roles(Set.of("HR"))
-                .build();
+  @BeforeEach
+  void setUp() {
+    Position position = new Position();
+    position.setPositionName("Manager");
 
-        user = new User();
-        user.setUserName("ptlinh");
-        user.setFullName("John Doe");
-        user.setEmail("john.doe@example.com");
-        user.setPassword("hashed_password");
-    }
+    GroupEntity group = new GroupEntity();
+    group.setGroupName("Group 1");
 
-    //unit test từng phương thức
-    @Test
+    user = new User();
+    user.setUserName("ptlinh");
+    user.setFullName("Phung Thi Linh");
+    user.setDepartment("Human Resources");
+    user.setEmail("john.doe@example.com");
+    user.setPhoneNumber("0123456789");
+    user.setPassword("hashed_password");
+    user.setEnabled(true);
+    user.setPosition(position);
+    user.setGroup(group);
+    user.setRoles(Set.of(Role.builder().roleName("HR").build()));
 
-    void createUser_Success() {
-        // Giả lập user chưa tồn tại
-        when(userRepository.existsByUserName(userDTO.getUserName())).thenReturn(false);
+    request = new UserRequest();
+    request.setUserName("ptlinh");
+    request.setFullName("Phung Thi Linh");
+    request.setDepartment("Human Resources");
+    request.setEmail("john.doe@example.com");
+    request.setPhoneNumber("0123456789");
+    request.setPassword("P@ssw0rd");
+    request.setEnabled(true);
+    request.setPosition(user.getPosition().getPositionName());
+    request.setGroup(user.getGroup().getGroupName());
+    request.setRoles(Set.of("HR"));
 
-        // Chuyển DTO thành entity
-        when(userMapper.toEntity(userDTO)).thenReturn(user);
+    response = new UserResponse();
+    response.setUserId(1L);
+    response.setUserName("ptlinh");
+    response.setFullName("Phung Thi Linh");
+    response.setDepartment("Human Resources");
+    response.setEmail("john.doe@example.com");
+    response.setPhoneNumber("0123456789");
+    response.setPositionName("Manager");
+    response.setGroupName("HR Department");
+    response.setRoles(Set.of("HR"));
+    response.setEnabled(true);
+  }
 
+  @Test
+  void createUser_Success() {
+    when(userRepository.existsByUserName(request.getUserName())).thenReturn(false);
+    when(roleRepository.findByRoleNameIn(anySet()))
+            .thenReturn(Set.of(Role.builder().roleName("HR").build()));
+    when(userMapper.toEntity(any(UserRequest.class))).thenReturn(user);
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-        // Giả lập lấy danh sách role
-        Role role = new Role("USER", "User role description", new HashSet<>());
-        when(roleRepository.findByRoleNameIn(anySet())).thenReturn(Set.of(role));
+    UserResponse result = userService.createUser(request);
 
-        // Giả lập lưu user vào database
-        when(userRepository.save(any(User.class))).thenReturn(user);
+    assertNotNull(result);
+    assertEquals(response.getUserName(), result.getUserName());
+    verify(userRepository).existsByUserName(request.getUserName());
+    verify(userRepository).save(any(User.class));
+    verify(userMapper).toUserResponse(any(User.class));
+  }
 
-        // **Bổ sung mock cho userMapper.toDTO()**
-        when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+  @Test
+  void createUser_UserAlreadyExists_ThrowsException() {
+    when(userRepository.existsByUserName(request.getUserName())).thenReturn(true);
 
-        // Gọi hàm service
-        UserDTO result = userService.createUser(userDTO);
+    assertThrows(AppEx.class, () -> userService.createUser(request));
+  }
 
-        // Kiểm tra kết quả
-        assertNotNull(result);
-        assertEquals(userDTO.getUserName(), result.getUserName());
-        verify(userRepository).save(any(User.class));
-    }
+  @Test
+  void getAllUsers_Success() {
+    when(userRepository.findAll()).thenReturn(List.of(user));
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
+    List<UserResponse> result = userService.getAll();
 
+    assertNotNull(result);
+    assertFalse(result.isEmpty());
+    assertEquals(1, result.size());
+  }
 
+  @Test
+  void getUserById_UserExists_ReturnsUser() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
-    @Test
-    void createUser_UserAlreadyExists_ThrowsException() {
-        when(userRepository.existsByUserName(userDTO.getUserName())).thenReturn(true);
+    UserResponse result = userService.getById(1L);
 
-        assertThrows(AppEx.class, () -> userService.createUser(userDTO));
-    }
+    assertNotNull(result);
+    assertEquals("ptlinh", result.getUserName());
+  }
 
-    @Test
-    void getAllUsers_Success() {
-        when(userRepository.findAll()).thenReturn(List.of(user));
-        when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+  @Test
+  void getUserById_UserNotFound_ThrowsException() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        List<UserDTO> result = userService.getAllUsers();
+    assertThrows(AppEx.class, () -> userService.getById(1L));
+  }
 
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(1, result.size());
-    }
+  @Test
+  void updateUser_Success() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(roleRepository.findAllById(anySet()))
+            .thenReturn(List.of(Role.builder().roleName("HR").build()));
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
+    UserResponse result = userService.update(1L, request);
 
-    @Test
-    void getUserById_UserExists_ReturnsUser() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
-        when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+    assertNotNull(result);
+    assertEquals(response.getUserName(), result.getUserName());
+    verify(userRepository).findById(1L);
+    verify(userRepository).save(any(User.class));
+    verify(userMapper).toUserResponse(any(User.class));
+  }
 
-        UserDTO result = userService.getUserById(1);
+  @Test
+  void updateUser_UserNotFound_ThrowsException() {
+    when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertNotNull(result);
-        assertEquals(userDTO.getUserName(), result.getUserName());
-    }
+    assertThrows(AppEx.class, () -> userService.update(1L, request));
+  }
 
-    @Test
-    void getUserById_UserNotFound_ThrowsException() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+  @Test
+  void deleteUser_Success() {
+    when(userRepository.existsById(anyLong())).thenReturn(true);
+    doNothing().when(userRepository).deleteById(anyLong());
 
-        assertThrows(AppEx.class, () -> userService.getUserById(1));
-    }
+    assertDoesNotThrow(() -> userService.delete(1L));
+    verify(userRepository).deleteById(1L);
+  }
 
-    @Test
-    void updateUser_Success() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toDTO(any(User.class))).thenReturn(userDTO);
+  @Test
+  void deleteUser_UserNotFound_ThrowsException() {
+    when(userRepository.existsById(anyLong())).thenReturn(false);
 
-        UserDTO updatedUser = new UserDTO.Builder()
-                .userName("ptlinh")
-                .fullName("Updated John Doe")
-                .email("updated@example.com")
-                .build();
+    assertThrows(AppEx.class, () -> userService.delete(1L));
+  }
 
-        UserDTO result = userService.updateUser(1, updatedUser);
+  @Test
+  void getMyInfo_Success() {
+    // Giả lập user đăng nhập
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("testUser");
+    SecurityContextHolder.setContext(securityContext);
 
-        assertNotNull(result);
-        assertEquals("ptlinh", result.getUserName());
-    }
+    // Giả lập tìm thấy user trong DB
+    User user = new User();
+    user.setUserName("testUser");
+    when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
 
-    @Test
-    void updateUser_UserNotFound_ThrowsException() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.empty());
+    // Giả lập ánh xạ sang DTO
+    UserResponse userResponse = new UserResponse();
+    userResponse.setUserName("testUser");
+    when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
-        assertThrows(AppEx.class, () -> userService.updateUser(1, userDTO));
-    }
+    // Gọi phương thức service
+    UserResponse result = userService.getMyInfo();
 
-    @Test
-    void deleteUser_Success() {
-        when(userRepository.existsById(anyInt())).thenReturn(true);
-        doNothing().when(userRepository).deleteById(anyInt());
+    // Kiểm tra kết quả
+    assertNotNull(result);
+    assertEquals("testUser", result.getUserName());
+    verify(userRepository).findByUserName("testUser");
+    verify(userMapper).toUserResponse(user);
+  }
 
-        assertDoesNotThrow(() -> userService.deleteUser(1));
+  @Test
+  void getMyInfo_UserNotFound() {
+    // Giả lập user đăng nhập
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("unknownUser");
+    SecurityContextHolder.setContext(securityContext);
 
-        verify(userRepository).deleteById(1);
-    }
+    // Giả lập không tìm thấy user trong DB
+    when(userRepository.findByUserName("unknownUser")).thenReturn(Optional.empty());
 
-    @Test
-    void deleteUser_UserNotFound_ThrowsException() {
-        when(userRepository.existsById(anyInt())).thenReturn(false);
+    // Kiểm tra ngoại lệ
+    AppEx exception = assertThrows(AppEx.class, () -> userService.getMyInfo());
 
-        assertThrows(AppEx.class, () -> userService.deleteUser(1));
-    }
-
-    @Test
-    void getMyInfo_Success() {
-        // Giả lập user đăng nhập
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("testUser");
-        SecurityContextHolder.setContext(securityContext);
-
-        // Giả lập tìm thấy user trong DB
-        User user = new User();
-        user.setUserName("testUser");
-        when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
-
-        // Giả lập ánh xạ sang DTO
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserName("testUser");
-        when(userMapper.toDTO(user)).thenReturn(userDTO);
-
-        // Gọi phương thức service
-        UserDTO result = userService.getMyInfo();
-
-        // Kiểm tra kết quả
-        assertNotNull(result);
-        assertEquals("testUser", result.getUserName());
-        verify(userRepository).findByUserName("testUser");
-        verify(userMapper).toDTO(user);
-    }
-
-    @Test
-    void getMyInfo_UserNotFound() {
-        // Giả lập user đăng nhập
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("unknownUser");
-        SecurityContextHolder.setContext(securityContext);
-
-        // Giả lập không tìm thấy user trong DB
-        when(userRepository.findByUserName("unknownUser")).thenReturn(Optional.empty());
-
-        // Kiểm tra ngoại lệ
-        AppEx exception = assertThrows(AppEx.class, () -> userService.getMyInfo());
-
-        // Kiểm tra mã lỗi
-        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-        verify(userRepository).findByUserName("unknownUser");
-    }
-
+    // Kiểm tra mã lỗi
+    assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    verify(userRepository).findByUserName("unknownUser");
+  }
 }

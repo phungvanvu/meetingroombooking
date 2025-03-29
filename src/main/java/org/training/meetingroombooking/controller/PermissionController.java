@@ -1,41 +1,62 @@
 package org.training.meetingroombooking.controller;
 
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.dto.response.ApiResponse;
-import org.training.meetingroombooking.dto.PermissionDTO;
+import org.training.meetingroombooking.entity.dto.PermissionDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PermissionService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/permissions")
+@RequestMapping("/permission")
 public class PermissionController {
 
-    private final PermissionService permissionService;
+  private final PermissionService permissionService;
 
-    public PermissionController(PermissionService permissionService) {
-        this.permissionService = permissionService;
-    }
+  public PermissionController(PermissionService permissionService) {
+    this.permissionService = permissionService;
+  }
 
-    @PostMapping
-    public ApiResponse<PermissionDTO> create(@RequestBody PermissionDTO request) {
-        return ApiResponse.<PermissionDTO>builder()
-                .success(true)
-                .data(permissionService.create(request))
-                .build();
-    }
+  @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<PermissionDTO> create(@Valid @RequestBody PermissionDTO request) {
+    return ApiResponse.<PermissionDTO>builder()
+        .success(true)
+        .data(permissionService.create(request))
+        .build();
+  }
 
-    @GetMapping
-    public ApiResponse<List<PermissionDTO>> findAll() {
-        return ApiResponse.<List<PermissionDTO>>builder()
-                .success(true)
-                .data(permissionService.getAllPermissions())
-                .build();
-    }
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<List<PermissionDTO>> getPermissions() {
+    return ApiResponse.<List<PermissionDTO>>builder()
+        .success(true)
+        .data(permissionService.getAll())
+        .build();
+  }
 
-    @DeleteMapping("/{permission}")
-    public ApiResponse<Void> delete(@PathVariable String permission) {
-        permissionService.deletePermission(permission);
-        return ApiResponse.<Void>builder().success(true).build();
-    }
+  @PutMapping("/{permissionName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<PermissionDTO> update(
+          @PathVariable String permissionName,
+          @Valid @RequestBody PermissionDTO permissionDTO
+  ) {
+    PermissionDTO updatedPermission = permissionService.update(permissionName, permissionDTO);
+    return ApiResponse.<PermissionDTO>builder()
+            .success(true)
+            .data(updatedPermission)
+            .build();
+  }
+
+  @DeleteMapping("/{permission}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<String> delete(@PathVariable String permission) {
+    permissionService.delete(permission);
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("Permission has been deleted")
+        .build();
+  }
 }

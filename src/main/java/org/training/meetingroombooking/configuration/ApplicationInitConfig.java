@@ -5,12 +5,11 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.training.meetingroombooking.entity.Role;
-import org.training.meetingroombooking.entity.User;
+import org.training.meetingroombooking.entity.models.Role;
+import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
@@ -36,11 +35,15 @@ public class ApplicationInitConfig {
                 newRole.setDescription("Administrator role with full access");
                 return roleRepository.save(newRole);
             });
-
             if (userRepository.findByUserName("admin").isEmpty()) {
                 User user = new User();
                 user.setUserName("admin");
-                user.setPassword(passwordEncoder.encode("admin"));
+                user.setFullName("Phung Van Vu");
+                user.setDepartment("Software Development");
+                user.setPhoneNumber("0332182284");
+                user.setEmail("***REMOVED***");
+                user.setPassword(passwordEncoder.encode("12345678@Zz"));
+                user.setEnabled(true);
                 user.setRoles(Set.of(adminRole));
                 userRepository.save(user);
                 log.warn("Admin has been created with default password, please change password");
