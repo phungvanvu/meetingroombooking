@@ -44,10 +44,9 @@ public class UserService {
   }
 
   public UserResponse createUser(UserRequest request) {
-    if (userRepository.existsByUserName(request.getUserName())) {
+    if (!userRepository.existsByUserName(request.getUserName())) {
       throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
     }
-
     User user = userMapper.toEntity(request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
 

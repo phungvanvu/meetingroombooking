@@ -38,7 +38,7 @@ public class Room {
   private int capacity;
 
   @Column(nullable = false)
-  private boolean available = true;
+  private boolean available;
 
   @ManyToMany
   @JoinTable(
