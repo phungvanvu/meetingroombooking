@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,8 +25,10 @@ import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
+import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.exception.AppEx;
+import org.training.meetingroombooking.repository.EquipmentRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
@@ -33,14 +36,26 @@ public class RoomService {
 
   private final RoomRepository roomRepository;
   private final RoomMapper roomMapper;
+  private final EquipmentRepository equipmentRepository;
 
-  public RoomService(RoomRepository roomRepository, RoomMapper roomMapper) {
+  public RoomService(RoomRepository roomRepository,
+                     RoomMapper roomMapper, EquipmentRepository equipmentRepository) {
     this.roomRepository = roomRepository;
     this.roomMapper = roomMapper;
+    this.equipmentRepository = equipmentRepository;
   }
 
   public RoomDTO create(RoomDTO dto, MultipartFile file) throws IOException {
     Room room = roomMapper.toEntity(dto);
+    Set<Equipment> equipmentSet = new HashSet<>();
+    for (String equipmentName : dto.getEquipments()) {
+      Equipment equipment = equipmentRepository.findById(equipmentName).orElse(null);
+      if (equipment == null) {
+        throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+      }
+      equipmentSet.add(equipment);
+    }
+    room.setEquipments(equipmentSet);
     // Nếu có ảnh, lưu vào thư mục
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
@@ -61,6 +76,7 @@ public class RoomService {
     Room savedRoom = roomRepository.save(room);
     return roomMapper.toDTO(savedRoom);
   }
+
 
   public RoomDTO findById(Long roomId) {
     Optional<Room> room = roomRepository.findById(roomId);
@@ -121,7 +137,16 @@ public class RoomService {
 
   public RoomDTO update(Long roomId, RoomDTO dto, MultipartFile file) throws IOException {
     Room room = roomRepository.findById(roomId)
-        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    Set<Equipment> equipmentSet = new HashSet<>();
+    for (String equipmentName : dto.getEquipments()) {
+      Equipment equipment = equipmentRepository.findById(equipmentName).orElse(null);
+      if (equipment == null) {
+        throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+      }
+      equipmentSet.add(equipment);
+    }
+    room.setEquipments(equipmentSet);
     roomMapper.updateRoom(room, dto);
     // Nếu có ảnh mới, lưu lại
     if (file != null && !file.isEmpty()) {
