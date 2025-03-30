@@ -41,6 +41,11 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking,Long> {
                                        @Param("startTime") LocalDateTime startTime,
                                        @Param("endTime") LocalDateTime endTime);
 
+    @Query("SELECT COUNT(rb) > 0 FROM RoomBooking rb WHERE rb.room.roomId = :roomId " +
+            "AND rb.startTime < :endTime AND rb.endTime > :startTime " +
+            "AND rb.bookingId <> :bookingId")
+    boolean existsByRoomAndTimeOverlapExcludingId(Long roomId, LocalDateTime startTime, LocalDateTime endTime, Long bookingId);
+
     // Đếm số lượt đặt theo tuần
     @Query(value = "SELECT WEEK(created_at) as period, COUNT(*) as bookings " +
             "FROM room_bookings " +

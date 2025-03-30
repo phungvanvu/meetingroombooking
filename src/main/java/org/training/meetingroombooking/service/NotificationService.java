@@ -7,10 +7,10 @@ import org.training.meetingroombooking.entity.dto.NotificationDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.NotificationMapper;
 import org.training.meetingroombooking.entity.models.Notification;
+import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.NotificationRepository;
-
-import java.nio.file.attribute.UserPrincipal;
+import org.training.meetingroombooking.repository.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,15 +19,20 @@ public class NotificationService {
 
   private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
+  private final UserRepository userRepository;
 
   public NotificationService(NotificationRepository notificationRepository,
-      NotificationMapper notificationMapper) {
+      NotificationMapper notificationMapper, UserRepository userRepository) {
     this.notificationRepository = notificationRepository;
     this.notificationMapper = notificationMapper;
+    this.userRepository = userRepository;
   }
 
   public NotificationDTO create(NotificationDTO dto) {
+    User user = userRepository.findById(dto.getUserId())
+            .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
     Notification notification = notificationMapper.toEntity(dto);
+    notification.setUser(user);
     Notification savedNotification = notificationRepository.save(notification);
     return notificationMapper.toDTO(savedNotification);
   }
@@ -57,7 +62,12 @@ public class NotificationService {
 
   public NotificationDTO update(Long id, NotificationDTO dto) {
     Notification existingNotification = notificationRepository.findById(id)
-        .orElseThrow(() -> new AppEx(ErrorCode.NOTIFICATION_NOT_FOUND));
+            .orElseThrow(() -> new AppEx(ErrorCode.NOTIFICATION_NOT_FOUND));
+    if (dto.getUserId() != null) {
+      User user = userRepository.findById(dto.getUserId())
+              .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+      existingNotification.setUser(user);
+    }
     notificationMapper.updateEntity(existingNotification, dto);
     Notification updatedNotification = notificationRepository.save(existingNotification);
     return notificationMapper.toDTO(updatedNotification);
