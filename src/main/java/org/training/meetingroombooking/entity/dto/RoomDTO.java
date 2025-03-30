@@ -1,14 +1,16 @@
 package org.training.meetingroombooking.entity.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -31,6 +33,7 @@ public class RoomDTO {
   @PositiveOrZero(message = "Capacity must be non-negative")
   private Integer capacity;
 
+  @NotNull(message = "Available cannot be null")
   private boolean available;
 
   @Size(max = 255, message = "Notes cannot exceed 255 characters")

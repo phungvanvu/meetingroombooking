@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 import java.util.Set;
 
@@ -39,7 +38,7 @@ public class Room {
   private int capacity;
 
   @Column(nullable = false)
-  private boolean available = true;
+  private boolean available;
 
   @ManyToMany
   @JoinTable(

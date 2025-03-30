@@ -10,6 +10,7 @@ import org.training.meetingroombooking.entity.models.Notification;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.NotificationRepository;
 
+import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 import java.util.stream.Collectors;
 

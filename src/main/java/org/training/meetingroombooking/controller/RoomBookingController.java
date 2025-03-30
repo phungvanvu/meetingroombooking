@@ -1,6 +1,12 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.service.RoomBookingService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/roombooking")
@@ -61,7 +65,6 @@ public class RoomBookingController {
   }
 
   @GetMapping("/MyBookings")
-  @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -70,7 +73,6 @@ public class RoomBookingController {
   }
 
   @PutMapping("/{bookingId}")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomBookingDTO> updateRoomBooking(@PathVariable Long bookingId,
       @Valid @RequestBody RoomBookingDTO dto) {
     return ApiResponse.<RoomBookingDTO>builder()
@@ -89,4 +91,45 @@ public class RoomBookingController {
         .build();
   }
 
+  @GetMapping("/upcoming")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookings() {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookings())
+            .build();
+  }
+
+  @GetMapping("/upcoming/user/{userName}")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByUserName(@PathVariable String userName) {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookingsByUserName(userName))
+            .build();
+  }
+
+  @GetMapping("/upcoming/room/{roomId}")
+  public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByRoomId(@PathVariable Long roomId) {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getUpcomingBookingsByRoomId(roomId))
+            .build();
+  }
+
+  @GetMapping("/upcoming/my")
+  public ApiResponse<List<RoomBookingDTO>> getMyUpcomingBookings() {
+    return ApiResponse.<List<RoomBookingDTO>>builder()
+            .success(true)
+            .data(roomBookingService.getMyUpcomingBookings())
+            .build();
+  }
+
+  // Endpoint hủy đặt phòng: đổi trạng thái booking thành CANCELLED
+  @PutMapping("/cancel/{bookingId}")
+  public ApiResponse<RoomBookingDTO> cancelRoomBooking(@PathVariable Long bookingId) {
+    RoomBookingDTO cancelledBooking = roomBookingService.cancelBooking(bookingId);
+    return ApiResponse.<RoomBookingDTO>builder()
+            .success(true)
+            .data(cancelledBooking)
+            .build();
+  }
 }

@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.NotificationType;
-
 import java.time.LocalDateTime;
 
 @Data

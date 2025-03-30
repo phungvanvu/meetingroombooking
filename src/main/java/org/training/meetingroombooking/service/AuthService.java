@@ -1,10 +1,21 @@
 package org.training.meetingroombooking.service;
 
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,19 +28,12 @@ import org.training.meetingroombooking.entity.dto.Request.LogoutRequest;
 import org.training.meetingroombooking.entity.dto.Request.RefreshRequest;
 import org.training.meetingroombooking.entity.dto.Response.AuthResponse;
 import org.training.meetingroombooking.entity.dto.Response.IntrospectResponse;
-import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.models.InvalidatedToken;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Slf4j
 @Service

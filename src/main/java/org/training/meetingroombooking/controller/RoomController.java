@@ -1,16 +1,19 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
+import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.service.RoomService;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/room")
