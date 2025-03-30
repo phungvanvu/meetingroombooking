@@ -33,6 +33,7 @@ public class RoomDTO {
   @PositiveOrZero(message = "Capacity must be non-negative")
   private Integer capacity;
 
+  @NotNull(message = "Available cannot be null")
   private boolean available;
 
   @Size(max = 255, message = "Notes cannot exceed 255 characters")

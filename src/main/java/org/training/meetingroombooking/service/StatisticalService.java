@@ -8,16 +8,12 @@ import org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
-import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
-import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
-
-import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,6 +94,9 @@ public class StatisticalService {
 
     public RoomSummaryDTO getMostBookedRoom() {
         Object[] result = roomBookingRepository.findMostBookedRoom();
+        if (result != null && result.length == 1 && result[0] instanceof Object[]) {
+            result = (Object[]) result[0];
+        }
         if (result != null && result.length >= 3) {
             Long roomId = ((Number) result[0]).longValue();
             String roomName = (String) result[1];
@@ -106,6 +105,8 @@ public class StatisticalService {
         }
         return null;
     }
+
+
 
     public CellStyle getHeaderCellStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();

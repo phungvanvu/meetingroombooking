@@ -19,8 +19,8 @@ import org.training.meetingroombooking.entity.models.Position;
 @Builder
 public class UserRequest {
 
-  @NotBlank(message = "Username cannot be left blank")
-  @Size(max = 50, message = "UserName cannot exceed 50 characters")
+  @NotNull(message = "Username cannot be null")
+  @Size(max = 50, message = "Username cannot exceed 50 characters")
   @Pattern(regexp = "^[^\\s]+$", message = "Username and password should not contain any spaces")
   private String userName;
 
@@ -28,6 +28,8 @@ public class UserRequest {
   @Size(max = 100, message = "Full name cannot exceed 100 characters")
   private String fullName;
 
+  @NotBlank(message = "Department cannot be left blank")
+  @NotNull(message = "Department cannot be null")
   @Size(max = 50, message = "department cannot exceed 50 characters")
   private String department;
 
@@ -47,9 +49,11 @@ public class UserRequest {
 
   private boolean enabled = true;
 
+  @NotBlank(message = "Position cannot be left blank")
   @NotNull(message = "Position cannot be null")
   private String position;
 
+  @NotBlank(message = "Group cannot be left blank")
   @NotNull(message = "Group cannot be null")
   private String group;
 
