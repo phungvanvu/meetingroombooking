@@ -1,7 +1,12 @@
 package org.training.meetingroombooking.service;
 
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
 import org.training.meetingroombooking.entity.dto.RoleDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoleMapper;
@@ -9,10 +14,6 @@ import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.PermissionRepository;
 import org.training.meetingroombooking.repository.RoleRepository;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

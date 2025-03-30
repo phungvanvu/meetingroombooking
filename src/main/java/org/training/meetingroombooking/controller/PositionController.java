@@ -1,13 +1,14 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.PositionDTO;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PositionService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/position")

@@ -1,6 +1,13 @@
 package org.training.meetingroombooking.service;
 
-import org.apache.poi.ss.usermodel.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -8,16 +15,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
-import org.training.meetingroombooking.entity.enums.ErrorCode;
-import org.training.meetingroombooking.entity.mapper.UserMapper;
+import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
+import org.training.meetingroombooking.entity.enums.ErrorCode;
+import org.training.meetingroombooking.entity.mapper.UserMapper;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +47,6 @@ public class UserService {
     if (userRepository.existsByUserName(request.getUserName())) {
       throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
     }
-
     User user = userMapper.toEntity(request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -128,14 +132,18 @@ public class UserService {
   }
 
   public UserResponse update(Long userId, UserRequest request) {
-    User user = userRepository.findById(userId).orElseThrow(
-        () -> new AppEx(ErrorCode.USER_NOT_FOUND));
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
     userMapper.updateEntity(user, request);
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    // Chỉ cập nhật mật khẩu nếu có giá trị mới
+    if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+    }
     var roles = roleRepository.findAllById(request.getRoles());
     user.setRoles(new HashSet<>(roles));
     return userMapper.toUserResponse(userRepository.save(user));
   }
+
 
   public void delete(Long userId) {
     if (!userRepository.existsById(userId)) {

@@ -1,5 +1,11 @@
 package org.training.meetingroombooking.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -7,12 +13,6 @@ import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class EquipmentService {

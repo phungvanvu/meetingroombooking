@@ -10,7 +10,6 @@ import org.training.meetingroombooking.entity.models.GroupEntity;
 import org.training.meetingroombooking.entity.models.Position;
 import org.training.meetingroombooking.entity.models.Role;
 import org.training.meetingroombooking.entity.models.User;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 

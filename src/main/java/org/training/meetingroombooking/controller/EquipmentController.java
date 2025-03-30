@@ -1,15 +1,22 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.training.meetingroombooking.entity.dto.EquipmentDTO;
-import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
-import org.training.meetingroombooking.service.EquipmentService;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.training.meetingroombooking.entity.dto.EquipmentDTO;
+import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.service.EquipmentService;
 
 @RestController
 @RequestMapping("/equipment")

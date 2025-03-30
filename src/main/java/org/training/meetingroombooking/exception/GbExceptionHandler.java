@@ -1,13 +1,12 @@
 package org.training.meetingroombooking.exception;
 
+import java.util.Objects;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
-
-import java.util.Objects;
 
 @ControllerAdvice
 public class GbExceptionHandler {
