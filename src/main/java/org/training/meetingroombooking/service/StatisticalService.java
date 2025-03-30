@@ -1,18 +1,13 @@
 package org.training.meetingroombooking.service;
 
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
 import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
-import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +17,7 @@ public class StatisticalService {
     private final RoomBookingRepository roomBookingRepository;
 
     public StatisticalService(RoomBookingRepository roomBookingRepository,
-                              RoomBookingMapper roomBookingMapper, RoomRepository roomRepository) {
+                              RoomRepository roomRepository) {
         this.roomBookingRepository = roomBookingRepository;
         this.roomRepository = roomRepository;
     }
@@ -42,10 +37,9 @@ public class StatisticalService {
         long totalRooms = roomRepository.count(); // Tổng số phòng
         long availableRooms = roomRepository.countByAvailable(true); // Phòng có sẵn
         long unavailableRooms = roomRepository.countByAvailable(false); // Phòng không có sẵn
-        // Đếm tổng số lượng đặt phòng
-        long totalBookings = roomBookingRepository.count();
-        // Đếm số lượng đặt phòng hôm nay
-        long todayBookings = roomBookingRepository.countByBookingDate(LocalDate.now());
+        long totalBookings = roomBookingRepository.count(); // Đếm tổng số lượng đặt phòng
+        long todayBookings = roomBookingRepository
+                .countByBookingDate(LocalDate.now()); // Đếm số lượng đặt phòng hôm nay
         return new RoomStatisticsDTO(
                 totalRooms,
                 availableRooms,
@@ -85,7 +79,6 @@ public class StatisticalService {
                 .collect(Collectors.toList());
     }
 
-
     public BookingSummaryDTO getCurrentMonthBookings() {
         int currentMonth = LocalDate.now().getMonthValue();
         long count = roomBookingRepository.countByMonth(currentMonth);
@@ -104,15 +97,5 @@ public class StatisticalService {
             return new RoomSummaryDTO(roomId, roomName, bookingCount);
         }
         return null;
-    }
-
-
-
-    public CellStyle getHeaderCellStyle(Workbook workbook) {
-        CellStyle style = workbook.createCellStyle();
-        Font font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        return style;
     }
 }

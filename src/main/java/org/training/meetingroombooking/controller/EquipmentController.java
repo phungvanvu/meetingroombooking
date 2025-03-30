@@ -55,30 +55,30 @@ public class EquipmentController {
             .build();
   }
 
-  @GetMapping("/{equipmentId}")
+  @GetMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<EquipmentDTO> getEquipmentById(@PathVariable Long equipmentId) {
+  public ApiResponse<EquipmentDTO> getEquipmentById(@PathVariable String equipmentName) {
     return ApiResponse.<EquipmentDTO>builder()
         .success(true)
-        .data(equipmentService.getById(equipmentId))
+        .data(equipmentService.getById(equipmentName))
         .build();
   }
 
 
-  @PutMapping("/{equipmentId}")
+  @PutMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable Long equipmentId,
+  public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable String equipmentName,
       @Valid @RequestBody EquipmentDTO dto) {
     return ApiResponse.<EquipmentDTO>builder()
         .success(true)
-        .data(equipmentService.update(equipmentId, dto))
+        .data(equipmentService.update(equipmentName, dto))
         .build();
   }
 
-  @DeleteMapping("/{equipmentId}")
+  @DeleteMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<String> deleteEquipment(@PathVariable Long equipmentId) {
-    equipmentService.delete(equipmentId);
+  public ApiResponse<String> deleteEquipment(@PathVariable String equipmentName) {
+    equipmentService.delete(equipmentName);
     return ApiResponse.<String>builder()
         .success(true)
         .data("equipment has been deleted")
