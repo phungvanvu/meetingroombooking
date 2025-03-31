@@ -19,6 +19,7 @@ import org.training.meetingroombooking.entity.models.Position;
 @Builder
 public class UserRequest {
 
+  @NotBlank(message = "Username cannot be left blank")
   @NotNull(message = "Username cannot be null")
   @Size(max = 50, message = "Username cannot exceed 50 characters")
   @Pattern(regexp = "^[^\\s]+$", message = "Username and password should not contain any spaces")
