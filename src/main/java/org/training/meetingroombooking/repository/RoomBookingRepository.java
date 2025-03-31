@@ -25,7 +25,7 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking,Long> {
             "ORDER BY booking_count DESC")
     List<Object[]> findTopUsers(int limit);
 
-    // Đếm số lượng đặt phòng hôm nay
+    // Đếm số phòng hợp diễn ra hôm nay
     @Query("SELECT COUNT(b) FROM RoomBooking b WHERE DATE(b.startTime) = :bookingDate")
     long countByBookingDate(@Param("bookingDate") LocalDate bookingDate);
 
