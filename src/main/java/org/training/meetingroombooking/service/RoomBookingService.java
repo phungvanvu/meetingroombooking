@@ -88,23 +88,27 @@ public class RoomBookingService {
 
     public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
-                .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
         Room room = roomRepository.findById(dto.getRoomId())
-                .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-        User user = userRepository.findByUserName(dto.getUserName())
-                .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+        User user = userRepository.findById(dto.getBookedById())
+            .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
         boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
-                dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
+            dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
         if (isOverlap) {
             throw new AppEx(ErrorCode.ALERADY_BOOKED);
         }
         roomBookingMapper.updateEntity(roomBooking, dto);
         roomBooking.setRoom(room);
         roomBooking.setBookedBy(user);
+        if (dto.getStatus() != null) {
+            roomBooking.setStatus(dto.getStatus());
+        } else {
+            roomBooking.setStatus(roomBooking.getStatus() != null ? roomBooking.getStatus() : BookingStatus.CONFIRMED);
+        }
         RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
         return roomBookingMapper.toDTO(updatedRoomBooking);
     }
-
 
     public void delete(Long bookingId) {
         if (!roomBookingRepository.existsById(bookingId)) {
