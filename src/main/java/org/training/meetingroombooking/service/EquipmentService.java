@@ -49,13 +49,6 @@ public class EquipmentService {
                 () -> new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND));
     }
 
-    public Set<EquipmentDTO> getAllDistinctEquipments() {
-        return equipmentRepository.findAll()
-                .stream()
-                .map(equipmentMapper::toDTO)
-                .collect(Collectors.toSet());
-    }
-
     public EquipmentDTO update(String equipmentName, EquipmentDTO equipmentDTO) {
         Optional<Equipment> existingEquipment = equipmentRepository.findById(equipmentName);
         if (existingEquipment.isPresent()) {

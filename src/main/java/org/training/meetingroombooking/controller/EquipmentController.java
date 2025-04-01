@@ -46,15 +46,6 @@ public class EquipmentController {
         .build();
   }
 
-  @GetMapping("/distinct")
-  public ApiResponse<Set<EquipmentDTO>> getAllDistinctEquipments() {
-    Set<EquipmentDTO> distinctEquipments = equipmentService.getAllDistinctEquipments();
-    return ApiResponse.<Set<EquipmentDTO>>builder()
-            .success(true)
-            .data(distinctEquipments)
-            .build();
-  }
-
   @GetMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<EquipmentDTO> getEquipmentById(@PathVariable String equipmentName) {
@@ -63,7 +54,6 @@ public class EquipmentController {
         .data(equipmentService.getById(equipmentName))
         .build();
   }
-
 
   @PutMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
