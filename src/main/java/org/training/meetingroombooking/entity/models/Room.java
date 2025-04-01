@@ -15,10 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Rooms",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"roomName"})
-        })
+@Table(name = "Rooms")
 public class Room {
 
   @Id

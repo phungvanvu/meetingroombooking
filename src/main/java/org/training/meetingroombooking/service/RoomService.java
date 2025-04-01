@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.criteria.Join;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -18,6 +20,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
@@ -88,6 +95,54 @@ public class RoomService {
     return rooms.stream()
         .map(roomMapper::toDTO)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Lấy danh sách phòng với phân trang và lọc theo:
+   * - roomName: tìm kiếm theo tên (không phân biệt chữ hoa thường)
+   * - location: lọc theo địa điểm
+   * - available: trạng thái (Available hay Unavailable)
+   * - capacity: sức chứa
+   * - equipments: tập hợp tên thiết bị; nếu không rỗng, phòng phải có ít nhất 1 trong số các thiết bị này
+   * Sắp xếp theo thứ tự giảm dần (mới nhất hiển thị đầu tiên)
+   */
+  public Page<RoomDTO> getRooms(String roomName, String location, Boolean available,
+                                Integer capacity, Set<String> equipments, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "roomId"));
+    Specification<Room> spec = Specification.where(null);
+    if (roomName != null && !roomName.isEmpty()) {
+      spec = spec.and((***REMOVED***, query, cb) ->
+              cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
+      );
+    }
+    if (location != null && !location.isEmpty()) {
+      spec = spec.and((***REMOVED***, query, cb) ->
+              cb.equal(***REMOVED***.get("location"), location)
+      );
+    }
+    if (available != null) {
+      spec = spec.and((***REMOVED***, query, cb) ->
+              cb.equal(***REMOVED***.get("available"), available)
+      );
+    }
+    if (capacity != null) {
+      spec = spec.and((***REMOVED***, query, cb) ->
+              cb.equal(***REMOVED***.get("capacity"), capacity)
+      );
+    }
+    if (equipments != null && !equipments.isEmpty()) {
+      spec = spec.and((***REMOVED***, query, cb) -> {
+        Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
+        return equipmentJoin.get("equipmentName").in(equipments);
+      });
+      spec = spec.and((***REMOVED***, query, cb) -> {
+          assert query != null;
+          query.distinct(true);
+        return cb.conjunction();
+      });
+    }
+    Page<Room> roomsPage = roomRepository.findAll(spec, pageable);
+    return roomsPage.map(roomMapper::toDTO);
   }
 
   public ByteArrayOutputStream exportRoomsToExcel() throws IOException {
