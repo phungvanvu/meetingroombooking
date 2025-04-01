@@ -27,6 +27,10 @@ public class EquipmentService {
     }
 
     public EquipmentDTO create(EquipmentDTO equipmentDTO) {
+        boolean exists = equipmentRepository.existsById(equipmentDTO.getEquipmentName());
+        if (exists) {
+            throw new AppEx(ErrorCode.EQUIPMENT_ALREADY_EXISTS);
+        }
         Equipment entity = equipmentMapper.toEntity(equipmentDTO);
         Equipment savedEquipment = equipmentRepository.save(entity);
         return equipmentMapper.toDTO(savedEquipment);

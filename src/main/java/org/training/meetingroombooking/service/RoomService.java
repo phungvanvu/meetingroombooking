@@ -77,7 +77,6 @@ public class RoomService {
     return roomMapper.toDTO(savedRoom);
   }
 
-
   public RoomDTO findById(Long roomId) {
     Optional<Room> room = roomRepository.findById(roomId);
     return room.map(roomMapper::toDTO).orElseThrow(
