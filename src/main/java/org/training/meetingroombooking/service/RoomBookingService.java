@@ -3,20 +3,15 @@ package org.training.meetingroombooking.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.mail.MessagingException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -56,7 +51,7 @@ public class RoomBookingService {
         boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlap(
                 dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
         if (isOverlap) {
-            throw new AppEx(ErrorCode.ALERADY_BOOKED);
+            throw new AppEx(ErrorCode.ALREADY_BOOKED);
         }
         RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
         roomBooking.setRoom(room);
@@ -104,7 +99,7 @@ public class RoomBookingService {
             boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
                     dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
             if (isOverlap) {
-                throw new AppEx(ErrorCode.ALERADY_BOOKED);
+                throw new AppEx(ErrorCode.ALREADY_BOOKED);
             }
             roomBooking.setStartTime(dto.getStartTime());
             roomBooking.setEndTime(dto.getEndTime());

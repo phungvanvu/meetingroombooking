@@ -1,45 +1,45 @@
 package org.training.meetingroombooking.entity.enums;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 import org.training.meetingroombooking.exception.ApiError;
 
 @Getter
 public enum ErrorCode {
-    ALERADY_BOOKED("This room is already booked for the selected time."),
-    INVALID_FILE_TYPE("Invalid file type. Only PNG, JPG, and JPEG are allowed."),
-    ROOM_BOOKING_NOT_FOUND("Room booking not found"),
-    ROOM_NOT_FOUND("Room not found"),
-    REQUEST_NOT_FOUND("Request not found"),
-    EQUIPMENT_NOT_FOUND("equipment not found"),
-    NOTIFICATION_NOT_FOUND("notification not found"),
-    GROUP_NOT_FOUND("Group not found"),
-    POSITION_NOT_FOUND("Position not found"),
-    PERMISSION_NOT_FOUND("Permission not found"),
-    ROLE_EXISTS("Role already exists"),
-    DATABASE_ERROR("database error"),
-    USER_ALREADY_EXISTS("User already exists."),
-    RESOURCE_NOT_FOUND("Requested resource does not exist."),
-    FUNCTION_NOT_FOUND("Requested API function does not exist."),
-    USAGE_LIMIT_EXCEEDED("Your monthly usage limit has been reached. Please upgrade your subscription plan."),
-    FEATURE_NOT_SUPPORTED("Your current subscription plan does not support this function."),
-    QUERY_NO_RESULTS("Your query did not return any results."),
-    ACCOUNT_INACTIVE("Your account is not active. Contact Customer Support."),
-    USER_NOT_FOUND("User not found."),
-    INVALID_CREDENTIALS("Invalid username or password."),
-    ROLE_NOT_FOUND("Role not found."),
-    INVALID_CURRENCY("Invalid source currency."),
-    INVALID_CURRENCY_CODE("Invalid currency codes provided."),
-    INVALID_DATE("Invalid date format."),
-    INVALID_TIME_FRAME("The specified time frame is invalid."),
-    TIME_FRAME_TOO_LONG("The time frame exceeds 365 days."),
-    VALIDATION_ERROR("Validation error occurred."),
-    INTERNAL_SERVER_ERROR("Internal Server Error"),
-    UNAUTHENTICATED("User is not authenticated."),
-    INVALID_LOGIN("Incorrect username or password.");
+    // Các lỗi 400 Bad Request
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "Invalid file type. Only PNG, JPG, and JPEG are allowed."),
+    VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error occurred."),
+    EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Equipment already exists."),
+    GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "Group already exists."),
+    POSITION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Position already exists."),
+    ROLE_EXISTS(HttpStatus.CONFLICT, "Role already exists"),
+    PERMISSION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Permission already exists."),
+    USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "User already exists."),
+    ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
 
+    // Các lỗi 401 Unauthorized
+    INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),
+    UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "User is not authenticated."),
+
+    // Các lỗi 404 Not Found
+    ROOM_BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "Room booking not found"),
+    ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "Room not found"),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found."),
+    ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "Role not found."),
+    EQUIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Equipment not found"),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Notification not found"),
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "Group not found"),
+    POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "Position not found"),
+    PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
+
+    // Lỗi 500 Internal Server Error
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
+
+    private final HttpStatus status;
     private final String message;
 
-    ErrorCode(String message) {
+    ErrorCode(HttpStatus status, String message) {
+        this.status = status;
         this.message = message;
     }
 

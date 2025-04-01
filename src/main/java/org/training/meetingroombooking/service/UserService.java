@@ -130,7 +130,7 @@ public class UserService {
 
     public UserResponse getById(long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppEx(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);
     }
 
@@ -173,7 +173,7 @@ public class UserService {
 
     public void delete(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new AppEx(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppEx(ErrorCode.USER_NOT_FOUND);
         }
         userRepository.deleteById(userId);
     }

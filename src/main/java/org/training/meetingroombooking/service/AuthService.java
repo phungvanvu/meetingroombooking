@@ -135,10 +135,13 @@ public class AuthService {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().subject(user.getUserName())
-                    .issuer("meeting-room-booking").issueTime(new Date())
-                    .jwtID(UUID.randomUUID().toString()).claim("name", user.getFullName())
+                    .issuer("meeting-room-booking")
+                    .issueTime(new Date())
                     .expirationTime(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))
-                    .jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user)).build();
+                    .jwtID(UUID.randomUUID().toString())
+                    .claim("scope", buildScope(user))
+                    .claim("name", user.getFullName())
+                    .build();
             JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaimsSet.toJSONObject()));
             jwsObject.sign(new MACSigner(SECRETKEY.getBytes()));
             return jwsObject.serialize();

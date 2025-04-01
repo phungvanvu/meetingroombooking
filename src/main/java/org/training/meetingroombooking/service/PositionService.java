@@ -22,10 +22,15 @@ public class PositionService {
     }
 
     public PositionDTO create(PositionDTO dto) {
+        boolean exists = positionRepository.existsById(dto.getPositionName());
+        if (exists) {
+            throw new AppEx(ErrorCode.POSITION_ALREADY_EXISTS);
+        }
         Position entity = positionMapper.toEntity(dto);
         Position savedPosition = positionRepository.save(entity);
         return positionMapper.toDTO(savedPosition);
     }
+
 
     public List<PositionDTO> getAll() {
         List<Position> positions = positionRepository.findAll();
