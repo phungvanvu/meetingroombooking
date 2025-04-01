@@ -82,7 +82,6 @@ public class UserService {
 
     public ByteArrayOutputStream exportUserToExcel() throws IOException {
         List<UserResponse> userResponses = getAll();
-
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Users");

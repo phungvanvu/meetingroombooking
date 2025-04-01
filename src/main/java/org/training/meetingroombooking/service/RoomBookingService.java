@@ -125,7 +125,6 @@ public class RoomBookingService {
 
     public ByteArrayOutputStream exportBookingsToExcel() throws IOException {
         List<RoomBookingDTO> bookings = getAll();
-
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Bookings");
@@ -160,7 +159,6 @@ public class RoomBookingService {
                         booking.getStatus() != null ? booking.getStatus().toString() : "N/A");
                 row.createCell(6).setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
             }
-
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -169,30 +167,27 @@ public class RoomBookingService {
         }
     }
 
-    //  @Scheduled(fixedRate = 30000)//30s
-    @Scheduled(fixedRate = 1800000)//30p
-    @Transactional
-    public void sendMeetingReminderEmails() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime twoHoursLater = now.plus(2, ChronoUnit.HOURS);
-
-        List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now,
-                twoHoursLater);
-
-        for (RoomBooking booking : upcomingMeetings) {
-            try {
-                emailService.sendMeetingReminderEmail(
-                        booking.getBookedBy().getEmail(),
-                        booking.getBookedBy().getUserName(),
-                        booking.getRoom().getRoomName(),
-                        booking.getStartTime().toString(),
-                        booking.getEndTime().toString()
-                );
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 3600000)//1h
+//    @Transactional
+//    public void sendMeetingReminderEmails() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime HoursLater = now.plus(1, ChronoUnit.HOURS);
+//        List<RoomBooking> upcomingMeetings = roomBookingRepository
+//            .findMeetingsBetween(now, HoursLater);
+//        for (RoomBooking booking : upcomingMeetings) {
+//            try {
+//                emailService.sendMeetingReminderEmail(
+//                        booking.getBookedBy().getEmail(),
+//                        booking.getBookedBy().getUserName(),
+//                        booking.getRoom().getRoomName(),
+//                        booking.getStartTime().toString(),
+//                        booking.getEndTime().toString()
+//                );
+//            } catch (MessagingException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
         Room room = roomRepository.findByRoomName(roomName)

@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.entity.dto;
 
 import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -39,7 +40,7 @@ public class RoomBookingDTO {
     @NotNull(message = "End time cannot be null")
     private LocalDateTime endTime;
 
-    @NotNull(message = "Purpose cannot be null")
+    @NotBlank(message = "Purpose name cannot be left blank")
     private Purpose purpose;
 
     private BookingStatus status;

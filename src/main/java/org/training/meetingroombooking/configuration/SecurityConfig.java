@@ -33,14 +33,12 @@ public class SecurityConfig {
                 request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                 .anyRequest()
                 .authenticated());
-
         httpSecurity.oauth2ResourceServer(oauth2
                 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(jwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
-
         return httpSecurity.build();
     }
 
@@ -50,7 +48,6 @@ public class SecurityConfig {
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-
         return jwtAuthenticationConverter;
     }
 
