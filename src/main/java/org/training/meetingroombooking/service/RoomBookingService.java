@@ -10,6 +10,11 @@ import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
@@ -60,6 +65,21 @@ public class RoomBookingService {
         RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
         emailService.sendRoomBookingConfirmationEmail(savedDTO);
         return savedDTO;
+    }
+
+    public Page<RoomBookingDTO> getRoomBookings(Long roomId, Long bookedById, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size,  Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(null);
+        if (roomId != null) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("roomId")), "%" + roomId + "%"));
+        }
+        if (bookedById != null) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("bookedById")), "%" + bookedById + "%"));
+        }
+        Page<RoomBooking> RoomBookingPage = roomBookingRepository.findAll(spec, pageable);
+        return RoomBookingPage.map(roomBookingMapper::toDTO);
     }
 
     public List<RoomBookingDTO> getAll() {

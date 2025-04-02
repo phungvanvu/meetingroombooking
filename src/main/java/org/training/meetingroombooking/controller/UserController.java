@@ -1,13 +1,16 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
+import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.service.UserService;
 
 import java.util.List;
@@ -32,6 +35,23 @@ public class UserController {
         .build();
   }
 
+  @GetMapping("/search")
+  public ApiResponse<Page<UserResponse>> searchUsers(
+      @RequestParam(value = "fullName", required = false) String fullName,
+      @RequestParam(value = "department", required = false) String department,
+      @RequestParam(value = "position", required = false) Set<String> position,
+      @RequestParam(value = "group", required = false) Set<String> group,
+      @RequestParam(value = "roles", required = false) Set<String> roles,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size
+  ) {
+    Page<UserResponse> usersPage = userService.getUsers(fullName, department, position, group, roles, page, size);
+    return ApiResponse.<Page<UserResponse>>builder()
+        .success(true)
+        .data(usersPage)
+        .build();
+  }
+
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   ApiResponse<List<UserResponse>> getUsers() {
@@ -40,7 +60,6 @@ public class UserController {
         .data(userService.getAll())
         .build();
   }
-
 
   @GetMapping("/{userId}")
   @PreAuthorize("hasRole('ADMIN')")

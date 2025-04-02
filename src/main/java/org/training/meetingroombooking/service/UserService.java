@@ -1,5 +1,6 @@
 package org.training.meetingroombooking.service;
 
+import jakarta.persistence.criteria.Join;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -10,6 +11,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +48,7 @@ public class UserService {
     private final PositionRepository positionRepository;
     private final GroupRepository groupRepository;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository,
+  public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        UserMapper userMapper, PositionRepository positionRepository, GroupRepository groupRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -50,7 +56,7 @@ public class UserService {
         this.passwordEncoder = new BCryptPasswordEncoder(10);
         this.positionRepository = positionRepository;
         this.groupRepository = groupRepository;
-    }
+  }
 
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUserName(request.getUserName())) {
@@ -71,6 +77,57 @@ public class UserService {
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
         return userMapper.toUserResponse(savedUser);
+    }
+
+    public Page<UserResponse> getUsers(String fullName, String department,
+        Set<String> positions, Set<String> groups, Set<String> roles, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "userId"));
+        Specification<User> spec = Specification.where(null);
+        if (fullName != null && !fullName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("fullName")), "%" + fullName.toLowerCase() + "%" )
+            );
+        }
+        if (department != null && !department.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("department")), "%" + department.toLowerCase() + "%" )
+            );
+        }
+        if (positions != null && !positions.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<User, Position> positionJoin = ***REMOVED***.join("positions");
+                return positionJoin.get("positionName").in(positions);
+            });
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                assert query != null;
+                query.distinct(true);
+                return cb.conjunction();
+            });
+        }
+        if (groups != null && !groups.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<User, GroupEntity> groupJoin = ***REMOVED***.join("groups");
+                return groupJoin.get("groupName").in(groups);
+            });
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                assert query != null;
+                query.distinct(true);
+                return cb.conjunction();
+            });
+        }
+        if (roles != null && !roles.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<User, Role> roleJoin = ***REMOVED***.join("roles");
+                return roleJoin.get("roleName").in(roles);
+            });
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                assert query != null;
+                query.distinct(true);
+                return cb.conjunction();
+            });
+        }
+        Page<User> usersPage = userRepository.findAll(spec, pageable);
+        return usersPage.map(userMapper::toUserResponse);
     }
 
     public List<UserResponse> getAll() {
