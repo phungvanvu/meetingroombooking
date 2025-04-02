@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import jakarta.persistence.criteria.Join;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -27,9 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
-import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
@@ -44,12 +41,14 @@ public class RoomService {
   private final RoomRepository roomRepository;
   private final RoomMapper roomMapper;
   private final EquipmentRepository equipmentRepository;
+  private final S3Service s3Service;
 
-  public RoomService(RoomRepository roomRepository,
-                     RoomMapper roomMapper, EquipmentRepository equipmentRepository) {
+  public RoomService(RoomRepository roomRepository, RoomMapper roomMapper,
+                     EquipmentRepository equipmentRepository, S3Service s3Service) {
     this.roomRepository = roomRepository;
     this.roomMapper = roomMapper;
     this.equipmentRepository = equipmentRepository;
+    this.s3Service = s3Service;
   }
 
   public RoomDTO create(RoomDTO dto, MultipartFile file) throws IOException {
@@ -63,7 +62,6 @@ public class RoomService {
       equipmentSet.add(equipment);
     }
     room.setEquipments(equipmentSet);
-    // Nếu có ảnh, lưu vào thư mục
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
       if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
@@ -71,15 +69,28 @@ public class RoomService {
       }
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-      String uploadDir = "uploads/rooms/";
-      File uploadPath = new File(uploadDir);
-      if (!uploadPath.exists()) {
-        uploadPath.mkdirs();
-      }
-      Path filePath = Paths.get(uploadDir, fileName);
-      Files.write(filePath, file.getBytes());
-      room.setImageUrl("/uploads/rooms/" + fileName);
+      String s3Key = "rooms/" + fileName;
+      // Upload file lên S3
+      String fileUrl = s3Service.uploadFile(s3Key, file);
+      room.setImageUrl(fileUrl);
     }
+    // Nếu có ảnh, lưu vào thư mục
+//    if (file != null && !file.isEmpty()) {
+//      String originalFilename = file.getOriginalFilename();
+//      if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
+//        throw new AppEx(ErrorCode.INVALID_FILE_TYPE);
+//      }
+//      String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//      String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
+//      String uploadDir = "uploads/rooms/";
+//      File uploadPath = new File(uploadDir);
+//      if (!uploadPath.exists()) {
+//        uploadPath.mkdirs();
+//      }
+//      Path filePath = Paths.get(uploadDir, fileName);
+//      Files.write(filePath, file.getBytes());
+//      room.setImageUrl("/uploads/rooms/" + fileName);
+//    }
     Room savedRoom = roomRepository.save(room);
     return roomMapper.toDTO(savedRoom);
   }
