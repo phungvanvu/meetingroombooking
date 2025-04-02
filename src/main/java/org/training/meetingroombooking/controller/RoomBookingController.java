@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.service.RoomBookingService;
 
@@ -30,6 +33,20 @@ public class RoomBookingController {
     return ApiResponse.<RoomBookingDTO>builder()
         .success(true)
         .data(roomBookingService.create(dto))
+        .build();
+  }
+
+  @GetMapping("/search")
+  public ApiResponse<Page<RoomBookingDTO>> searchUsers(
+      @RequestParam(value = "roomId", required = false) Long roomId,
+      @RequestParam(value = "bookedById", required = false) Long bookedById,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size
+  ) {
+    Page<RoomBookingDTO> roombookingsPage = roomBookingService.getRoomBookings(roomId, bookedById, page, size);
+    return ApiResponse.<Page<RoomBookingDTO>>builder()
+        .success(true)
+        .data(roombookingsPage)
         .build();
   }
 
