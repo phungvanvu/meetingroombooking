@@ -37,19 +37,19 @@ public class UserController {
 
   @GetMapping("/search")
   public ApiResponse<Page<UserResponse>> searchUsers(
-      @RequestParam(value = "fullName", required = false) String fullName,
-      @RequestParam(value = "department", required = false) String department,
-      @RequestParam(value = "position", required = false) Set<String> position,
-      @RequestParam(value = "group", required = false) Set<String> group,
-      @RequestParam(value = "roles", required = false) Set<String> roles,
-      @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "size", defaultValue = "10") int size
+          @RequestParam(value = "fullName", required = false) String fullName,
+          @RequestParam(value = "department", required = false) String department,
+          @RequestParam(value = "position", required = false) Set<String> position,
+          @RequestParam(value = "group", required = false) Set<String> group,
+          @RequestParam(value = "roles", required = false) Set<String> roles,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "10") int size
   ) {
     Page<UserResponse> usersPage = userService.getUsers(fullName, department, position, group, roles, page, size);
     return ApiResponse.<Page<UserResponse>>builder()
-        .success(true)
-        .data(usersPage)
-        .build();
+            .success(true)
+            .data(usersPage)
+            .build();
   }
 
   @GetMapping

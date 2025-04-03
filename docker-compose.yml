@@ -1,14 +1,14 @@
-version: "3.8"
 services:
   localstack:
     image: localstack/localstack
-    container_name: localstack
+    container_name: localstack_main
     ports:
-      - "4566:4566"    # cổng cho các service của LocalStack (s3)
-      - "4571:4571"
+      - "4566:4566"
     environment:
       - SERVICES=s3
       - DEFAULT_REGION=us-east-1
-      - DATA_DIR=/tmp/new_localstack
+      - PERSISTENCE=1
     volumes:
-      - "./localstack:/tmp/new_localstack"
+      - "./localstack_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+#aws --endpoint-url=http://localhost:4566 s3 mb s3://my-bucket

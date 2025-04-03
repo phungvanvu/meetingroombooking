@@ -80,37 +80,36 @@ public class UserService {
     }
 
     public Page<UserResponse> getUsers(String fullName, String department,
-        Set<String> positions, Set<String> groups, Set<String> roles, int page, int size) {
+                                       Set<String> positions, Set<String> groups, Set<String> roles, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "userId"));
         Specification<User> spec = Specification.where(null);
+
         if (fullName != null && !fullName.isEmpty()) {
             spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("fullName")), "%" + fullName.toLowerCase() + "%" )
+                    cb.like(cb.lower(root.get("fullName")), "%" + fullName.toLowerCase() + "%")
             );
         }
         if (department != null && !department.isEmpty()) {
             spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("department")), "%" + department.toLowerCase() + "%" )
+                    cb.like(cb.lower(root.get("department")), "%" + department.toLowerCase() + "%")
             );
         }
         if (positions != null && !positions.isEmpty()) {
             spec = spec.and((root, query, cb) -> {
-                Join<User, Position> positionJoin = root.join("positions");
+                Join<User, Position> positionJoin = root.join("position");
                 return positionJoin.get("positionName").in(positions);
             });
             spec = spec.and((root, query, cb) -> {
-                assert query != null;
                 query.distinct(true);
                 return cb.conjunction();
             });
         }
         if (groups != null && !groups.isEmpty()) {
             spec = spec.and((root, query, cb) -> {
-                Join<User, GroupEntity> groupJoin = root.join("groups");
+                Join<User, GroupEntity> groupJoin = root.join("group");
                 return groupJoin.get("groupName").in(groups);
             });
             spec = spec.and((root, query, cb) -> {
-                assert query != null;
                 query.distinct(true);
                 return cb.conjunction();
             });
@@ -121,7 +120,6 @@ public class UserService {
                 return roleJoin.get("roleName").in(roles);
             });
             spec = spec.and((root, query, cb) -> {
-                assert query != null;
                 query.distinct(true);
                 return cb.conjunction();
             });
@@ -129,6 +127,7 @@ public class UserService {
         Page<User> usersPage = userRepository.findAll(spec, pageable);
         return usersPage.map(userMapper::toUserResponse);
     }
+
 
     public List<UserResponse> getAll() {
         return userRepository.findAll()

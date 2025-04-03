@@ -38,7 +38,6 @@ public class EquipmentController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<EquipmentDTO>> getEquipments() {
     return ApiResponse.<List<EquipmentDTO>>builder()
         .success(true)
