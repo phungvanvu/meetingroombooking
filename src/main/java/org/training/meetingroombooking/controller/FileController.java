@@ -1,30 +1,33 @@
 package org.training.meetingroombooking.controller;
 
-import org.springframework.http.HttpHeaders;
+import org.training.meetingroombooking.service.S3Service;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/uploads")
+@RequestMapping("/files")
 public class FileController {
 
-  private final Path ***REMOVED*** = Paths.get("uploads");
+  private final S3Service s3Service;
 
-  @GetMapping("/rooms/{filename:.+}")
-  public ResponseEntity<Resource> getFile(@PathVariable String filename) throws MalformedURLException {
-    Path file = ***REMOVED***.resolve("rooms").resolve(filename);
-    Resource resource = new UrlResource(file.toUri());
-    if (resource.exists() || resource.isReadable()) {
-      return ResponseEntity.ok()
-              .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-              .body(resource);
-    } else {
-      throw new RuntimeException("File not found: " + filename);
+  public FileController(S3Service s3Service) {
+    this.s3Service = s3Service;
+  }
+
+  @PostMapping("/upload")
+  public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+    try {
+      String fileUrl = s3Service.uploadFile("rooms/" + file.getOriginalFilename(), file);
+      Map<String, String> response = new HashMap<>();
+      response.put("url", fileUrl);
+      return ResponseEntity.ok(response);
+    } catch (IOException e) {
+      return ResponseEntity.internalServerError().body(Map.of("error", "File upload failed"));
     }
   }
 }

@@ -3,6 +3,7 @@ package org.training.meetingroombooking.service;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,6 +63,7 @@ public class RoomService {
       equipmentSet.add(equipment);
     }
     room.setEquipments(equipmentSet);
+    // Nếu có file, upload file lên S3
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
       if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
@@ -70,27 +72,11 @@ public class RoomService {
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
       String s3Key = "rooms/" + fileName;
-      // Upload file lên S3
+      // Upload file lên S3 và nhận lại URL
       String fileUrl = s3Service.uploadFile(s3Key, file);
       room.setImageUrl(fileUrl);
     }
-    // Nếu có ảnh, lưu vào thư mục
-//    if (file != null && !file.isEmpty()) {
-//      String originalFilename = file.getOriginalFilename();
-//      if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
-//        throw new AppEx(ErrorCode.INVALID_FILE_TYPE);
-//      }
-//      String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-//      String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-//      String uploadDir = "uploads/rooms/";
-//      File uploadPath = new File(uploadDir);
-//      if (!uploadPath.exists()) {
-//        uploadPath.mkdirs();
-//      }
-//      Path filePath = Paths.get(uploadDir, fileName);
-//      Files.write(filePath, file.getBytes());
-//      room.setImageUrl("/uploads/rooms/" + fileName);
-//    }
+    // Lưu phòng vào cơ sở dữ liệu
     Room savedRoom = roomRepository.save(room);
     return roomMapper.toDTO(savedRoom);
   }
@@ -111,24 +97,25 @@ public class RoomService {
   /**
    * Lấy danh sách phòng với phân trang và lọc theo:
    * - roomName: tìm kiếm theo tên (không phân biệt chữ hoa thường)
-   * - location: lọc theo địa điểm
+   * - locations: danh sách địa điểm
    * - available: trạng thái (Available hay Unavailable)
-   * - capacity: sức chứa
-   * - equipments: tập hợp tên thiết bị; nếu không rỗng, phòng phải có ít nhất 1 trong số các thiết bị này
+   * - capacities: danh sách sức chứa
+   * - equipments: tập hợp tên thiết bị
    * Sắp xếp theo thứ tự giảm dần (mới nhất hiển thị đầu tiên)
    */
-  public Page<RoomDTO> getRooms(String roomName, String location, Boolean available,
-                                Integer capacity, Set<String> equipments, int page, int size) {
+  public Page<RoomDTO> getRooms(String roomName, List<String> locations, Boolean available,
+                                List<Integer> capacities, Set<String> equipments, int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "roomId"));
     Specification<Room> spec = Specification.where(null);
+
     if (roomName != null && !roomName.isEmpty()) {
       spec = spec.and((***REMOVED***, query, cb) ->
               cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
       );
     }
-    if (location != null && !location.isEmpty()) {
+    if (locations != null && !locations.isEmpty()) {
       spec = spec.and((***REMOVED***, query, cb) ->
-              cb.equal(***REMOVED***.get("location"), location)
+              ***REMOVED***.get("location").in(locations)
       );
     }
     if (available != null) {
@@ -136,9 +123,9 @@ public class RoomService {
               cb.equal(***REMOVED***.get("available"), available)
       );
     }
-    if (capacity != null) {
+    if (capacities != null && !capacities.isEmpty()) {
       spec = spec.and((***REMOVED***, query, cb) ->
-              cb.equal(***REMOVED***.get("capacity"), capacity)
+              ***REMOVED***.get("capacity").in(capacities)
       );
     }
     if (equipments != null && !equipments.isEmpty()) {
@@ -147,8 +134,7 @@ public class RoomService {
         return equipmentJoin.get("equipmentName").in(equipments);
       });
       spec = spec.and((***REMOVED***, query, cb) -> {
-          assert query != null;
-          query.distinct(true);
+        query.distinct(true);
         return cb.conjunction();
       });
     }
@@ -158,14 +144,17 @@ public class RoomService {
 
   public ByteArrayOutputStream exportRoomsToExcel() throws IOException {
     List<RoomDTO> rooms = getAll();
-
-    try (Workbook workbook = new XSSFWorkbook();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      Sheet sheet = workbook.createSheet("Rooms");
-      // Tạo hàng tiêu đề
+    Workbook workbook = null;
+    InputStream templateStream = getClass().getResourceAsStream("/templates/rooms_template.xlsx");
+    if (templateStream != null) {
+      workbook = new XSSFWorkbook(templateStream);
+    } else {
+      workbook = new XSSFWorkbook();
+    }
+    Sheet sheet = workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : workbook.createSheet("Rooms");
+    if (sheet.getPhysicalNumberOfRows() == 0) {
       Row headerRow = sheet.createRow(0);
-      String[] headers = {"Room ID", "Room Name", "Location",
-          "Capacity", "Note", "isAvailable", "ImageUrl"};
+      String[] headers = {"Room Name", "Location", "Capacity", "Note", "isAvailable", "ImageUrl"};
       for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
@@ -175,29 +164,25 @@ public class RoomService {
         style.setFont(font);
         cell.setCellStyle(style);
       }
-      int rowNum = 1;
-      for (RoomDTO room : rooms) {
-        Row row = sheet.createRow(rowNum++);
-        if (room.getRoomId() != null) {
-          row.createCell(0).setCellValue(room.getRoomId());
-        } else {
-          row.createCell(0).setCellValue("N/A");
-        }
-        row.createCell(1).setCellValue(room.getRoomName() != null ? room.getRoomName() : "N/A");
-        row.createCell(2).setCellValue(room.getLocation() != null ? room.getLocation() : "N/A");
-        row.createCell(3).setCellValue(
-            room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
-        row.createCell(4).setCellValue(
-            room.getNote() != null ? room.getNote() : "N/A");
-        row.createCell(5).setCellValue(room.isAvailable());
-        row.createCell(6).setCellValue(room.getImageUrl() != null ? room.getImageUrl() : "N/A");
-      }
-      for (int i = 0; i < headers.length; i++) {
-        sheet.autoSizeColumn(i);
-      }
-      workbook.write(outputStream);
-      return outputStream;
     }
+    int rowNum = sheet.getLastRowNum() + 1;
+    for (RoomDTO room : rooms) {
+      Row row = sheet.createRow(rowNum++);
+      row.createCell(1).setCellValue(room.getRoomName() != null ? room.getRoomName() : "N/A");
+      row.createCell(2).setCellValue(room.getLocation() != null ? room.getLocation() : "N/A");
+      row.createCell(3).setCellValue(room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
+      row.createCell(4).setCellValue(room.getNote() != null ? room.getNote() : "N/A");
+      row.createCell(5).setCellValue(room.isAvailable());
+      row.createCell(6).setCellValue(room.getImageUrl() != null ? room.getImageUrl() : "N/A");
+    }
+    int headerCount = 7;
+    for (int i = 0; i < headerCount; i++) {
+      sheet.autoSizeColumn(i);
+    }
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    workbook.write(outputStream);
+    workbook.close();
+    return outputStream;
   }
 
   public RoomDTO update(Long roomId, RoomDTO dto, MultipartFile file) throws IOException {
@@ -213,7 +198,6 @@ public class RoomService {
     }
     room.setEquipments(equipmentSet);
     roomMapper.updateRoom(room, dto);
-    // Nếu có ảnh mới, lưu lại
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
       if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
@@ -221,18 +205,14 @@ public class RoomService {
       }
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
-      String uploadDir = "uploads/rooms/";
-      File uploadPath = new File(uploadDir);
-      if (!uploadPath.exists()) {
-        uploadPath.mkdirs();
-      }
-      Path filePath = Paths.get(uploadDir, fileName);
-      Files.write(filePath, file.getBytes());
-      room.setImageUrl("/uploads/rooms/" + fileName);
+      String s3Key = "rooms/" + fileName;
+      String fileUrl = s3Service.uploadFile(s3Key, file);
+      room.setImageUrl(fileUrl);
     }
     Room updatedRoom = roomRepository.save(room);
     return roomMapper.toDTO(updatedRoom);
   }
+
 
   public void delete(Long roomId) {
     if (!roomRepository.existsById(roomId)) {

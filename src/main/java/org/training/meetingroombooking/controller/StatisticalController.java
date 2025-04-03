@@ -19,6 +19,8 @@ import org.training.meetingroombooking.service.RoomBookingService;
 import org.training.meetingroombooking.service.RoomService;
 import org.training.meetingroombooking.service.StatisticalService;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.training.meetingroombooking.service.UserService;
 
@@ -71,21 +73,26 @@ public class StatisticalController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportRoomsToExcel() throws IOException {
         ByteArrayOutputStream outputStream = roomService.exportRoomsToExcel();
+        String currentTime = LocalTime.now().toString().replace(":", "-");
+        String fileName = "rooms_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=rooms.xlsx")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(outputStream.toByteArray());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(outputStream.toByteArray());
     }
 
     @GetMapping("/export-user-excel")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportUsersToExcel() throws IOException {
         ByteArrayOutputStream outputStream = userService.exportUserToExcel();
+        String currentTime = LocalTime.now().toString().replace(":", "-");
+        String fileName = "users_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=users.xlsx")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(outputStream.toByteArray());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(outputStream.toByteArray());
     }
+
     // Endpoint: Lấy phòng được đặt nhiều nhất
     @GetMapping("/most-booked-room")
     public ApiResponse<RoomSummaryDTO> getMostBookedRoom() {

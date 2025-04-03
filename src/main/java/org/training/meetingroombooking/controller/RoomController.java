@@ -29,13 +29,13 @@ public class RoomController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> createRoom(
-      @RequestPart("room") @Valid RoomDTO dto,
-      @RequestPart(value = "file", required = false) MultipartFile file
+          @RequestPart("room") @Valid RoomDTO dto,
+          @RequestPart(value = "file", required = false) MultipartFile file
   ) throws IOException {
     return ApiResponse.<RoomDTO>builder()
-        .success(true)
-        .data(roomService.create(dto, file))
-        .build();
+            .success(true)
+            .data(roomService.create(dto, file))
+            .build();
   }
 
   @GetMapping("/name/{roomName}")
@@ -57,14 +57,14 @@ public class RoomController {
   @GetMapping("/search")
   public ApiResponse<Page<RoomDTO>> searchRooms(
           @RequestParam(value = "roomName", required = false) String roomName,
-          @RequestParam(value = "location", required = false) String location,
+          @RequestParam(value = "locations", required = false) List<String> locations,
           @RequestParam(value = "available", required = false) Boolean available,
-          @RequestParam(value = "capacity", required = false) Integer capacity,
+          @RequestParam(value = "capacities", required = false) List<Integer> capacities,
           @RequestParam(value = "equipments", required = false) Set<String> equipments,
           @RequestParam(value = "page", defaultValue = "0") int page,
           @RequestParam(value = "size", defaultValue = "6") int size
   ) {
-    Page<RoomDTO> roomsPage = roomService.getRooms(roomName, location, available, capacity, equipments, page, size);
+    Page<RoomDTO> roomsPage = roomService.getRooms(roomName, locations, available, capacities, equipments, page, size);
     return ApiResponse.<Page<RoomDTO>>builder()
             .success(true)
             .data(roomsPage)
