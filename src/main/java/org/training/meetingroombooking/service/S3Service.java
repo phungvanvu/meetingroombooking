@@ -24,9 +24,7 @@ public class S3Service {
                      @Value("${aws.access-key-id}") String accessKeyId,
                      @Value("${aws.secret-access-key}") String secretAccessKey,
                      @Value("${aws.s3.bucket-name}") String bucketName) {
-
         this.bucketName = bucketName;
-
         // Cấu hình client AWS S3
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKeyId, secretAccessKey);
         this.amazonS3 = AmazonS3ClientBuilder.standard()
@@ -39,10 +37,8 @@ public class S3Service {
     public String uploadFile(String keyName, MultipartFile file) throws IOException {
         // Tạo file tạm thời từ MultipartFile
         File convertedFile = convertMultiPartToFile(file);
-
         // Upload file lên S3
         amazonS3.putObject(new PutObjectRequest(bucketName, keyName, convertedFile));
-
         // Trả về URL của file trên S3
         return amazonS3.getUrl(bucketName, keyName).toString();
     }
@@ -52,5 +48,4 @@ public class S3Service {
         file.transferTo(convertedFile);
         return convertedFile;
     }
-
 }

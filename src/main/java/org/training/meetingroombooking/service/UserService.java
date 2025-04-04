@@ -143,7 +143,7 @@ public class UserService {
             Sheet sheet = workbook.createSheet("Users");
             // Tạo hàng tiêu đề
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"User ID", "UserName", "FullName",
+            String[] headers = {"UserName", "FullName",
                     "Email", "Phone", "Department", "Roles", "Group", "Position", "isEnabled"};
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -157,24 +157,19 @@ public class UserService {
             int rowNum = 1;
             for (UserResponse user : userResponses) {
                 Row row = sheet.createRow(rowNum++);
-                if (user.getUserId() != null) {
-                    row.createCell(0).setCellValue(user.getUserId());
-                } else {
-                    row.createCell(0).setCellValue("N/A");
-                }
-                row.createCell(1).setCellValue(user.getUserName() != null ? user.getUserName() : "N/A");
-                row.createCell(2).setCellValue(user.getFullName() != null ? user.getFullName() : "N/A");
-                row.createCell(3).setCellValue(user.getEmail() != null ? user.getEmail() : "N/A");
-                row.createCell(4).setCellValue(
+                row.createCell(0).setCellValue(user.getUserName() != null ? user.getUserName() : "N/A");
+                row.createCell(1).setCellValue(user.getFullName() != null ? user.getFullName() : "N/A");
+                row.createCell(2).setCellValue(user.getEmail() != null ? user.getEmail() : "N/A");
+                row.createCell(3).setCellValue(
                         user.getPhoneNumber() != null ? user.getPhoneNumber() : "N/A");
-                row.createCell(5).setCellValue(
+                row.createCell(4).setCellValue(
                         user.getDepartment() != null ? user.getDepartment() : "N/A");
                 Set<String> roles = user.getRoles();
                 String rolesString = (roles != null && !roles.isEmpty()) ? String.join(", ", roles) : "N/A";
-                row.createCell(6).setCellValue(rolesString);
-                row.createCell(7).setCellValue(user.getGroupName() != null ? user.getGroupName() : "N/A");
-                row.createCell(8).setCellValue(user.getPositionName() != null ? user.getPositionName() : "N/A");
-                row.createCell(9).setCellValue(user.isEnabled());
+                row.createCell(5).setCellValue(rolesString);
+                row.createCell(6).setCellValue(user.getGroupName() != null ? user.getGroupName() : "N/A");
+                row.createCell(7).setCellValue(user.getPositionName() != null ? user.getPositionName() : "N/A");
+                row.createCell(8).setCellValue(user.isEnabled());
             }
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);

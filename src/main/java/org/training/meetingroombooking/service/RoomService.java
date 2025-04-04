@@ -154,7 +154,8 @@ public class RoomService {
     Sheet sheet = workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : workbook.createSheet("Rooms");
     if (sheet.getPhysicalNumberOfRows() == 0) {
       Row headerRow = sheet.createRow(0);
-      String[] headers = {"Room Name", "Location", "Capacity", "Note", "isAvailable", "ImageUrl"};
+      String[] headers = {"Room Name", "Location", "Capacity", "Note", "isAvailable"};
+//          , "ImageUrl"};
       for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
@@ -168,12 +169,12 @@ public class RoomService {
     int rowNum = sheet.getLastRowNum() + 1;
     for (RoomDTO room : rooms) {
       Row row = sheet.createRow(rowNum++);
-      row.createCell(1).setCellValue(room.getRoomName() != null ? room.getRoomName() : "N/A");
-      row.createCell(2).setCellValue(room.getLocation() != null ? room.getLocation() : "N/A");
-      row.createCell(3).setCellValue(room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
-      row.createCell(4).setCellValue(room.getNote() != null ? room.getNote() : "N/A");
-      row.createCell(5).setCellValue(room.isAvailable());
-      row.createCell(6).setCellValue(room.getImageUrl() != null ? room.getImageUrl() : "N/A");
+      row.createCell(0).setCellValue(room.getRoomName() != null ? room.getRoomName() : "N/A");
+      row.createCell(1).setCellValue(room.getLocation() != null ? room.getLocation() : "N/A");
+      row.createCell(2).setCellValue(room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
+      row.createCell(3).setCellValue(room.getNote() != null ? room.getNote() : "N/A");
+      row.createCell(4).setCellValue(room.isAvailable());
+//      row.createCell(5).setCellValue(room.getImageUrl() != null ? room.getImageUrl() : "N/A");
     }
     int headerCount = 7;
     for (int i = 0; i < headerCount; i++) {
