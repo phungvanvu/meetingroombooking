@@ -81,7 +81,7 @@ public class StatisticalController {
                 .body(outputStream.toByteArray());
     }
 
-    @GetMapping("/export-user-excel")
+    @GetMapping("/export-users-excel")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportUsersToExcel() throws IOException {
         ByteArrayOutputStream outputStream = userService.exportUserToExcel();
