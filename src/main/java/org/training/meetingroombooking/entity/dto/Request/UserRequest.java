@@ -38,6 +38,7 @@ public class UserRequest {
   @Pattern(regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
       message = "Invalid email format. Please provide a valid email address with proper domain (e.g., user@example.com).")
   @Size(max = 100, message = "Email cannot exceed 100 characters")
+  @NotNull(message = "Email cannot be null")
   private String email;
 
   @Size(max = 20, message = "Phone number cannot exceed 20 characters")

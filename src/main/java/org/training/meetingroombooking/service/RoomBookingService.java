@@ -67,6 +67,8 @@ public class RoomBookingService {
         return savedDTO;
     }
 
+    //fitter roomName, From-To, Status
+
     public Page<RoomBookingDTO> getRoomBookings(Long roomId, Long bookedById, Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size,  Sort.by(Sort.Direction.DESC, "bookingId"));
         Specification<RoomBooking> spec = Specification.where(null);

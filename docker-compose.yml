@@ -11,4 +11,4 @@ services:
     volumes:
       - "./localstack_data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-#aws --endpoint-url=http://localhost:4566 s3 mb s3://my-bucket
+      #aws --endpoint-url=http://localhost:4566 s3 mb s3://my-bucket
