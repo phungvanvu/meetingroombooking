@@ -37,6 +37,7 @@ import org.training.meetingroombooking.repository.UserRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -66,15 +67,24 @@ public class UserService {
                 .orElseThrow(() -> new AppEx(ErrorCode.POSITION_NOT_FOUND));
         GroupEntity group = groupRepository.findById(request.getGroup())
                 .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
-        Set<Role> roles = new HashSet<>(roleRepository.findByRoleNameIn(request.getRoles()));
-        if (roles.isEmpty()) {
+        Set<Role> existingRoles = roleRepository.findByRoleNameIn(request.getRoles());
+        Set<String> existingRoleNames = existingRoles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
+        Set<String> invalidRoles = request.getRoles().stream()
+                .filter(role -> !existingRoleNames.contains(role))
+                .collect(Collectors.toSet());
+        if (!invalidRoles.isEmpty()) {
             throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
         }
         User user = userMapper.toEntity(request);
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new AppEx(ErrorCode.PASSWORD_NULL);
+        }
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPosition(position);
         user.setGroup(group);
-        user.setRoles(roles);
+        user.setRoles(new HashSet<>(existingRoles));
         User savedUser = userRepository.save(user);
         return userMapper.toUserResponse(savedUser);
     }

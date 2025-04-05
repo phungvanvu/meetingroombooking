@@ -69,7 +69,7 @@ public class AuthService {
         if (!auth) {
             throw new AppEx(ErrorCode.INVALID_LOGIN);
         }
-        var accessToken = generateToken(user, 30);  // Access Token sống 30 phút
+        var accessToken = generateToken(user, 360); // Access Token sống 6 tiếng
         var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
         return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
     }

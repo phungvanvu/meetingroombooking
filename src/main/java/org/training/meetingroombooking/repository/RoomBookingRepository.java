@@ -38,21 +38,31 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Long>,
 
   //kiểm tra xem có bản ghi đặt phòng nào đã tồn tại cho cùng khoảng thời gian/phòng không
   @Query("""
-      SELECT COUNT(rb) > 0 FROM RoomBooking rb
-      WHERE rb.room.roomId = :roomId
-      AND (
-          (rb.startTime < :endTime AND rb.endTime > :startTime)
-      )
-      """)
-  boolean existsByRoomAndTimeOverlap(@Param("roomId") Long roomId,
-      @Param("startTime") LocalDateTime startTime,
-      @Param("endTime") LocalDateTime endTime);
+    SELECT COUNT(rb) > 0 FROM RoomBooking rb
+    WHERE rb.room.roomId = :roomId
+    AND rb.status = 'CONFIRMED'
+    AND (rb.startTime < :endTime AND rb.endTime > :startTime)
+    """)
+  boolean existsByRoomAndTimeOverlap(
+          @Param("roomId") Long roomId,
+          @Param("startTime") LocalDateTime startTime,
+          @Param("endTime") LocalDateTime endTime
+  );
 
-  @Query("SELECT COUNT(rb) > 0 FROM RoomBooking rb WHERE rb.room.roomId = :roomId " +
-      "AND rb.startTime < :endTime AND rb.endTime > :startTime " +
-      "AND rb.bookingId <> :bookingId")
-  boolean existsByRoomAndTimeOverlapExcludingId(Long roomId, LocalDateTime startTime,
-      LocalDateTime endTime, Long bookingId);
+  @Query("""
+    SELECT COUNT(rb) > 0 FROM RoomBooking rb
+    WHERE rb.room.roomId = :roomId
+    AND rb.status = 'CONFIRMED'
+    AND rb.startTime < :endTime AND rb.endTime > :startTime
+    AND rb.bookingId <> :bookingId
+    """)
+  boolean existsByRoomAndTimeOverlapExcludingId(
+          @Param("roomId") Long roomId,
+          @Param("startTime") LocalDateTime startTime,
+          @Param("endTime") LocalDateTime endTime,
+          @Param("bookingId") Long bookingId
+  );
+
 
   // Đếm số lượt đặt theo tuần
   @Query(value = "SELECT WEEK(created_at) as period, COUNT(*) as bookings " +

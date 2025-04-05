@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class NotificationDTO {
 
-  @NotBlank(message = "Notification content cannot be left blank")
+  @NotBlank(message = "Notification content cannot be blank")
   @Size(max = 255, message = "Notification content name cannot exceed 255 characters")
   private String content;
 

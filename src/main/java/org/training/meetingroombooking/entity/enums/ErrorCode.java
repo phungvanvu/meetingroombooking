@@ -9,6 +9,7 @@ public enum ErrorCode {
     // Các lỗi 400 Bad Request
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "Invalid file type. Only PNG, JPG, and JPEG are allowed."),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error occurred."),
+    PASSWORD_NULL(HttpStatus.BAD_REQUEST, "Password must be provided."),
     EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Equipment already exists."),
     GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "Group already exists."),
     POSITION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Position already exists."),

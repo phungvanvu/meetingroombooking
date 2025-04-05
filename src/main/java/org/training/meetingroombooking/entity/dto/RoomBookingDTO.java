@@ -40,7 +40,7 @@ public class RoomBookingDTO {
     @NotNull(message = "End time cannot be null")
     private LocalDateTime endTime;
 
-    @NotBlank(message = "Purpose name cannot be left blank")
+    @NotNull(message = "You need to specify the purpose of the booking.")
     private Purpose purpose;
 
     private BookingStatus status;
