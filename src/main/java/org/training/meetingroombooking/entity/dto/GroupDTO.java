@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 public class GroupDTO {
 
-    @NotBlank(message = "Group name cannot be left blank")
+    @NotBlank(message = "Group name cannot be blank")
     @Size(max = 50, message = "Group name cannot exceed 50 characters")
     private String groupName;
 

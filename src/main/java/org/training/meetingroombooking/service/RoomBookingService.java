@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.criteria.Join;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -67,21 +68,37 @@ public class RoomBookingService {
         return savedDTO;
     }
 
-    //fitter roomName, From-To, Status
-
-    public Page<RoomBookingDTO> getRoomBookings(Long roomId, Long bookedById, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size,  Sort.by(Sort.Direction.DESC, "bookingId"));
-        Specification<RoomBooking> spec = Specification.where(null);
-        if (roomId != null) {
-            spec = spec.and((***REMOVED***, query, cb) ->
-                cb.like(cb.lower(***REMOVED***.get("roomId")), "%" + roomId + "%"));
+    /**
+     * Lấy danh sách RoomBooking của người dùng hiện hành theo các tiêu chí:
+     * - roomName: tìm kiếm theo tên phòng (không phân biệt chữ hoa chữ thường)
+     * - fromTime: thời gian bắt đầu (startTime) từ
+     * - toTime: thời gian kết thúc (endTime) đến
+     * - status: trạng thái đặt phòng
+     * - Phân trang theo thứ tự giảm dần của bookingId
+     */
+    public Page<RoomBookingDTO> searchMyBookings(String roomName, LocalDateTime fromTime, LocalDateTime toTime, BookingStatus status, int page, int size) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(
+                (***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("bookedBy").get("userName"), currentUserName)
+        );
+        if (roomName != null && !roomName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
+                return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
+            });
         }
-        if (bookedById != null) {
-            spec = spec.and((***REMOVED***, query, cb) ->
-                cb.like(cb.lower(***REMOVED***.get("bookedById")), "%" + bookedById + "%"));
+        if (fromTime != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
         }
-        Page<RoomBooking> RoomBookingPage = roomBookingRepository.findAll(spec, pageable);
-        return RoomBookingPage.map(roomBookingMapper::toDTO);
+        if (toTime != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
+        }
+        if (status != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
+        }
+        Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
+        return bookingPage.map(roomBookingMapper::toDTO);
     }
 
     public List<RoomBookingDTO> getAll() {
@@ -96,11 +113,6 @@ public class RoomBookingService {
         return roomBookings.stream()
                 .map(roomBookingMapper::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    public List<RoomBookingDTO> getMyBookings() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getBookingsByUserName(userName);
     }
 
     public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
@@ -226,6 +238,7 @@ public class RoomBookingService {
             return Collections.emptyList();
         }
         return roomBookings.stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
                 .map(roomBookingMapper::toDTO)
                 .collect(Collectors.toList());
     }

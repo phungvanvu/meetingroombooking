@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PositionDTO {
 
-  @NotBlank(message = "Position name cannot be left blank")
+  @NotBlank(message = "Position name cannot be blank")
   @Size(max = 75, message = "Position name cannot exceed 75 characters")
   private String positionName;
 

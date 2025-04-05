@@ -38,14 +38,6 @@ public class RoomController {
             .build();
   }
 
-  @GetMapping("/name/{roomName}")
-  public ApiResponse<RoomDTO> getRoomByName(@PathVariable String roomName) {
-    return ApiResponse.<RoomDTO>builder()
-        .success(true)
-        .data(roomService.findByRoomName(roomName))
-        .build();
-  }
-
   @GetMapping
   public ApiResponse<List<RoomDTO>> getRooms() {
     return ApiResponse.<List<RoomDTO>>builder()
@@ -91,7 +83,6 @@ public class RoomController {
         .data(roomService.update(roomId, dto, file))
         .build();
   }
-
 
   @DeleteMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")
