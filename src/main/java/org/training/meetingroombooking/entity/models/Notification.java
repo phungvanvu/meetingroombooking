@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.NotificationType;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -26,8 +25,6 @@ public class Notification {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private NotificationType type; // Loại thông báo (INFO, WARNING, ERROR)
-
-  private boolean hasRead;
 
   @ManyToOne
   @JoinColumn(name = "user_id")

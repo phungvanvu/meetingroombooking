@@ -107,11 +107,28 @@ public class RoomBookingController {
             .build();
   }
 
+  /**
+   * Lấy danh sách các booking sắp tới (startTime > hiện tại) của người dùng hiện tại.
+   * Hỗ trợ lọc theo:
+   * - roomName: tên phòng
+   * - fromTime: thời gian bắt đầu từ
+   * - toTime: thời gian kết thúc đến
+   * - Phân trang, sắp xếp theo bookingId giảm dần
+   */
   @GetMapping("/upcoming/my")
-  public ApiResponse<List<RoomBookingDTO>> getMyUpcomingBookings() {
-    return ApiResponse.<List<RoomBookingDTO>>builder()
+  public ApiResponse<Page<RoomBookingDTO>> getMyUpcomingBookings(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "fromTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromTime,
+          @RequestParam(value = "toTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toTime,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "10") int size) {
+
+    Page<RoomBookingDTO> bookings = roomBookingService.getMyUpcomingBookings(roomName, fromTime, toTime, page, size);
+    return ApiResponse.<Page<RoomBookingDTO>>builder()
             .success(true)
-            .data(roomBookingService.getMyUpcomingBookings())
+            .data(bookings)
             .build();
   }
 
