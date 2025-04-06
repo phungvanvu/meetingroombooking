@@ -34,6 +34,7 @@ import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
+import org.training.meetingroombooking.repository.RoomBookingRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
@@ -42,13 +43,16 @@ public class RoomService {
   private final RoomRepository roomRepository;
   private final RoomMapper roomMapper;
   private final EquipmentRepository equipmentRepository;
+  private final RoomBookingRepository roomBookingRepository;
   private final S3Service s3Service;
 
   public RoomService(RoomRepository roomRepository, RoomMapper roomMapper,
-                     EquipmentRepository equipmentRepository, S3Service s3Service) {
+                     EquipmentRepository equipmentRepository, S3Service s3Service,
+                     RoomBookingRepository roomBookingRepository) {
     this.roomRepository = roomRepository;
     this.roomMapper = roomMapper;
     this.equipmentRepository = equipmentRepository;
+    this.roomBookingRepository = roomBookingRepository;
     this.s3Service = s3Service;
   }
 
@@ -216,17 +220,17 @@ public class RoomService {
 
 
   public void delete(Long roomId) {
-    if (!roomRepository.existsById(roomId)) {
+    Optional<Room> roomOptional = roomRepository.findById(roomId);
+    if (!roomOptional.isPresent()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
+    }
+    Room room = roomOptional.get();
+    if (roomBookingRepository.existsByRoom(room)) {
+      throw new AppEx(ErrorCode.CANNOT_DELETE_ROOM_IN_USE);
     }
     roomRepository.deleteById(roomId);
   }
 
-  public RoomDTO findByRoomName(String roomName) {
-    Room room = roomRepository.findByRoomName(roomName)
-        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-    return roomMapper.toDTO(room);
-  }
 
   public Set<String> getAllRoomNames() {
     return roomRepository.findAll()

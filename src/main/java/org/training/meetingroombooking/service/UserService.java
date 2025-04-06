@@ -29,13 +29,11 @@ import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.UserMapper;
-import org.training.meetingroombooking.repository.GroupRepository;
-import org.training.meetingroombooking.repository.PositionRepository;
-import org.training.meetingroombooking.repository.RoleRepository;
-import org.training.meetingroombooking.repository.UserRepository;
+import org.training.meetingroombooking.repository.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,24 +42,30 @@ public class UserService {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final RoomBookingRepository roomBookingRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final PositionRepository positionRepository;
     private final GroupRepository groupRepository;
 
   public UserService(UserRepository userRepository, RoleRepository roleRepository,
-                       UserMapper userMapper, PositionRepository positionRepository, GroupRepository groupRepository) {
+                       UserMapper userMapper, PositionRepository positionRepository,
+                     GroupRepository groupRepository, RoomBookingRepository roomBookingRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = new BCryptPasswordEncoder(10);
         this.positionRepository = positionRepository;
         this.groupRepository = groupRepository;
+        this.roomBookingRepository = roomBookingRepository;
   }
 
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUserName(request.getUserName())) {
-            throw new AppEx(ErrorCode.USER_ALREADY_EXISTS);
+            throw new AppEx(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new AppEx(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
         Position position = positionRepository.findById(request.getPosition())
                 .orElseThrow(() -> new AppEx(ErrorCode.POSITION_NOT_FOUND));
@@ -207,6 +211,11 @@ public class UserService {
     public UserResponse update(Long userId, UserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+        if (request.getUserName() != null &&
+                !request.getUserName().equals(user.getUserName()) &&
+                userRepository.existsByUserName(request.getUserName())) {
+            throw new AppEx(ErrorCode.USERNAME_ALREADY_EXISTS);
+        }
         if (request.getPosition() != null) {
             Position position = positionRepository.findById(request.getPosition())
                     .orElseThrow(() -> new AppEx(ErrorCode.POSITION_NOT_FOUND));
@@ -233,9 +242,15 @@ public class UserService {
     }
 
     public void delete(Long userId) {
-        if (!userRepository.existsById(userId)) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
             throw new AppEx(ErrorCode.USER_NOT_FOUND);
+        }
+        User user = userOptional.get();
+        if (roomBookingRepository.existsByBookedBy(user)) {
+            throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
         }
         userRepository.deleteById(userId);
     }
+
 }

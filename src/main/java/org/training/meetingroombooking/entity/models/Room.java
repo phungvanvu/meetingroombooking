@@ -52,6 +52,6 @@ public class Room {
   @Column(length = 255)
   private String imageUrl;
 
-  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "room")
   private List<RoomBooking> bookings;
 }
