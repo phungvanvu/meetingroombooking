@@ -15,7 +15,8 @@ public enum ErrorCode {
     POSITION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Position already exists."),
     ROLE_EXISTS(HttpStatus.CONFLICT, "Role already exists"),
     PERMISSION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Permission already exists."),
-    USER_ALREADY_EXISTS(HttpStatus.CONFLICT, "User already exists."),
+    USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "UserName already exists."),
+    EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists."),
     ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
 
     // Các lỗi 401 Unauthorized
@@ -32,6 +33,9 @@ public enum ErrorCode {
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "Group not found"),
     POSITION_NOT_FOUND(HttpStatus.NOT_FOUND, "Position not found"),
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
+    CANNOT_DELETE_USER_IN_USE(HttpStatus.CONFLICT, "Cannot delete user: User is associated with existing bookings."),
+    CANNOT_DELETE_ROOM_IN_USE(HttpStatus.CONFLICT, "Cannot delete room: Room is associated with existing bookings."),
+
 
     // Lỗi 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");

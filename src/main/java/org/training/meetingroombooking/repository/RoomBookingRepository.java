@@ -5,7 +5,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
+import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomBooking;
+import org.training.meetingroombooking.entity.models.User;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -93,4 +96,6 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Long>,
       "LIMIT 1", nativeQuery = true)
   Object[] findMostBookedRoom();
 
+  boolean existsByBookedBy(User user);
+  boolean existsByRoom(Room room);
 }

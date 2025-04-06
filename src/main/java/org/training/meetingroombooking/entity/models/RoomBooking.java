@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.Purpose;
-
 import java.time.LocalDateTime;
 
 @Data

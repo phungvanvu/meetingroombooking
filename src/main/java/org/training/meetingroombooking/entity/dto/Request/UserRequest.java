@@ -44,7 +44,8 @@ public class UserRequest {
           message = "Password must be at least 8 characters, contain at least one uppercase letter, one lowercase letter, one number, and one special character")
   private String password;
 
-  private boolean enabled = true;
+  @NotNull(message = "Enabled cannot be null")
+  private boolean enabled;
 
   @NotBlank(message = "Position cannot be blank")
   @NotNull(message = "Position cannot be null")
