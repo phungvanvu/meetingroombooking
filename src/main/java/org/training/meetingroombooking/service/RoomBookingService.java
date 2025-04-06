@@ -272,15 +272,40 @@ public class RoomBookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<RoomBookingDTO> getMyUpcomingBookings() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    /**
+     * Lấy danh sách các booking sắp tới (startTime > hiện tại) của người dùng hiện tại, có:
+     * - roomName: tìm kiếm tên phòng (không phân biệt chữ hoa thường)
+     * - fromTime: thời gian bắt đầu từ
+     * - toTime: thời gian kết thúc đến
+     * - Phân trang theo thứ tự giảm dần bookingId
+     */
+    public Page<RoomBookingDTO> getMyUpcomingBookings(String roomName, LocalDateTime fromTime, LocalDateTime toTime, int page, int size) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         LocalDateTime now = LocalDateTime.now();
-        List<RoomBooking> bookings = roomBookingRepository
-                .findByBookedBy_UserNameAndStatusAndStartTimeAfter(userName, BookingStatus.CONFIRMED, now);
-        return bookings.stream()
-                .map(roomBookingMapper::toDTO)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(
+                (root, query, cb) -> cb.and(
+                        cb.equal(root.get("bookedBy").get("userName"), currentUserName),
+                        cb.equal(root.get("status"), BookingStatus.CONFIRMED),
+                        cb.greaterThan(root.get("startTime"), now)
+                )
+        );
+        if (roomName != null && !roomName.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
+                return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
+            });
+        }
+        if (fromTime != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+        }
+        if (toTime != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+        }
+        Page<RoomBooking> resultPage = roomBookingRepository.findAll(spec, pageable);
+        return resultPage.map(roomBookingMapper::toDTO);
     }
+
 
     public RoomBookingDTO cancelBooking(Long bookingId) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
