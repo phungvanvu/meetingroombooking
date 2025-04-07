@@ -39,7 +39,6 @@ public class NotificationController {
   }
 
   @GetMapping("/MyNotification")
-  @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<List<NotificationDTO>> getMyNotifications() {
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
@@ -48,7 +47,7 @@ public class NotificationController {
   }
 
   @GetMapping("/{userName}")
-  @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
+  @PostAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<NotificationDTO>> getNotifications(@Valid @PathVariable String userName) {
     return ApiResponse.<List<NotificationDTO>>builder()
         .success(true)
