@@ -23,6 +23,9 @@ public class NotificationDTO {
   @NotNull(message = "Notification type cannot be null")
   private NotificationType type;
 
+  @NotNull(message = "Read status cannot be null")
+  private Boolean isRead;
+
   @NotNull(message = "Notification recipient ID cannot be null")
   private Long userId;
 

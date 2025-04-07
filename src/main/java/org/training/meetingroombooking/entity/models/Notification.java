@@ -26,6 +26,9 @@ public class Notification {
   @Column(nullable = false)
   private NotificationType type; // Loại thông báo (INFO, WARNING, ERROR)
 
+  @Column(nullable = false)
+  private Boolean hasRead;
+
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user; // Người nhận thông báo
@@ -36,6 +39,10 @@ public class Notification {
 
   @PrePersist
   protected void onCreate() {
+    if (this.hasRead == null) {
+      this.hasRead = false;
+    }
     this.createdAt = LocalDateTime.now();
   }
+
 }

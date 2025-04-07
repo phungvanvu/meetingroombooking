@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.training.meetingroombooking.entity.dto.NotificationDTO;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -41,18 +42,18 @@ public class RoomBookingService {
     private final EmailService emailService;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               RoomBookingMapper roomBookingMapper, EmailService emailService,
                               RoomRepository roomRepository, UserRepository userRepository,
-                              NotificationRepository notificationRepository) {
+                              NotificationService notificationService) {
         this.roomBookingRepository = roomBookingRepository;
         this.roomBookingMapper = roomBookingMapper;
         this.emailService = emailService;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
-        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
     }
 
     public RoomBookingDTO create(RoomBookingDTO dto) {
@@ -70,14 +71,16 @@ public class RoomBookingService {
         roomBooking.setBookedBy(user);
         RoomBooking savedRoomBooking = roomBookingRepository.save(roomBooking);
         RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
+        // Gửi email xác nhận
         emailService.sendRoomBookingConfirmationEmail(savedDTO);
-        Notification notification = Notification.builder()
-                .content("Room '" + room.getRoomName() + "' booked successfully from " +
+        // Tạo và gửi thông báo
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .content("Room '" + room.getRoomName() + "' booking successfully from " +
                         dto.getStartTime() + " to " + dto.getEndTime())
                 .type(NotificationType.INFO)
-                .user(user)
+                .userId(user.getUserId())
                 .build();
-        notificationRepository.save(notification);
+        notificationService.create(notificationDTO);
         return savedDTO;
     }
 
@@ -127,11 +130,11 @@ public class RoomBookingService {
                 .map(roomBookingMapper::toDTO)
                 .collect(Collectors.toList());
     }
-
     public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
         roomBookingMapper.updateEntity(roomBooking, dto);
+
         if (dto.getRoomId() != null) {
             Room room = roomRepository.findById(dto.getRoomId())
                     .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
@@ -157,13 +160,14 @@ public class RoomBookingService {
         RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
         RoomBookingDTO updatedDTO = roomBookingMapper.toDTO(updatedRoomBooking);
         User bookingUser = updatedRoomBooking.getBookedBy();
-        Notification notification = Notification.builder()
+        NotificationDTO notificationDTO = NotificationDTO.builder()
                 .content("Your booking for room '" + updatedRoomBooking.getRoom().getRoomName() +
-                        "' has been updated. New time: " + updatedRoomBooking.getStartTime() + " - " + updatedRoomBooking.getEndTime())
+                        "' has been updated. New time: " + updatedRoomBooking.getStartTime() +
+                        " - " + updatedRoomBooking.getEndTime())
                 .type(NotificationType.INFO)
-                .user(bookingUser)
+                .userId(bookingUser.getUserId())
                 .build();
-        notificationRepository.save(notification);
+        notificationService.create(notificationDTO);
         return updatedDTO;
     }
 
