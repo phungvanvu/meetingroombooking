@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,21 +29,13 @@ public class RoomController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> createRoom(
-      @RequestPart("room") @Valid RoomDTO dto,
-      @RequestPart(value = "file", required = false) MultipartFile file
+          @RequestPart("room") @Valid RoomDTO dto,
+          @RequestPart(value = "file", required = false) MultipartFile file
   ) throws IOException {
     return ApiResponse.<RoomDTO>builder()
-        .success(true)
-        .data(roomService.create(dto, file))
-        .build();
-  }
-
-  @GetMapping("/name/{roomName}")
-  public ApiResponse<RoomDTO> getRoomByName(@PathVariable String roomName) {
-    return ApiResponse.<RoomDTO>builder()
-        .success(true)
-        .data(roomService.findByRoomName(roomName))
-        .build();
+            .success(true)
+            .data(roomService.create(dto, file))
+            .build();
   }
 
   @GetMapping
@@ -51,6 +44,23 @@ public class RoomController {
         .success(true)
         .data(roomService.getAll())
         .build();
+  }
+
+  @GetMapping("/search")
+  public ApiResponse<Page<RoomDTO>> searchRooms(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "locations", required = false) List<String> locations,
+          @RequestParam(value = "available", required = false) Boolean available,
+          @RequestParam(value = "capacities", required = false) List<Integer> capacities,
+          @RequestParam(value = "equipments", required = false) Set<String> equipments,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "6") int size
+  ) {
+    Page<RoomDTO> roomsPage = roomService.getRooms(roomName, locations, available, capacities, equipments, page, size);
+    return ApiResponse.<Page<RoomDTO>>builder()
+            .success(true)
+            .data(roomsPage)
+            .build();
   }
 
   @GetMapping("/{roomId}")
@@ -73,7 +83,6 @@ public class RoomController {
         .data(roomService.update(roomId, dto, file))
         .build();
   }
-
 
   @DeleteMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")

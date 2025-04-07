@@ -23,10 +23,15 @@ public class PermissionService {
     }
 
     public PermissionDTO create(PermissionDTO permissionDTO) {
+        boolean exists = permissionRepository.existsById(permissionDTO.getPermissionName());
+        if (exists) {
+            throw new AppEx(ErrorCode.PERMISSION_ALREADY_EXISTS);
+        }
         Permission permission = permissionMapper.toEntity(permissionDTO);
         Permission savedPermission = permissionRepository.save(permission);
         return permissionMapper.toDTO(savedPermission);
     }
+
 
     public List<PermissionDTO> getAll() {
         var permissions = permissionRepository.findAll();

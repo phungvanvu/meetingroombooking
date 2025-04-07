@@ -15,10 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Rooms",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"roomName"})
-        })
+@Table(name = "Rooms")
 public class Room {
 
   @Id
@@ -55,6 +52,6 @@ public class Room {
   @Column(length = 255)
   private String imageUrl;
 
-  @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "room")
   private List<RoomBooking> bookings;
 }

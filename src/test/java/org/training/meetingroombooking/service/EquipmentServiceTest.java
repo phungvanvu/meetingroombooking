@@ -66,22 +66,22 @@ class EquipmentServiceTest {
 
     @Test
     void ***REMOVED***GetById_Found() {
-        when(equipmentRepository.findById(1L)).thenReturn(Optional.of(equipment));
+        when(equipmentRepository.findById("Máy chiếu")).thenReturn(Optional.of(equipment));
         when(equipmentMapper.toDTO(equipment)).thenReturn(equipmentDTO);
 
-        EquipmentDTO result = equipmentService.getById(1L);
+        EquipmentDTO result = equipmentService.getById("Máy chiếu");
 
         assertNotNull(result);
         assertEquals("Máy chiếu", result.getEquipmentName());
-        verify(equipmentRepository, times(1)).findById(1L);
+        verify(equipmentRepository, times(1)).findById("Máy chiếu");
     }
 
     @Test
     void ***REMOVED***GetById_NotFound() {
-        when(equipmentRepository.findById(1L)).thenReturn(Optional.empty());
+        when(equipmentRepository.findById("Máy chiếu")).thenReturn(Optional.empty());
 
-        assertThrows(AppEx.class, () -> equipmentService.getById(1L));
-        verify(equipmentRepository, times(1)).findById(1L);
+        assertThrows(AppEx.class, () -> equipmentService.getById("Máy chiếu"));
+        verify(equipmentRepository, times(1)).findById("Máy chiếu");
     }
 
     @Test
@@ -92,12 +92,12 @@ class EquipmentServiceTest {
                 .available(false)
                 .build();
 
-        when(equipmentRepository.findById(1L)).thenReturn(Optional.of(equipment));
+        when(equipmentRepository.findById("Máy chiếu")).thenReturn(Optional.of(equipment));
         doNothing().when(equipmentMapper).updateEntity(equipment, updateDTO);
         when(equipmentRepository.save(equipment)).thenReturn(equipment);
         when(equipmentMapper.toDTO(equipment)).thenReturn(updateDTO);
 
-        EquipmentDTO result = equipmentService.update(1L, updateDTO);
+        EquipmentDTO result = equipmentService.update("Máy chiếu", updateDTO);
 
         assertNotNull(result);
         assertEquals("Máy chiếu HD", result.getEquipmentName());
@@ -108,7 +108,7 @@ class EquipmentServiceTest {
 
     @Test
     void ***REMOVED***UpdateEquipment_NotFound() {
-        when(equipmentRepository.findById(1L)).thenReturn(Optional.empty());
+        when(equipmentRepository.findById("Máy chiếu")).thenReturn(Optional.empty());
 
         EquipmentDTO updateDTO = EquipmentDTO.builder()
                 .equipmentName("Máy chiếu HD")
@@ -116,27 +116,27 @@ class EquipmentServiceTest {
                 .available(false)
                 .build();
 
-        assertThrows(AppEx.class, () -> equipmentService.update(1L, updateDTO));
-        verify(equipmentRepository, times(1)).findById(1L);
+        assertThrows(AppEx.class, () -> equipmentService.update("Máy chiếu", updateDTO));
+        verify(equipmentRepository, times(1)).findById("Máy chiếu");
         verify(equipmentRepository, never()).save(any());
     }
 
     @Test
     void ***REMOVED***DeleteEquipment_Found() {
-        when(equipmentRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(equipmentRepository).deleteById(1L);
+        when(equipmentRepository.existsById("Máy chiếu")).thenReturn(true);
+        doNothing().when(equipmentRepository).deleteById("Máy chiếu");
 
-        assertDoesNotThrow(() -> equipmentService.delete(1L));
-        verify(equipmentRepository, times(1)).deleteById(1L);
+        assertDoesNotThrow(() -> equipmentService.delete("Máy chiếu"));
+        verify(equipmentRepository, times(1)).deleteById("Máy chiếu");
     }
 
     @Test
     void ***REMOVED***DeleteEquipment_NotFound() {
-        when(equipmentRepository.existsById(1L)).thenReturn(false);
+        when(equipmentRepository.existsById("Máy chiếu")).thenReturn(false);
 
-        assertThrows(AppEx.class, () -> equipmentService.delete(1L));
-        verify(equipmentRepository, times(1)).existsById(1L);
-        verify(equipmentRepository, never()).deleteById(anyLong());
+        assertThrows(AppEx.class, () -> equipmentService.delete("Máy chiếu"));
+        verify(equipmentRepository, times(1)).existsById("Máy chiếu");
+        verify(equipmentRepository, never()).deleteById(anyString());
     }
 
     @Test

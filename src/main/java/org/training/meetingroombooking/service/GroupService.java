@@ -22,10 +22,15 @@ public class GroupService {
     }
 
     public GroupDTO create(GroupDTO dto) {
+        boolean exists = groupRepository.existsById(dto.getGroupName());
+        if (exists) {
+            throw new AppEx(ErrorCode.GROUP_ALREADY_EXISTS);
+        }
         GroupEntity entity = groupMapper.toEntity(dto);
         GroupEntity savedGroup = groupRepository.save(entity);
         return groupMapper.toDTO(savedGroup);
     }
+
 
     public List<GroupDTO> getAll() {
         List<GroupEntity> groups = groupRepository.findAll();
