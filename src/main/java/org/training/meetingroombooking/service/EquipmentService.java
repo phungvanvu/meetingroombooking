@@ -27,6 +27,10 @@ public class EquipmentService {
     }
 
     public EquipmentDTO create(EquipmentDTO equipmentDTO) {
+        boolean exists = equipmentRepository.existsById(equipmentDTO.getEquipmentName());
+        if (exists) {
+            throw new AppEx(ErrorCode.EQUIPMENT_ALREADY_EXISTS);
+        }
         Equipment entity = equipmentMapper.toEntity(equipmentDTO);
         Equipment savedEquipment = equipmentRepository.save(entity);
         return equipmentMapper.toDTO(savedEquipment);
@@ -43,13 +47,6 @@ public class EquipmentService {
         Optional<Equipment> equipment = equipmentRepository.findById(equipmentName);
         return equipment.map(equipmentMapper::toDTO).orElseThrow(
                 () -> new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND));
-    }
-
-    public Set<EquipmentDTO> getAllDistinctEquipments() {
-        return equipmentRepository.findAll()
-                .stream()
-                .map(equipmentMapper::toDTO)
-                .collect(Collectors.toSet());
     }
 
     public EquipmentDTO update(String equipmentName, EquipmentDTO equipmentDTO) {

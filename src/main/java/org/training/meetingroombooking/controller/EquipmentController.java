@@ -38,21 +38,11 @@ public class EquipmentController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<EquipmentDTO>> getEquipments() {
     return ApiResponse.<List<EquipmentDTO>>builder()
         .success(true)
         .data(equipmentService.getAll())
         .build();
-  }
-
-  @GetMapping("/distinct")
-  public ApiResponse<Set<EquipmentDTO>> getAllDistinctEquipments() {
-    Set<EquipmentDTO> distinctEquipments = equipmentService.getAllDistinctEquipments();
-    return ApiResponse.<Set<EquipmentDTO>>builder()
-            .success(true)
-            .data(distinctEquipments)
-            .build();
   }
 
   @GetMapping("/{equipmentName}")
@@ -63,7 +53,6 @@ public class EquipmentController {
         .data(equipmentService.getById(equipmentName))
         .build();
   }
-
 
   @PutMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")

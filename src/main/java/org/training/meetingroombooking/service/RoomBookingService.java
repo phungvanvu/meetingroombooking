@@ -3,20 +3,21 @@ package org.training.meetingroombooking.service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.mail.MessagingException;
+import jakarta.persistence.criteria.Join;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -56,7 +57,7 @@ public class RoomBookingService {
         boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlap(
                 dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
         if (isOverlap) {
-            throw new AppEx(ErrorCode.ALERADY_BOOKED);
+            throw new AppEx(ErrorCode.ALREADY_BOOKED);
         }
         RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
         roomBooking.setRoom(room);
@@ -65,6 +66,39 @@ public class RoomBookingService {
         RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
         emailService.sendRoomBookingConfirmationEmail(savedDTO);
         return savedDTO;
+    }
+
+    /**
+     * Lấy danh sách RoomBooking của người dùng hiện hành theo các tiêu chí:
+     * - roomName: tìm kiếm theo tên phòng (không phân biệt chữ hoa chữ thường)
+     * - fromTime: thời gian bắt đầu (startTime) từ
+     * - toTime: thời gian kết thúc (endTime) đến
+     * - status: trạng thái đặt phòng
+     * - Phân trang theo thứ tự giảm dần của bookingId
+     */
+    public Page<RoomBookingDTO> searchMyBookings(String roomName, LocalDateTime fromTime, LocalDateTime toTime, BookingStatus status, int page, int size) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(
+                (root, query, cb) -> cb.equal(root.get("bookedBy").get("userName"), currentUserName)
+        );
+        if (roomName != null && !roomName.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
+                return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
+            });
+        }
+        if (fromTime != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+        }
+        if (toTime != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+        }
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+        Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
+        return bookingPage.map(roomBookingMapper::toDTO);
     }
 
     public List<RoomBookingDTO> getAll() {
@@ -81,30 +115,35 @@ public class RoomBookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<RoomBookingDTO> getMyBookings() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getBookingsByUserName(userName);
-    }
-
     public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
-        Room room = roomRepository.findById(dto.getRoomId())
-                .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-        User user = userRepository.findByUserName(dto.getUserName())
-                .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-        boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
-                dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
-        if (isOverlap) {
-            throw new AppEx(ErrorCode.ALERADY_BOOKED);
-        }
         roomBookingMapper.updateEntity(roomBooking, dto);
-        roomBooking.setRoom(room);
-        roomBooking.setBookedBy(user);
+        if (dto.getRoomId() != null) {
+            Room room = roomRepository.findById(dto.getRoomId())
+                    .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+            roomBooking.setRoom(room);
+        }
+        if (dto.getBookedById() != null) {
+            User user = userRepository.findById(dto.getBookedById())
+                    .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+            roomBooking.setBookedBy(user);
+        }
+        if (dto.getStartTime() != null && dto.getEndTime() != null) {
+            boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
+                    dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
+            if (isOverlap) {
+                throw new AppEx(ErrorCode.ALREADY_BOOKED);
+            }
+            roomBooking.setStartTime(dto.getStartTime());
+            roomBooking.setEndTime(dto.getEndTime());
+        }
+        if (dto.getStatus() != null) {
+            roomBooking.setStatus(dto.getStatus());
+        }
         RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
         return roomBookingMapper.toDTO(updatedRoomBooking);
     }
-
 
     public void delete(Long bookingId) {
         if (!roomBookingRepository.existsById(bookingId)) {
@@ -115,7 +154,6 @@ public class RoomBookingService {
 
     public ByteArrayOutputStream exportBookingsToExcel() throws IOException {
         List<RoomBookingDTO> bookings = getAll();
-
         try (Workbook workbook = new XSSFWorkbook();
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Bookings");
@@ -150,7 +188,6 @@ public class RoomBookingService {
                         booking.getStatus() != null ? booking.getStatus().toString() : "N/A");
                 row.createCell(6).setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
             }
-
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -159,30 +196,27 @@ public class RoomBookingService {
         }
     }
 
-    //  @Scheduled(fixedRate = 30000)//30s
-    @Scheduled(fixedRate = 1800000)//30p
-    @Transactional
-    public void sendMeetingReminderEmails() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime twoHoursLater = now.plus(2, ChronoUnit.HOURS);
-
-        List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now,
-                twoHoursLater);
-
-        for (RoomBooking booking : upcomingMeetings) {
-            try {
-                emailService.sendMeetingReminderEmail(
-                        booking.getBookedBy().getEmail(),
-                        booking.getBookedBy().getUserName(),
-                        booking.getRoom().getRoomName(),
-                        booking.getStartTime().toString(),
-                        booking.getEndTime().toString()
-                );
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    @Scheduled(fixedRate = 3600000)//1h
+//    @Transactional
+//    public void sendMeetingReminderEmails() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime HoursLater = now.plus(1, ChronoUnit.HOURS);
+//        List<RoomBooking> upcomingMeetings = roomBookingRepository
+//            .findMeetingsBetween(now, HoursLater);
+//        for (RoomBooking booking : upcomingMeetings) {
+//            try {
+//                emailService.sendMeetingReminderEmail(
+//                        booking.getBookedBy().getEmail(),
+//                        booking.getBookedBy().getUserName(),
+//                        booking.getRoom().getRoomName(),
+//                        booking.getStartTime().toString(),
+//                        booking.getEndTime().toString()
+//                );
+//            } catch (MessagingException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 
     public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
         Room room = roomRepository.findByRoomName(roomName)
@@ -204,6 +238,7 @@ public class RoomBookingService {
             return Collections.emptyList();
         }
         return roomBookings.stream()
+                .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
                 .map(roomBookingMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -237,15 +272,40 @@ public class RoomBookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<RoomBookingDTO> getMyUpcomingBookings() {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    /**
+     * Lấy danh sách các booking sắp tới (startTime > hiện tại) của người dùng hiện tại, có:
+     * - roomName: tìm kiếm tên phòng (không phân biệt chữ hoa thường)
+     * - fromTime: thời gian bắt đầu từ
+     * - toTime: thời gian kết thúc đến
+     * - Phân trang theo thứ tự giảm dần bookingId
+     */
+    public Page<RoomBookingDTO> getMyUpcomingBookings(String roomName, LocalDateTime fromTime, LocalDateTime toTime, int page, int size) {
+        String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         LocalDateTime now = LocalDateTime.now();
-        List<RoomBooking> bookings = roomBookingRepository
-                .findByBookedBy_UserNameAndStatusAndStartTimeAfter(userName, BookingStatus.CONFIRMED, now);
-        return bookings.stream()
-                .map(roomBookingMapper::toDTO)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(
+                (root, query, cb) -> cb.and(
+                        cb.equal(root.get("bookedBy").get("userName"), currentUserName),
+                        cb.equal(root.get("status"), BookingStatus.CONFIRMED),
+                        cb.greaterThan(root.get("startTime"), now)
+                )
+        );
+        if (roomName != null && !roomName.isEmpty()) {
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
+                return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
+            });
+        }
+        if (fromTime != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+        }
+        if (toTime != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+        }
+        Page<RoomBooking> resultPage = roomBookingRepository.findAll(spec, pageable);
+        return resultPage.map(roomBookingMapper::toDTO);
     }
+
 
     public RoomBookingDTO cancelBooking(Long bookingId) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)

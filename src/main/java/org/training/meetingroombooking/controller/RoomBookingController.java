@@ -4,7 +4,11 @@ import jakarta.validation.Valid;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +16,9 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
+import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
+import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.service.RoomBookingService;
 
 @RestController
@@ -41,12 +47,6 @@ public class RoomBookingController {
         .build();
   }
 
-  @GetMapping("/by-room-name")
-  public ResponseEntity<List<RoomBookingDTO>> getBookingsByRoomName(@RequestParam String roomName) {
-    List<RoomBookingDTO> bookings = roomBookingService.getBookingsByRoomName(roomName);
-    return ResponseEntity.ok(bookings);
-  }
-
   @GetMapping("/user/{userName}")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
@@ -62,14 +62,6 @@ public class RoomBookingController {
             .success(true)
             .data(bookings)
             .build();
-  }
-
-  @GetMapping("/MyBookings")
-  public ApiResponse<List<RoomBookingDTO>> getMyBookings() {
-    return ApiResponse.<List<RoomBookingDTO>>builder()
-        .success(true)
-        .data(roomBookingService.getMyBookings())
-        .build();
   }
 
   @PutMapping("/{bookingId}")
@@ -115,11 +107,28 @@ public class RoomBookingController {
             .build();
   }
 
+  /**
+   * Lấy danh sách các booking sắp tới (startTime > hiện tại) của người dùng hiện tại.
+   * Hỗ trợ lọc theo:
+   * - roomName: tên phòng
+   * - fromTime: thời gian bắt đầu từ
+   * - toTime: thời gian kết thúc đến
+   * - Phân trang, sắp xếp theo bookingId giảm dần
+   */
   @GetMapping("/upcoming/my")
-  public ApiResponse<List<RoomBookingDTO>> getMyUpcomingBookings() {
-    return ApiResponse.<List<RoomBookingDTO>>builder()
+  public ApiResponse<Page<RoomBookingDTO>> getMyUpcomingBookings(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "fromTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromTime,
+          @RequestParam(value = "toTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toTime,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "10") int size) {
+
+    Page<RoomBookingDTO> bookings = roomBookingService.getMyUpcomingBookings(roomName, fromTime, toTime, page, size);
+    return ApiResponse.<Page<RoomBookingDTO>>builder()
             .success(true)
-            .data(roomBookingService.getMyUpcomingBookings())
+            .data(bookings)
             .build();
   }
 
@@ -130,6 +139,32 @@ public class RoomBookingController {
     return ApiResponse.<RoomBookingDTO>builder()
             .success(true)
             .data(cancelledBooking)
+            .build();
+  }
+
+  /**
+   * Lấy danh sách RoomBooking của người dùng hiện hành theo các tiêu chí:
+   * - roomName: tìm kiếm theo tên phòng (không phân biệt chữ hoa chữ thường)
+   * - fromTime: thời gian bắt đầu (startTime) từ
+   * - toTime: thời gian kết thúc (endTime) đến
+   * - status: trạng thái đặt phòng
+   * - Phân trang theo thứ tự giảm dần của bookingId
+   */
+  @GetMapping("/search-my")
+  public ApiResponse<Page<RoomBookingDTO>> searchMyBookings(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "fromTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromTime,
+          @RequestParam(value = "toTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toTime,
+          @RequestParam(value = "status", required = false) BookingStatus status,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "10") int size) {
+
+    Page<RoomBookingDTO> bookingsPage = roomBookingService.searchMyBookings(roomName, fromTime, toTime, status, page, size);
+    return ApiResponse.<Page<RoomBookingDTO>>builder()
+            .success(true)
+            .data(bookingsPage)
             .build();
   }
 }

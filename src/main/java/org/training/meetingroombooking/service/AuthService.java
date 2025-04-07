@@ -64,31 +64,23 @@ public class AuthService {
     public AuthResponse authenticate(AuthRequest request) {
         var user = userRepository.findByUserName(request.getUsername())
                 .orElseThrow(() -> new AppEx(ErrorCode.INVALID_LOGIN));
-
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean auth = passwordEncoder.matches(request.getPassword(), user.getPassword());
-
         if (!auth) {
             throw new AppEx(ErrorCode.INVALID_LOGIN);
         }
-
-        var accessToken = generateToken(user, 30);  // Access Token sống 30 phút
+        var accessToken = generateToken(user, 360); // Access Token sống 6 tiếng
         var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
-
         return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
     }
-
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken());
-
             String jit = signToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-
             InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime)
                     .build();
-
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (AppEx exception) {
             log.info("Token already expired");
@@ -143,13 +135,15 @@ public class AuthService {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS384);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().subject(user.getUserName())
-                    .issuer("meeting-room-booking").issueTime(new Date())
+                    .issuer("meeting-room-booking")
+                    .issueTime(new Date())
                     .expirationTime(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))
-                    .jwtID(UUID.randomUUID().toString()).claim("scope", buildScope(user)).build();
-
+                    .jwtID(UUID.randomUUID().toString())
+                    .claim("scope", buildScope(user))
+                    .claim("name", user.getFullName())
+                    .build();
             JWSObject jwsObject = new JWSObject(header, new Payload(jwtClaimsSet.toJSONObject()));
             jwsObject.sign(new MACSigner(SECRETKEY.getBytes()));
-
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Error generating token", e);
@@ -159,7 +153,6 @@ public class AuthService {
 
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
-
         if (!CollectionUtils.isEmpty(user.getRoles())) {
             user.getRoles().forEach(role -> {
                 stringJoiner.add("ROLE_" + role.getRoleName());

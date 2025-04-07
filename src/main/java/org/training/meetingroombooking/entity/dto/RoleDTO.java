@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 public class RoleDTO {
 
-    @NotBlank(message = "Role name cannot be left blank")
+    @NotBlank(message = "Role name cannot be blank")
     @Size(max = 50, message = "Role names cannot exceed 50 characters.")
     private String roleName;
 

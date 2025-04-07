@@ -51,8 +51,6 @@ public class EmailService {
             String userEmail = user.getEmail();
             System.out.println("Sending email to: " + userEmail);
 
-            System.out.println("DTO: " + dto);
-
             String subject = "Meeting room booking confirmation successful";
             String htmlBody = "<h3>Greet " + (user.getFullName() != null ? user.getFullName() : "N/A") + ",</h3>"
                     + "<p>You have successfully booked a meeting room!</p>"
@@ -66,7 +64,6 @@ public class EmailService {
                     + "<li><b>Created at:</b> " + (dto.getCreatedAt() != null ? dto.getCreatedAt().toString() : "N/A") + "</li>"
                     + "</ul>"
                     + "<p>Thank you for using our service!</p>";
-
             sendHtmlEmail(userEmail, subject, htmlBody);
         } catch (MessagingException e) {
             System.err.println("Failed to send email: " + e.getMessage());
