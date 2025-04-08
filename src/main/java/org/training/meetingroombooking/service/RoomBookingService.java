@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.NotificationDTO;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
@@ -345,4 +346,14 @@ public class RoomBookingService {
         return roomBookingMapper.toDTO(cancelledBooking);
     }
 
+    @Transactional
+    public void cancelMultipleBookings(List<Long> bookingIds) {
+        if (bookingIds == null || bookingIds.isEmpty()) {
+            throw new IllegalArgumentException("Booking ids list cannot be empty");
+        }
+        int updatedCount = roomBookingRepository.updateStatusForBookings(bookingIds, BookingStatus.CANCELLED);
+        if (updatedCount != bookingIds.size()) {
+            throw new AppEx(ErrorCode.BATCH_CANCELLATION_FAILED);
+        }
+    }
 }
