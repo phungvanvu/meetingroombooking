@@ -18,6 +18,9 @@ public enum ErrorCode {
     USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "UserName already exists."),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists."),
     ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
+    BATCH_CANCELLATION_FAILED(HttpStatus.CONFLICT, "Some bookings could not be cancelled."),
+
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
 
     // Các lỗi 401 Unauthorized
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),
@@ -35,7 +38,6 @@ public enum ErrorCode {
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
     CANNOT_DELETE_USER_IN_USE(HttpStatus.CONFLICT, "Cannot delete user: User is associated with existing bookings."),
     CANNOT_DELETE_ROOM_IN_USE(HttpStatus.CONFLICT, "Cannot delete room: Room is associated with existing bookings."),
-
 
     // Lỗi 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");

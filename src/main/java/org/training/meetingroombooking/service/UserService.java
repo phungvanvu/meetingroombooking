@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.models.GroupEntity;
@@ -251,6 +252,23 @@ public class UserService {
             throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
         }
         userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public void deleteMultipleUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            throw new AppEx(ErrorCode.INVALID_INPUT);
+        }
+        List<User> users = userRepository.findAllById(userIds);
+        if (users.size() != userIds.size()) {
+            throw new AppEx(ErrorCode.USER_NOT_FOUND);
+        }
+        for (User user : users) {
+            if (roomBookingRepository.existsByBookedBy(user)) {
+                throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
+            }
+        }
+        userRepository.deleteAll(users);
     }
 
 }

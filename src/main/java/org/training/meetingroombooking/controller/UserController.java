@@ -2,7 +2,6 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,12 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
-import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.service.UserService;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -97,5 +94,15 @@ public class UserController {
         .success(true)
         .data("User has been deleted")
         .build();
+  }
+
+  @DeleteMapping("/delete-multiple")
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<String> deleteMultipleUsers(@RequestBody List<Long> userIds) {
+    userService.deleteMultipleUsers(userIds);
+    return ApiResponse.<String>builder()
+            .success(true)
+            .data("Selected users have been deleted successfully.")
+            .build();
   }
 }
