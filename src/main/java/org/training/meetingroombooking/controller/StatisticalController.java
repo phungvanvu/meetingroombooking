@@ -51,12 +51,15 @@ public class StatisticalController {
                 .data(statisticalService.getTopUsers(limit))
                 .build();
     }
+
     @GetMapping("/statistics")
-    public ApiResponse<RoomStatisticsDTO> getRoomStatistics() {
-        return ApiResponse.<RoomStatisticsDTO>builder()
+    public ResponseEntity<ApiResponse<RoomStatisticsDTO>> getRoomStatistics() {
+        RoomStatisticsDTO stats = statisticalService.getRoomStatistics();
+        ApiResponse<RoomStatisticsDTO> response = ApiResponse.<RoomStatisticsDTO>builder()
                 .success(true)
-                .data(statisticalService.getRoomStatistics())
+                .data(stats)
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/export-bookings-excel")
