@@ -8,7 +8,7 @@ import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 import org.training.meetingroombooking.entity.models.User;
-
+import org.springframework.data.jpa.repository.Modifying;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,4 +98,9 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Long>,
 
   boolean existsByBookedBy(User user);
   boolean existsByRoom(Room room);
+
+  @Modifying
+  @Query("UPDATE RoomBooking rb SET rb.status = :status WHERE rb.bookingId IN :bookingIds")
+  int updateStatusForBookings(@Param("bookingIds") List<Long> bookingIds, @Param("status") BookingStatus status);
+
 }

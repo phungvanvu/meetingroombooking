@@ -142,6 +142,17 @@ public class RoomBookingController {
             .build();
   }
 
+  // Endpoint hủy đặt phòng đồng loạt: đổi trạng thái booking thành CANCELLED
+  @PutMapping("/cancel-multiple")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<String> cancelMultipleBookings(@RequestBody List<Long> bookingIds) {
+    roomBookingService.cancelMultipleBookings(bookingIds);
+    return ApiResponse.<String>builder()
+            .success(true)
+            .data("Selected bookings have been canceled successfully.")
+            .build();
+  }
+
   /**
    * Lấy danh sách RoomBooking của người dùng hiện hành theo các tiêu chí:
    * - roomName: tìm kiếm theo tên phòng (không phân biệt chữ hoa chữ thường)
