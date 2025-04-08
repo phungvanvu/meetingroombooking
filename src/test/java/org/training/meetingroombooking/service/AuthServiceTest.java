@@ -38,7 +38,7 @@ class AuthServiceTest {
     @Mock
     private InvalidatedTokenRepository invalidatedTokenRepository;
 
-    private static final String SECRET_KEY = "***REMOVED***";
+    private static final String SECRET_KEY = "i/L8yAnX0nO6iwtGaQKVdv6iP0HkV3ke8tT-amS3N/7Q/jMiDVYL3lbmar2NA!OR";
 
     @BeforeEach
     void setUp() throws Exception {
