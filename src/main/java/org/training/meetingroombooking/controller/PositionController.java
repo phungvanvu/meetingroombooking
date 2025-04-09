@@ -1,9 +1,8 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
-
 import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.PositionDTO;
@@ -34,6 +33,23 @@ public class PositionController {
         return ApiResponse.<List<PositionDTO>>builder()
                 .success(true)
                 .data(positionService.getAll())
+                .build();
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Page<PositionDTO>> searchPositions(
+            @RequestParam(value = "positionName", required = false) String positionName,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "positionName") String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "ASC") String sortDirection
+    ) {
+        Page<PositionDTO> pageResult = positionService.getPositions(positionName, description, page, size, sortBy, sortDirection);
+        return ApiResponse.<Page<PositionDTO>>builder()
+                .success(true)
+                .data(pageResult)
                 .build();
     }
 
