@@ -35,11 +35,8 @@ public class S3Service {
     }
 
     public String uploadFile(String keyName, MultipartFile file) throws IOException {
-        // Tạo file tạm thời từ MultipartFile
         File convertedFile = convertMultiPartToFile(file);
-        // Upload file lên S3
         amazonS3.putObject(new PutObjectRequest(bucketName, keyName, convertedFile));
-        // Trả về URL của file trên S3
         return amazonS3.getUrl(bucketName, keyName).toString();
     }
 

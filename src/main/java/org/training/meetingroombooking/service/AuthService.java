@@ -56,7 +56,6 @@ public class AuthService {
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
         var token = request.getToken();
-
         verifyToken(token);
         return IntrospectResponse.builder().valid(true).build();
     }
@@ -68,6 +67,9 @@ public class AuthService {
         boolean auth = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!auth) {
             throw new AppEx(ErrorCode.INVALID_LOGIN);
+        }
+        if (!user.isEnabled()) {
+            throw new AppEx(ErrorCode.NOT_ACTIVE);
         }
         var accessToken = generateToken(user, 360); // Access Token sống 6 tiếng
         var refreshToken = generateToken(user, 7 * 24 * 60);  // Refresh Token sống 7 ngày
@@ -89,23 +91,18 @@ public class AuthService {
 
     public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken());
-
         // Kiểm tra token đã bị vô hiệu hóa chưa
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         if (invalidatedTokenRepository.existsById(jit)) {
             throw new AppEx(ErrorCode.UNAUTHENTICATED);
         }
-
         var username = signedJWT.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new AppEx(ErrorCode.UNAUTHENTICATED));
-
         var newAccessToken = generateToken(user, 30);
-
         return AuthResponse.builder().accessToken(newAccessToken).refreshToken(request.getToken())
                 .build();
     }
-
 
     protected SignedJWT verifyToken(String token) throws JOSEException {
         try {
@@ -120,11 +117,9 @@ public class AuthService {
             if (!(verified && expiryTime.after(new Date()))) {
                 throw new AppEx(ErrorCode.UNAUTHENTICATED);
             }
-
             if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
                 throw new AppEx(ErrorCode.UNAUTHENTICATED);
             }
-
             return signedJWT;
         } catch (ParseException e) {
             throw new AppEx(ErrorCode.UNAUTHENTICATED);
