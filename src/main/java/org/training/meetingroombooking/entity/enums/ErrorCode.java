@@ -24,6 +24,7 @@ public enum ErrorCode {
 
     // Các lỗi 401 Unauthorized
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),
+    NOT_ACTIVE(HttpStatus.FORBIDDEN, "This account is not active."),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "User is not authenticated."),
 
     // Các lỗi 404 Not Found

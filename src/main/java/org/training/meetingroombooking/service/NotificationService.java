@@ -22,16 +22,13 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
   private final UserRepository userRepository;
-  private final SimpMessagingTemplate messagingTemplate;
 
   public NotificationService(NotificationRepository notificationRepository,
                              NotificationMapper notificationMapper,
-                             UserRepository userRepository,
-                             SimpMessagingTemplate messagingTemplate) {
+                             UserRepository userRepository) {
     this.notificationRepository = notificationRepository;
     this.notificationMapper = notificationMapper;
     this.userRepository = userRepository;
-    this.messagingTemplate = messagingTemplate;
   }
 
   public NotificationDTO create(NotificationDTO dto) {
@@ -40,10 +37,7 @@ public class NotificationService {
     Notification notification = notificationMapper.toEntity(dto);
     notification.setUser(user);
     Notification savedNotification = notificationRepository.save(notification);
-    NotificationDTO notificationDTO = notificationMapper.toDTO(savedNotification);
-    // Gửi thông báo qua WebSocket tới destination riêng cho user, ví dụ: /queue/notifications-{userName}
-    messagingTemplate.convertAndSend("/queue/notifications-" + user.getUserName(), notificationDTO);
-    return notificationDTO;
+    return notificationMapper.toDTO(savedNotification);
   }
 
   public List<NotificationDTO> getAll() {
