@@ -74,7 +74,7 @@ public class RoomBookingService {
         RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
         // Gửi email xác nhận
         emailService.sendRoomBookingConfirmationEmail(savedDTO);
-        // Tạo và gửi thông báo
+        // Tạo thông báo
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .content("Room '" + room.getRoomName() + "' booking successfully from " +
                         dto.getStartTime() + " to " + dto.getEndTime())
