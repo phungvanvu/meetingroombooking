@@ -26,12 +26,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
+import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
@@ -244,4 +246,21 @@ public class RoomService {
             .map(Room::getLocation)
             .collect(Collectors.toSet());
   }
+
+  public void deleteMultipleRooms(List<Long> roomIds) {
+    if (roomIds == null || roomIds.isEmpty()) {
+      throw new AppEx(ErrorCode.INVALID_INPUT);
+    }
+    List<Room> rooms = roomRepository.findAllById(roomIds);
+    if (rooms.size() != roomIds.size()) {
+      throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
+    }
+    for (Room room : rooms) {
+      if (roomBookingRepository.existsByRoom(room)) {
+        throw new AppEx(ErrorCode.CANNOT_DELETE_ROOM_IN_USE);
+      }
+    }
+    roomRepository.deleteAll(rooms);
+  }
+
 }

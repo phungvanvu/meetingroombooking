@@ -72,7 +72,6 @@ public class RoleService {
         return roleMapper.toDTO(updatedRole);
     }
 
-
     public void delete(String roleName) {
         if (!roleRepository.existsById(roleName)) {
             throw new AppEx(ErrorCode.ROLE_NOT_FOUND);

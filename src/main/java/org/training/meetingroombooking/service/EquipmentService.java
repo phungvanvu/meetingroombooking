@@ -11,19 +11,23 @@ import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
+import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
+import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
+    private final RoomRepository roomRepository;
     private final EquipmentMapper equipmentMapper;
 
     public EquipmentService(EquipmentRepository equipmentRepository,
-                            EquipmentMapper equipmentMapper) {
+                            EquipmentMapper equipmentMapper, RoomRepository roomRepository) {
         this.equipmentRepository = equipmentRepository;
         this.equipmentMapper = equipmentMapper;
+        this.roomRepository = roomRepository;
     }
 
     public EquipmentDTO create(EquipmentDTO equipmentDTO) {
@@ -83,5 +87,21 @@ public class EquipmentService {
                 "available", availableCount,
                 "unavailable", unavailableCount
         );
+    }
+
+    public void deleteMultipleEquipments(List<String> equipmentNames) {
+        if (equipmentNames == null || equipmentNames.isEmpty()) {
+            throw new AppEx(ErrorCode.INVALID_INPUT);
+        }
+        List<Equipment> equipments = equipmentRepository.findAllById(equipmentNames);
+        if (equipments.size() != equipmentNames.size()) {
+            throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+        }
+        for (Equipment equipment : equipments) {
+            if (roomRepository.existsByEquipments(Set.of(equipment))) {
+                throw new AppEx(ErrorCode.CANNOT_DELETE_EQUIPMENT_IN_USE);
+            }
+        }
+        equipmentRepository.deleteAll(equipments);
     }
 }
