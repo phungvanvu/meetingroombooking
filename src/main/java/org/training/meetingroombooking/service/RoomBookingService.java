@@ -74,7 +74,7 @@ public class RoomBookingService {
         RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
         // Gửi email xác nhận
         emailService.sendRoomBookingConfirmationEmail(savedDTO);
-        // Tạo và gửi thông báo
+        // Tạo thông báo
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .content("Room '" + room.getRoomName() + "' booking successfully from " +
                         dto.getStartTime() + " to " + dto.getEndTime())
@@ -172,7 +172,6 @@ public class RoomBookingService {
         return updatedDTO;
     }
 
-
     public void delete(Long bookingId) {
         if (!roomBookingRepository.existsById(bookingId)) {
             throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
@@ -245,18 +244,6 @@ public class RoomBookingService {
 //            }
 //        }
 //    }
-
-    public List<RoomBookingDTO> getBookingsByRoomName(String roomName) {
-        Room room = roomRepository.findByRoomName(roomName)
-                .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-        List<RoomBooking> roomBookings = room.getBookings();
-        if (roomBookings.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return roomBookings.stream()
-                .map(roomBookingMapper::toDTO)
-                .collect(Collectors.toList());
-    }
 
     public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
         Room room = roomRepository.findById(roomId)

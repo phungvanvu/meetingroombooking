@@ -92,4 +92,13 @@ public class EquipmentController {
         .build();
   }
 
+  @DeleteMapping("/delete-multiple")
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<String> deleteMultipleEquipments(@RequestBody List<String> equipmentNames) {
+    equipmentService.deleteMultipleEquipments(equipmentNames);
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("Selected equipments have been deleted successfully.")
+        .build();
+  }
 }

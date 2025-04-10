@@ -39,7 +39,9 @@ public enum ErrorCode {
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
     CANNOT_DELETE_USER_IN_USE(HttpStatus.CONFLICT, "Cannot delete user: User is associated with existing bookings."),
     CANNOT_DELETE_ROOM_IN_USE(HttpStatus.CONFLICT, "Cannot delete room: Room is associated with existing bookings."),
-
+    CANNOT_DELETE_GROUP_IN_USE(HttpStatus.CONFLICT, "Cannot delete group: Group is associated with existing users."),
+    CANNOT_DELETE_POSITION_IN_USE(HttpStatus.CONFLICT, "Cannot delete position: Position is associated with existing users."),
+    CANNOT_DELETE_EQUIPMENT_IN_USE(HttpStatus.CONFLICT,"Cannot delete equipment: Equipment is associated with existing rooms."),
     // Lỗi 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
 
