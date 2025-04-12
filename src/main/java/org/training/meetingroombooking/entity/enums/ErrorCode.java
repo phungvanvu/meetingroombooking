@@ -10,6 +10,11 @@ public enum ErrorCode {
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "Invalid file type. Only PNG, JPG, and JPEG are allowed."),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error occurred."),
     PASSWORD_NULL(HttpStatus.BAD_REQUEST, "Password must be provided."),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
+    INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid OTP."),
+    OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP has expired."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "Old password is incorrect."),
+
     EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Equipment already exists."),
     GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "Group already exists."),
     POSITION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Position already exists."),
@@ -19,8 +24,6 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists."),
     ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
     BATCH_CANCELLATION_FAILED(HttpStatus.CONFLICT, "Some bookings could not be cancelled."),
-
-    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
 
     // Các lỗi 401 Unauthorized
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),

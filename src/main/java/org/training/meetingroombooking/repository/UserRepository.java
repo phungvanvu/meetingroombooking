@@ -12,10 +12,14 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     Optional<User> findByUserName(String userName);
+
+    Optional<User> findByEmail(String email);
+
     boolean existsByUserName(String userName);
+
     boolean existsByEmail(String email);
 
-  boolean existsByPosition(Position position);
+    boolean existsByPosition(Position position);
 
-  boolean existsByGroup(GroupEntity group);
+    boolean existsByGroup(GroupEntity group);
 }

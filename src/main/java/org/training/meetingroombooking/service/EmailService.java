@@ -29,6 +29,7 @@ public class EmailService {
     }
 
     // Phương thức chung để gửi email HTML
+    @Async
     public void sendHtmlEmail(String to, String subject,
                               String htmlBody) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();

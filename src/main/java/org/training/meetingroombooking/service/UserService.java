@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.entity.models.GroupEntity;
@@ -269,6 +270,17 @@ public class UserService {
             }
         }
         userRepository.deleteAll(users);
+    }
+
+    public void changePassword(ChangePasswordRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppEx(ErrorCode.INVALID_PASSWORD);
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
 }

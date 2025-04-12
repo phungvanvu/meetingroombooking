@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
@@ -103,6 +104,15 @@ public class UserController {
     return ApiResponse.<String>builder()
             .success(true)
             .data("Selected users have been deleted successfully.")
+            .build();
+  }
+
+  @PutMapping("/change-password")
+  public ApiResponse<String> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
+    userService.changePassword(changePasswordRequest);
+    return ApiResponse.<String>builder()
+            .success(true)
+            .data("Password changed successfully")
             .build();
   }
 }
