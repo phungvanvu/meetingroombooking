@@ -144,7 +144,6 @@ public class RoomBookingController {
 
   // Endpoint hủy đặt phòng đồng loạt: đổi trạng thái booking thành CANCELLED
   @PutMapping("/cancel-multiple")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> cancelMultipleBookings(@RequestBody List<Long> bookingIds) {
     roomBookingService.cancelMultipleBookings(bookingIds);
     return ApiResponse.<String>builder()
@@ -178,4 +177,36 @@ public class RoomBookingController {
             .data(bookingsPage)
             .build();
   }
+
+  /**
+   * Endpoint tìm kiếm toàn bộ bản ghi booking theo các tiêu chí:
+   * - roomName: tên phòng (không phân biệt chữ hoa chữ thường)
+   * - fromTime: thời gian bắt đầu (startTime) từ
+   * - toTime: thời gian kết thúc (endTime) đến
+   * - status: trạng thái booking
+   * - bookedById: filter theo userId của người đặt
+   * - Phân trang, sắp xếp theo bookingId giảm dần
+   * Endpoint này dành cho Admin.
+   */
+  @GetMapping("/search")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Page<RoomBookingDTO>> searchBookings(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "fromTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromTime,
+          @RequestParam(value = "toTime", required = false)
+          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toTime,
+          @RequestParam(value = "status", required = false) BookingStatus status,
+          @RequestParam(value = "bookedByName", required = false) String bookedByName,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "10") int size) {
+
+    Page<RoomBookingDTO> bookings = roomBookingService
+            .searchBookings(roomName, fromTime, toTime, status, bookedByName, page, size);
+    return ApiResponse.<Page<RoomBookingDTO>>builder()
+            .success(true)
+            .data(bookings)
+            .build();
+  }
+
 }

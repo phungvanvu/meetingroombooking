@@ -66,11 +66,14 @@ public class StatisticalController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
         ByteArrayOutputStream outputStream = roomBookingService.exportBookingsToExcel();
+        String currentTime = LocalTime.now().toString().replace(":", "-");
+        String fileName = "bookings_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
         return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bookings.xlsx")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(outputStream.toByteArray());
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(outputStream.toByteArray());
     }
+
 
     @GetMapping("/export-rooms-excel")
     @PreAuthorize("hasRole('ADMIN')")

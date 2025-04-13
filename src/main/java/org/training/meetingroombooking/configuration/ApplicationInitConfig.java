@@ -38,7 +38,7 @@ public class ApplicationInitConfig {
             if (userRepository.findByUserName("admin").isEmpty()) {
                 User user = new User();
                 user.setUserName("admin");
-                user.setFullName("Phung Van Vu");
+                user.setFullName("Admin");
                 user.setDepartment("Software Development");
                 user.setPhoneNumber("***REMOVED***");
                 user.setEmail("***REMOVED***");

@@ -118,6 +118,37 @@ public class RoomBookingService {
         return bookingPage.map(roomBookingMapper::toDTO);
     }
 
+    public Page<RoomBookingDTO> searchBookings(String roomName, LocalDateTime fromTime, LocalDateTime toTime, BookingStatus status, String bookedByName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+        Specification<RoomBooking> spec = Specification.where(null);
+
+        if (roomName != null && !roomName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
+                return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
+            });
+        }
+        if (fromTime != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
+        }
+        if (toTime != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
+        }
+        if (status != null) {
+            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
+        }
+        // Sử dụng userName trong bookedBy vì nó độc nhất.
+        if (bookedByName != null && !bookedByName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, User> userJoin = ***REMOVED***.join("bookedBy");
+                return cb.like(cb.lower(userJoin.get("userName")), "%" + bookedByName.toLowerCase() + "%");
+            });
+        }
+
+        Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
+        return bookingPage.map(roomBookingMapper::toDTO);
+    }
+
     public List<RoomBookingDTO> getAll() {
         List<RoomBooking> roomBookings = roomBookingRepository.findAll();
         return roomBookings.stream()
@@ -131,6 +162,7 @@ public class RoomBookingService {
                 .map(roomBookingMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
     public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
         RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
                 .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
