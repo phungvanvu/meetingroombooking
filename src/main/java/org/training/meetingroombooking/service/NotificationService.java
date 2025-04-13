@@ -1,6 +1,6 @@
 package org.training.meetingroombooking.service;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import java.util.Comparator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,6 @@ import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.NotificationRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,16 +21,13 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final NotificationMapper notificationMapper;
   private final UserRepository userRepository;
-  private final SimpMessagingTemplate messagingTemplate;
 
   public NotificationService(NotificationRepository notificationRepository,
                              NotificationMapper notificationMapper,
-                             UserRepository userRepository,
-                             SimpMessagingTemplate messagingTemplate) {
+                             UserRepository userRepository) {
     this.notificationRepository = notificationRepository;
     this.notificationMapper = notificationMapper;
     this.userRepository = userRepository;
-    this.messagingTemplate = messagingTemplate;
   }
 
   public NotificationDTO create(NotificationDTO dto) {
@@ -40,10 +36,7 @@ public class NotificationService {
     Notification notification = notificationMapper.toEntity(dto);
     notification.setUser(user);
     Notification savedNotification = notificationRepository.save(notification);
-    NotificationDTO notificationDTO = notificationMapper.toDTO(savedNotification);
-    // Gửi thông báo qua WebSocket tới destination riêng cho user, ví dụ: /queue/notifications-{userName}
-    messagingTemplate.convertAndSend("/queue/notifications-" + user.getUserName(), notificationDTO);
-    return notificationDTO;
+    return notificationMapper.toDTO(savedNotification);
   }
 
   public List<NotificationDTO> getAll() {
@@ -64,10 +57,12 @@ public class NotificationService {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String username = authentication.getName();
     List<Notification> notifications = notificationRepository.findByUser_UserName(username);
+    notifications.sort(Comparator.comparing(Notification::getCreatedAt).reversed());
     return notifications.stream()
             .map(notificationMapper::toDTO)
             .collect(Collectors.toList());
   }
+
 
   public NotificationDTO update(Long id, NotificationDTO dto) {
     Notification existingNotification = notificationRepository.findById(id)

@@ -6,24 +6,33 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
+import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
+import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
+    private final RoomRepository roomRepository;
     private final EquipmentMapper equipmentMapper;
 
     public EquipmentService(EquipmentRepository equipmentRepository,
-                            EquipmentMapper equipmentMapper) {
+                            EquipmentMapper equipmentMapper, RoomRepository roomRepository) {
         this.equipmentRepository = equipmentRepository;
         this.equipmentMapper = equipmentMapper;
+        this.roomRepository = roomRepository;
     }
 
     public EquipmentDTO create(EquipmentDTO equipmentDTO) {
@@ -41,6 +50,29 @@ public class EquipmentService {
                 .stream()
                 .map(equipmentMapper::toDTO)
                 .toList();
+    }
+
+    public Page<EquipmentDTO> getEquipments(String equipmentName, String description, Boolean available,
+                                            int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase("DESC")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Specification<Equipment> spec = Specification.where(null);
+        if (equipmentName != null && !equipmentName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
+        }
+        if (description != null && !description.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
+        }
+        if (available != null) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.equal(***REMOVED***.get("available"), available));
+        }
+        Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
+        return equipmentPage.map(equipmentMapper::toDTO);
     }
 
     public EquipmentDTO getById(String equipmentName) {
@@ -83,5 +115,21 @@ public class EquipmentService {
                 "available", availableCount,
                 "unavailable", unavailableCount
         );
+    }
+
+    public void deleteMultipleEquipments(List<String> equipmentNames) {
+        if (equipmentNames == null || equipmentNames.isEmpty()) {
+            throw new AppEx(ErrorCode.INVALID_INPUT);
+        }
+        List<Equipment> equipments = equipmentRepository.findAllById(equipmentNames);
+        if (equipments.size() != equipmentNames.size()) {
+            throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+        }
+        for (Equipment equipment : equipments) {
+            if (roomRepository.existsByEquipments(Set.of(equipment))) {
+                throw new AppEx(ErrorCode.CANNOT_DELETE_EQUIPMENT_IN_USE);
+            }
+        }
+        equipmentRepository.deleteAll(equipments);
     }
 }

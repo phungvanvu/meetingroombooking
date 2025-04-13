@@ -10,6 +10,11 @@ public enum ErrorCode {
     INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "Invalid file type. Only PNG, JPG, and JPEG are allowed."),
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Validation error occurred."),
     PASSWORD_NULL(HttpStatus.BAD_REQUEST, "Password must be provided."),
+    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
+    INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid OTP."),
+    OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP has expired."),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "Old password is incorrect."),
+
     EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Equipment already exists."),
     GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "Group already exists."),
     POSITION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Position already exists."),
@@ -20,10 +25,9 @@ public enum ErrorCode {
     ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
     BATCH_CANCELLATION_FAILED(HttpStatus.CONFLICT, "Some bookings could not be cancelled."),
 
-    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
-
     // Các lỗi 401 Unauthorized
     INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),
+    NOT_ACTIVE(HttpStatus.FORBIDDEN, "This account is not active."),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "User is not authenticated."),
 
     // Các lỗi 404 Not Found
@@ -38,7 +42,9 @@ public enum ErrorCode {
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
     CANNOT_DELETE_USER_IN_USE(HttpStatus.CONFLICT, "Cannot delete user: User is associated with existing bookings."),
     CANNOT_DELETE_ROOM_IN_USE(HttpStatus.CONFLICT, "Cannot delete room: Room is associated with existing bookings."),
-
+    CANNOT_DELETE_GROUP_IN_USE(HttpStatus.CONFLICT, "Cannot delete group: Group is associated with existing users."),
+    CANNOT_DELETE_POSITION_IN_USE(HttpStatus.CONFLICT, "Cannot delete position: Position is associated with existing users."),
+    CANNOT_DELETE_EQUIPMENT_IN_USE(HttpStatus.CONFLICT,"Cannot delete equipment: Equipment is associated with existing rooms."),
     // Lỗi 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error");
 

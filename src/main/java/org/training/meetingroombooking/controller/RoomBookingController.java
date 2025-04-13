@@ -144,7 +144,7 @@ public class RoomBookingController {
 
   // Endpoint hủy đặt phòng đồng loạt: đổi trạng thái booking thành CANCELLED
   @PutMapping("/cancel-multiple")
-
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> cancelMultipleBookings(@RequestBody List<Long> bookingIds) {
     roomBookingService.cancelMultipleBookings(bookingIds);
     return ApiResponse.<String>builder()
