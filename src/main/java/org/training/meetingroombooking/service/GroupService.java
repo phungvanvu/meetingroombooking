@@ -92,7 +92,7 @@ public class GroupService {
 
     public void delete(String groupName) {
         Optional<GroupEntity> groupOptional = groupRepository.findById(groupName);
-        if (groupOptional.isPresent()) {
+        if (!groupOptional.isPresent()) {
             throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
         }
         GroupEntity group = groupOptional.get();

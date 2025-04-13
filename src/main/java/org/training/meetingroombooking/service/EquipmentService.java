@@ -6,6 +6,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
@@ -45,6 +50,29 @@ public class EquipmentService {
                 .stream()
                 .map(equipmentMapper::toDTO)
                 .toList();
+    }
+
+    public Page<EquipmentDTO> getEquipments(String equipmentName, String description, Boolean available,
+                                            int page, int size, String sortBy, String sortDirection) {
+        Sort sort = sortDirection.equalsIgnoreCase("DESC")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Specification<Equipment> spec = Specification.where(null);
+        if (equipmentName != null && !equipmentName.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
+        }
+        if (description != null && !description.isEmpty()) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
+        }
+        if (available != null) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.equal(***REMOVED***.get("available"), available));
+        }
+        Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
+        return equipmentPage.map(equipmentMapper::toDTO);
     }
 
     public EquipmentDTO getById(String equipmentName) {

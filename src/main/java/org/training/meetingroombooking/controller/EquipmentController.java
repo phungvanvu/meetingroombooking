@@ -5,15 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.EquipmentService;
@@ -100,5 +94,22 @@ public class EquipmentController {
         .success(true)
         .data("Selected equipments have been deleted successfully.")
         .build();
+  }
+  // Endpoint: tìm kiếm, phân trang và sắp xếp Equipment
+  @GetMapping("/search")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Page<EquipmentDTO>> searchEquipments(
+          @RequestParam(required = false) String equipmentName,
+          @RequestParam(required = false) String description,
+          @RequestParam(required = false) Boolean available,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size,
+          @RequestParam(defaultValue = "equipmentName") String sortBy,
+          @RequestParam(defaultValue = "ASC") String sortDirection) {
+    Page<EquipmentDTO> result = equipmentService.getEquipments(equipmentName, description, available, page, size, sortBy, sortDirection);
+    return ApiResponse.<Page<EquipmentDTO>>builder()
+            .success(true)
+            .data(result)
+            .build();
   }
 }
