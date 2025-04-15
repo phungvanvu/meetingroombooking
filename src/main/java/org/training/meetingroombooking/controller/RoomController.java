@@ -46,6 +46,15 @@ public class RoomController {
         .build();
   }
 
+  @GetMapping("/available/all")
+  public ApiResponse<List<RoomDTO>> getAvailableRooms() {
+    return ApiResponse.<List<RoomDTO>>builder()
+            .success(true)
+            .data(roomService.getAllAvailable())
+            .build();
+  }
+
+
   @GetMapping("/search")
   public ApiResponse<Page<RoomDTO>> searchRooms(
           @RequestParam(value = "roomName", required = false) String roomName,
@@ -57,6 +66,21 @@ public class RoomController {
           @RequestParam(value = "size", defaultValue = "6") int size
   ) {
     Page<RoomDTO> roomsPage = roomService.getRooms(roomName, locations, available, capacities, equipments, page, size);
+    return ApiResponse.<Page<RoomDTO>>builder()
+            .success(true)
+            .data(roomsPage)
+            .build();
+  }
+
+  @GetMapping("/available")
+  public ApiResponse<Page<RoomDTO>> getAvailableRooms(
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "locations", required = false) List<String> locations,
+          @RequestParam(value = "capacities", required = false) List<Integer> capacities,
+          @RequestParam(value = "equipments", required = false) Set<String> equipments,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "6") int size) {
+    Page<RoomDTO> roomsPage = roomService.getAvailableRooms(roomName, locations, capacities, equipments, page, size);
     return ApiResponse.<Page<RoomDTO>>builder()
             .success(true)
             .data(roomsPage)
@@ -93,22 +117,6 @@ public class RoomController {
         .success(true)
         .data("Room has been deleted")
         .build();
-  }
-
-  @GetMapping("/names")
-  public ApiResponse<Set<String>> getAllRoomNames() {
-    return ApiResponse.<Set<String>>builder()
-            .success(true)
-            .data(roomService.getAllRoomNames())
-            .build();
-  }
-
-  @GetMapping("/locations")
-  public ApiResponse<Set<String>> getAllRoomLocations() {
-    return ApiResponse.<Set<String>>builder()
-            .success(true)
-            .data(roomService.getAllRoomLocations())
-            .build();
   }
 
   @DeleteMapping("/delete-multiple")

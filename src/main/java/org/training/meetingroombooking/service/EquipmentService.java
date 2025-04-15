@@ -3,9 +3,8 @@ package org.training.meetingroombooking.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
-import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
@@ -25,8 +23,8 @@ import org.training.meetingroombooking.repository.RoomRepository;
 public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
-    private final RoomRepository roomRepository;
     private final EquipmentMapper equipmentMapper;
+    private final RoomRepository roomRepository;
 
     public EquipmentService(EquipmentRepository equipmentRepository,
                             EquipmentMapper equipmentMapper, RoomRepository roomRepository) {
@@ -52,20 +50,24 @@ public class EquipmentService {
                 .toList();
     }
 
-    public Page<EquipmentDTO> getEquipments(String equipmentName, String description,
-                                            int page, int size, String sortBy, String sortDirection) {
+    public Page<EquipmentDTO> getEquipments(String equipmentName, String description, Boolean available,
+        int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase("DESC")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
+            ? Sort.by(sortBy).descending()
+            : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Equipment> spec = Specification.where(null);
         if (equipmentName != null && !equipmentName.isEmpty()) {
             spec = spec.and((***REMOVED***, query, cb) ->
-                    cb.like(cb.lower(***REMOVED***.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
+                cb.like(cb.lower(***REMOVED***.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
         }
         if (description != null && !description.isEmpty()) {
             spec = spec.and((***REMOVED***, query, cb) ->
-                    cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
+                cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
+        }
+        if (available != null) {
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.equal(***REMOVED***.get("available"), available));
         }
         Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
         return equipmentPage.map(equipmentMapper::toDTO);
