@@ -1,7 +1,7 @@
 package org.training.meetingroombooking;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.***REMOVED***.context.SpringBootTest;
 
 @SpringBootTest
 class MeetingRoomBookingApplicationTests {

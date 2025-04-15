@@ -203,17 +203,17 @@ public class UserServiceTest {
   void getMyInfo_Success() {
     // Giả lập user đăng nhập
     when(securityContext.getAuthentication()).thenReturn(authentication);
-    when(authentication.getName()).thenReturn("testUser");
+    when(authentication.getName()).thenReturn("***REMOVED***User");
     SecurityContextHolder.setContext(securityContext);
 
     // Giả lập tìm thấy user trong DB
     User user = new User();
-    user.setUserName("testUser");
-    when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
+    user.setUserName("***REMOVED***User");
+    when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.of(user));
 
     // Giả lập ánh xạ sang DTO
     UserResponse userResponse = new UserResponse();
-    userResponse.setUserName("testUser");
+    userResponse.setUserName("***REMOVED***User");
     when(userMapper.toUserResponse(user)).thenReturn(userResponse);
 
     // Gọi phương thức service
@@ -221,8 +221,8 @@ public class UserServiceTest {
 
     // Kiểm tra kết quả
     assertNotNull(result);
-    assertEquals("testUser", result.getUserName());
-    verify(userRepository).findByUserName("testUser");
+    assertEquals("***REMOVED***User", result.getUserName());
+    verify(userRepository).findByUserName("***REMOVED***User");
     verify(userMapper).toUserResponse(user);
   }
 

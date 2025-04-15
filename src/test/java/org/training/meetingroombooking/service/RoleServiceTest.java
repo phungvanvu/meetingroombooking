@@ -40,7 +40,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testCreateRole_Success() {
+    void ***REMOVED***CreateRole_Success() {
         RoleDTO request = new RoleDTO("ADMIN", "Admin role", Set.of("READ", "WRITE"));
 
         Permission permissionRead = mock(Permission.class);
@@ -69,7 +69,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testCreateRole_RoleExists() {
+    void ***REMOVED***CreateRole_RoleExists() {
         // Arrange
         RoleDTO request = new RoleDTO("ADMIN", "Admin role", Set.of("READ", "WRITE"));
 
@@ -83,7 +83,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testUpdateRole_Success() {
+    void ***REMOVED***UpdateRole_Success() {
         // Arrange
         RoleDTO request = new RoleDTO("ADMIN", "Updated Admin role", Set.of("READ", "WRITE"));
 
@@ -117,7 +117,7 @@ class RoleServiceTest {
 
 
     @Test
-    void testUpdateRole_NotFound() {
+    void ***REMOVED***UpdateRole_NotFound() {
         // Arrange
         RoleDTO request = new RoleDTO("ADMIN", "Updated Admin role", Set.of("READ", "WRITE"));
 
@@ -131,7 +131,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testDeleteRole_Success() {
+    void ***REMOVED***DeleteRole_Success() {
         // Arrange
         when(roleRepository.existsById("ADMIN")).thenReturn(true);
 
@@ -143,7 +143,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testDeleteRole_NotFound() {
+    void ***REMOVED***DeleteRole_NotFound() {
         // Arrange
         when(roleRepository.existsById("ADMIN")).thenReturn(false);
 
@@ -155,7 +155,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void testGetAllRoles_Success() {
+    void ***REMOVED***GetAllRoles_Success() {
         // Arrange
         Permission permissionRead = mock(Permission.class);
         when(permissionRead.getPermissionName()).thenReturn("READ");

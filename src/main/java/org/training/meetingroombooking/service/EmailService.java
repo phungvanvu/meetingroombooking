@@ -37,7 +37,7 @@ public class EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(htmlBody, true);
-        helper.setFrom("phungvanvu0@gmail.com");
+        helper.setFrom("***REMOVED***");
         mailSender.send(message);
     }
 

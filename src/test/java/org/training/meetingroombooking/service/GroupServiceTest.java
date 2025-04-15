@@ -53,7 +53,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testCreateGroup() {
+    void ***REMOVED***CreateGroup() {
         // Arrange
         when(groupMapper.toEntity(groupDTO)).thenReturn(groupEntity);
         when(groupRepository.save(groupEntity)).thenReturn(groupEntity);
@@ -69,7 +69,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testGetAllGroups() {
+    void ***REMOVED***GetAllGroups() {
         // Arrange
         List<GroupEntity> groupEntities = List.of(groupEntity);
         when(groupRepository.findAll()).thenReturn(groupEntities);
@@ -85,7 +85,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testGetGroupById() {
+    void ***REMOVED***GetGroupById() {
         // Arrange
         when(groupRepository.findById("Test Group")).thenReturn(Optional.of(groupEntity));
         when(groupMapper.toDTO(groupEntity)).thenReturn(groupDTO);
@@ -99,7 +99,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testGetGroupByIdNotFound() {
+    void ***REMOVED***GetGroupByIdNotFound() {
         // Arrange
         when(groupRepository.findById("Non Existent Group")).thenReturn(Optional.empty());
 
@@ -109,7 +109,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testUpdateGroup() {
+    void ***REMOVED***UpdateGroup() {
         // Arrange
         GroupDTO updatedGroupDTO = GroupDTO.builder()
                 .groupName("Test Group")
@@ -148,7 +148,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testDeleteGroup() {
+    void ***REMOVED***DeleteGroup() {
         // Arrange
         when(groupRepository.existsById("Test Group")).thenReturn(true);
 
@@ -160,7 +160,7 @@ class GroupServiceTest {
     }
 
     @Test
-    void testDeleteGroupNotFound() {
+    void ***REMOVED***DeleteGroupNotFound() {
         // Arrange
         when(groupRepository.existsById("Non Existent Group")).thenReturn(false);
 

@@ -60,16 +60,16 @@ public class EquipmentService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Equipment> spec = Specification.where(null);
         if (equipmentName != null && !equipmentName.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("equipmentName")), "%" + equipmentName.toLowerCase() + "%"));
         }
         if (description != null && !description.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
         }
         if (available != null) {
-            spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("available"), available));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                cb.equal(***REMOVED***.get("available"), available));
         }
         Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
         return equipmentPage.map(equipmentMapper::toDTO);

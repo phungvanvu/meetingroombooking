@@ -97,22 +97,22 @@ public class RoomBookingService {
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
         Specification<RoomBooking> spec = Specification.where(
-                (root, query, cb) -> cb.equal(root.get("bookedBy").get("userName"), currentUserName)
+                (***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("bookedBy").get("userName"), currentUserName)
         );
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
         }
         if (status != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
         }
         Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
         return bookingPage.map(roomBookingMapper::toDTO);
@@ -123,24 +123,24 @@ public class RoomBookingService {
         Specification<RoomBooking> spec = Specification.where(null);
 
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
         }
         if (status != null) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
         }
         // Sử dụng userName trong bookedBy vì nó độc nhất.
         if (bookedByName != null && !bookedByName.isEmpty()) {
-            spec = spec.and((root, query, cb) -> {
-                Join<RoomBooking, User> userJoin = root.join("bookedBy");
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, User> userJoin = ***REMOVED***.join("bookedBy");
                 return cb.like(cb.lower(userJoin.get("userName")), "%" + bookedByName.toLowerCase() + "%");
             });
         }
@@ -179,6 +179,10 @@ public class RoomBookingService {
             roomBooking.setBookedBy(user);
         }
         if (dto.getStartTime() != null && dto.getEndTime() != null) {
+            // Kiểm tra hợp lệ: startTime không được sau endTime
+            if (dto.getStartTime().isAfter(dto.getEndTime())) {
+                throw new AppEx(ErrorCode.INVALID_TIME_RANGE);
+            }
             boolean isOverlap = roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
                     dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
             if (isOverlap) {
@@ -192,6 +196,7 @@ public class RoomBookingService {
         }
         RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
         RoomBookingDTO updatedDTO = roomBookingMapper.toDTO(updatedRoomBooking);
+
         User bookingUser = updatedRoomBooking.getBookedBy();
         NotificationDTO notificationDTO = NotificationDTO.builder()
                 .content("Your booking for room '" + updatedRoomBooking.getRoom().getRoomName() +
@@ -201,15 +206,29 @@ public class RoomBookingService {
                 .userId(bookingUser.getUserId())
                 .build();
         notificationService.create(notificationDTO);
+
         return updatedDTO;
     }
 
+
     public void delete(Long bookingId) {
-        if (!roomBookingRepository.existsById(bookingId)) {
-            throw new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND);
-        }
+        RoomBooking roomBooking = roomBookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+
+        String roomName = roomBooking.getRoom().getRoomName();
+        LocalDateTime startTime = roomBooking.getStartTime();
+        LocalDateTime endTime = roomBooking.getEndTime();
+        Long userId = roomBooking.getBookedBy().getUserId();
         roomBookingRepository.deleteById(bookingId);
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .content("Your booking for room '" + roomName + "' from " +
+                        startTime + " to " + endTime + " has been deleted.")
+                .type(NotificationType.WARNING)
+                .userId(userId)
+                .build();
+        notificationService.create(notificationDTO);
     }
+
 
     public ByteArrayOutputStream exportBookingsToExcel() throws IOException {
         List<RoomBookingDTO> bookings = getAll();
@@ -331,23 +350,23 @@ public class RoomBookingService {
         LocalDateTime now = LocalDateTime.now();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
         Specification<RoomBooking> spec = Specification.where(
-                (root, query, cb) -> cb.and(
-                        cb.equal(root.get("bookedBy").get("userName"), currentUserName),
-                        cb.equal(root.get("status"), BookingStatus.CONFIRMED),
-                        cb.greaterThan(root.get("startTime"), now)
+                (***REMOVED***, query, cb) -> cb.and(
+                        cb.equal(***REMOVED***.get("bookedBy").get("userName"), currentUserName),
+                        cb.equal(***REMOVED***.get("status"), BookingStatus.CONFIRMED),
+                        cb.greaterThan(***REMOVED***.get("startTime"), now)
                 )
         );
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
+            spec = spec.and((***REMOVED***, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
+            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
         }
         Page<RoomBooking> resultPage = roomBookingRepository.findAll(spec, pageable);
         return resultPage.map(roomBookingMapper::toDTO);
@@ -362,17 +381,39 @@ public class RoomBookingService {
         }
         roomBooking.setStatus(BookingStatus.CANCELLED);
         RoomBooking cancelledBooking = roomBookingRepository.save(roomBooking);
+        NotificationDTO notificationDTO = NotificationDTO.builder()
+                .content("Your booking for room '" + cancelledBooking.getRoom().getRoomName() + "' from " +
+                        cancelledBooking.getStartTime() + " to " + cancelledBooking.getEndTime() +
+                        " has been cancelled.")
+                .type(NotificationType.WARNING)
+                .userId(cancelledBooking.getBookedBy().getUserId())
+                .build();
+        notificationService.create(notificationDTO);
         return roomBookingMapper.toDTO(cancelledBooking);
     }
+
 
     @Transactional
     public void cancelMultipleBookings(List<Long> bookingIds) {
         if (bookingIds == null || bookingIds.isEmpty()) {
             throw new IllegalArgumentException("Booking ids list cannot be empty");
         }
-        int updatedCount = roomBookingRepository.updateStatusForBookings(bookingIds, BookingStatus.CANCELLED);
-        if (updatedCount != bookingIds.size()) {
+        List<RoomBooking> bookings = roomBookingRepository.findAllById(bookingIds);
+        if (bookings.size() != bookingIds.size()) {
             throw new AppEx(ErrorCode.BATCH_CANCELLATION_FAILED);
+        }
+        for (RoomBooking booking : bookings) {
+            booking.setStatus(BookingStatus.CANCELLED);
+        }
+        roomBookingRepository.saveAll(bookings);
+        for (RoomBooking booking : bookings) {
+            NotificationDTO notificationDTO = NotificationDTO.builder()
+                    .content("Your booking for room '" + booking.getRoom().getRoomName() + "' from " +
+                            booking.getStartTime() + " to " + booking.getEndTime() + " has been cancelled.")
+                    .type(NotificationType.WARNING)
+                    .userId(booking.getBookedBy().getUserId())
+                    .build();
+            notificationService.create(notificationDTO);
         }
     }
 }

@@ -60,16 +60,16 @@ public class GroupService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Specification<GroupEntity> spec = Specification.where(null);
         if (groupName != null && !groupName.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("groupName")), "%" + groupName.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("groupName")), "%" + groupName.toLowerCase() + "%"));
         }
         if (location != null && !location.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("location")), "%" + location.toLowerCase() + "%"));
         }
         if (division != null && !division.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("division")), "%" + division.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("division")), "%" + division.toLowerCase() + "%"));
         }
 
         Page<GroupEntity> groupPage = groupRepository.findAll(spec, pageable);
