@@ -114,31 +114,31 @@ public class RoomService {
     Specification<Room> spec = Specification.where(null);
 
     if (roomName != null && !roomName.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
+      spec = spec.and((root, query, cb) ->
+              cb.like(cb.lower(root.get("roomName")), "%" + roomName.toLowerCase() + "%")
       );
     }
     if (locations != null && !locations.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("location").in(locations)
+      spec = spec.and((root, query, cb) ->
+              root.get("location").in(locations)
       );
     }
     if (available != null) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.equal(***REMOVED***.get("available"), available)
+      spec = spec.and((root, query, cb) ->
+              cb.equal(root.get("available"), available)
       );
     }
     if (capacities != null && !capacities.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("capacity").in(capacities)
+      spec = spec.and((root, query, cb) ->
+              root.get("capacity").in(capacities)
       );
     }
     if (equipments != null && !equipments.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
+      spec = spec.and((root, query, cb) -> {
+        Join<Room, Equipment> equipmentJoin = root.join("equipments");
         return equipmentJoin.get("equipmentName").in(equipments);
       });
-      spec = spec.and((***REMOVED***, query, cb) -> {
+      spec = spec.and((root, query, cb) -> {
         query.distinct(true);
         return cb.conjunction();
       });
@@ -151,29 +151,29 @@ public class RoomService {
                                          List<Integer> capacities, Set<String> equipments,
                                          int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "roomId"));
-    Specification<Room> spec = Specification.where((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("available"), true));
+    Specification<Room> spec = Specification.where((root, query, cb) -> cb.equal(root.get("available"), true));
 
     if (roomName != null && !roomName.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
+      spec = spec.and((root, query, cb) ->
+              cb.like(cb.lower(root.get("roomName")), "%" + roomName.toLowerCase() + "%")
       );
     }
     if (locations != null && !locations.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("location").in(locations)
+      spec = spec.and((root, query, cb) ->
+              root.get("location").in(locations)
       );
     }
     if (capacities != null && !capacities.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("capacity").in(capacities)
+      spec = spec.and((root, query, cb) ->
+              root.get("capacity").in(capacities)
       );
     }
     if (equipments != null && !equipments.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
+      spec = spec.and((root, query, cb) -> {
+        Join<Room, Equipment> equipmentJoin = root.join("equipments");
         return equipmentJoin.get("equipmentName").in(equipments);
       });
-      spec = spec.and((***REMOVED***, query, cb) -> {
+      spec = spec.and((root, query, cb) -> {
         query.distinct(true);
         return cb.conjunction();
       });

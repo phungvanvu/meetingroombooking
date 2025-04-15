@@ -5,7 +5,7 @@
 //import org.mockito.InjectMocks;
 //import org.mockito.Mock;
 //import org.mockito.MockitoAnnotations;
-//import org.springframework.boot.***REMOVED***.context.SpringBootTest;
+//import org.springframework.boot.test.context.SpringBootTest;
 //import org.training.meetingroombooking.entity.dto.EquipmentDTO;
 //import org.training.meetingroombooking.entity.models.Equipment;
 //import org.training.meetingroombooking.exception.AppEx;
@@ -54,7 +54,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***Create() {
+//    void testCreate() {
 //        // Arrange
 //        when(equipmentMapper.toEntity(equipmentDTO)).thenReturn(equipment);
 //        when(equipmentRepository.save(equipment)).thenReturn(equipment);
@@ -70,7 +70,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***GetAll() {
+//    void testGetAll() {
 //        // Arrange
 //        List<Equipment> equipmentList = List.of(equipment);
 //        when(equipmentRepository.findAll()).thenReturn(equipmentList);
@@ -86,7 +86,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***GetById_Found() {
+//    void testGetById_Found() {
 //        // Arrange
 //        when(equipmentRepository.findById(1L)).thenReturn(Optional.of(equipment));
 //        when(equipmentMapper.toDTO(equipment)).thenReturn(equipmentDTO);
@@ -100,7 +100,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***GetById_NotFound() {
+//    void testGetById_NotFound() {
 //        // Arrange
 //        when(equipmentRepository.findById(1L)).thenReturn(Optional.empty());
 //
@@ -110,7 +110,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***Update() {
+//    void testUpdate() {
 //        EquipmentDTO updatedDTO = EquipmentDTO.builder()
 //                .name("Updated Projector")
 //                .description("Updated Description")
@@ -142,7 +142,7 @@
 //
 //
 //    @Test
-//    void ***REMOVED***Delete() {
+//    void testDelete() {
 //        // Arrange
 //        when(equipmentRepository.existsById(1L)).thenReturn(true);
 //
@@ -154,7 +154,7 @@
 //    }
 //
 //    @Test
-//    void ***REMOVED***Delete_NotFound() {
+//    void testDelete_NotFound() {
 //        // Arrange
 //        when(equipmentRepository.existsById(1L)).thenReturn(false);
 //
