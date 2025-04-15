@@ -21,7 +21,4 @@ public class EquipmentDTO {
 
     @Size(max = 255, message = "Device description cannot exceed 255 characters")
     private String description;
-
-    @NotNull(message = "Device status cannot be null")
-    private Boolean available;
 }

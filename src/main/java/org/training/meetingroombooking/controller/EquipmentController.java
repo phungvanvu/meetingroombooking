@@ -68,24 +68,6 @@ public class EquipmentController {
         .build();
   }
 
-  @GetMapping("/unavailable")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<List<EquipmentDTO>> getUnavailableEquipments() {
-    return ApiResponse.<List<EquipmentDTO>>builder()
-        .success(true)
-        .data(equipmentService.getUnavailableEquipments())
-        .build();
-  }
-
-  @GetMapping("/statistics")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<Map<String, Long>> getEquipmentStatistics() {
-    return ApiResponse.<Map<String, Long>>builder()
-        .success(true)
-        .data(equipmentService.getEquipmentStatistics())
-        .build();
-  }
-
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
   ApiResponse<String> deleteMultipleEquipments(@RequestBody List<String> equipmentNames) {
@@ -101,12 +83,11 @@ public class EquipmentController {
   public ApiResponse<Page<EquipmentDTO>> searchEquipments(
           @RequestParam(required = false) String equipmentName,
           @RequestParam(required = false) String description,
-          @RequestParam(required = false) Boolean available,
           @RequestParam(defaultValue = "0") int page,
           @RequestParam(defaultValue = "10") int size,
           @RequestParam(defaultValue = "equipmentName") String sortBy,
           @RequestParam(defaultValue = "ASC") String sortDirection) {
-    Page<EquipmentDTO> result = equipmentService.getEquipments(equipmentName, description, available, page, size, sortBy, sortDirection);
+    Page<EquipmentDTO> result = equipmentService.getEquipments(equipmentName, description, page, size, sortBy, sortDirection);
     return ApiResponse.<Page<EquipmentDTO>>builder()
             .success(true)
             .data(result)

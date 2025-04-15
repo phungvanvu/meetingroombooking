@@ -52,7 +52,7 @@ public class EquipmentService {
                 .toList();
     }
 
-    public Page<EquipmentDTO> getEquipments(String equipmentName, String description, Boolean available,
+    public Page<EquipmentDTO> getEquipments(String equipmentName, String description,
                                             int page, int size, String sortBy, String sortDirection) {
         Sort sort = sortDirection.equalsIgnoreCase("DESC")
                 ? Sort.by(sortBy).descending()
@@ -66,10 +66,6 @@ public class EquipmentService {
         if (description != null && !description.isEmpty()) {
             spec = spec.and((***REMOVED***, query, cb) ->
                     cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
-        }
-        if (available != null) {
-            spec = spec.and((***REMOVED***, query, cb) ->
-                    cb.equal(***REMOVED***.get("available"), available));
         }
         Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
         return equipmentPage.map(equipmentMapper::toDTO);
@@ -97,24 +93,6 @@ public class EquipmentService {
             throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
         }
         equipmentRepository.deleteById(equipmentName);
-    }
-
-    // Lấy danh sách thiết bị không khả dụng
-    public List<EquipmentDTO> getUnavailableEquipments() {
-        return equipmentRepository.findByAvailableFalse()
-                .stream()
-                .map(equipmentMapper::toDTO)
-                .toList();
-    }
-
-    // Thống kê thiết bị theo trạng thái
-    public Map<String, Long> getEquipmentStatistics() {
-        long availableCount = equipmentRepository.countByAvailableTrue();
-        long unavailableCount = equipmentRepository.countByAvailableFalse();
-        return Map.of(
-                "available", availableCount,
-                "unavailable", unavailableCount
-        );
     }
 
     public void deleteMultipleEquipments(List<String> equipmentNames) {

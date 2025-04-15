@@ -21,6 +21,4 @@ public class Equipment {
     @Column(length = 255)
     private String description; // Mô tả thiết bị (VD: Máy chiếu 4K)
 
-    @Column(nullable = false)
-    private boolean available = true; // Trạng thái của thiết bị
 }
