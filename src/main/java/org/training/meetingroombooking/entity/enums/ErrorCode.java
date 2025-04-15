@@ -14,6 +14,8 @@ public enum ErrorCode {
     INVALID_OTP(HttpStatus.BAD_REQUEST, "Invalid OTP."),
     OTP_EXPIRED(HttpStatus.BAD_REQUEST, "OTP has expired."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "Old password is incorrect."),
+    NEW_PASSWORD_MUST_BE_DIFFERENT(HttpStatus.BAD_REQUEST, "New password must be different from current password."),
+
 
     EQUIPMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "Equipment already exists."),
     GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "Group already exists."),

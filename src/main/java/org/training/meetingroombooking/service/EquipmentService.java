@@ -17,6 +17,7 @@ import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
+import org.training.meetingroombooking.repository.RoomEquipmentRepository;
 import org.training.meetingroombooking.repository.RoomRepository;
 
 @Service
@@ -24,13 +25,14 @@ public class EquipmentService {
 
     private final EquipmentRepository equipmentRepository;
     private final EquipmentMapper equipmentMapper;
-    private final RoomRepository roomRepository;
+    private final RoomEquipmentRepository roomEquipmentRepository;
 
     public EquipmentService(EquipmentRepository equipmentRepository,
-                            EquipmentMapper equipmentMapper, RoomRepository roomRepository) {
+                            EquipmentMapper equipmentMapper,
+                            RoomEquipmentRepository roomEquipmentRepository) {
         this.equipmentRepository = equipmentRepository;
         this.equipmentMapper = equipmentMapper;
-        this.roomRepository = roomRepository;
+        this.roomEquipmentRepository = roomEquipmentRepository;
     }
 
     public EquipmentDTO create(EquipmentDTO equipmentDTO) {
@@ -106,7 +108,7 @@ public class EquipmentService {
             throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
         }
         for (Equipment equipment : equipments) {
-            if (roomRepository.existsByEquipments(Set.of(equipment))) {
+            if (roomEquipmentRepository.existsByEquipment_EquipmentName(equipment.getEquipmentName())) {
                 throw new AppEx(ErrorCode.CANNOT_DELETE_EQUIPMENT_IN_USE);
             }
         }

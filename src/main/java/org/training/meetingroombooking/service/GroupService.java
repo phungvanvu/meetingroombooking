@@ -96,9 +96,9 @@ public class GroupService {
             throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
         }
         GroupEntity group = groupOptional.get();
-        if (userRepository.existsByGroup(group)) {
-            throw new AppEx(ErrorCode.CANNOT_DELETE_GROUP_IN_USE);
-        }
+//        if (userRepository.existsByGroup(group)) {
+//            throw new AppEx(ErrorCode.CANNOT_DELETE_GROUP_IN_USE);
+//        }
         groupRepository.deleteById(groupName);
     }
 
@@ -111,11 +111,11 @@ public class GroupService {
         if (groups.size() != groupName.size()) {
             throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
         }
-        for (GroupEntity group : groups) {
-            if (userRepository.existsByGroup(group)) {
-                throw new AppEx(ErrorCode.CANNOT_DELETE_GROUP_IN_USE);
-            }
-        }
+//        for (GroupEntity group : groups) {
+//            if (userRepository.existsByGroup(group)) {
+//                throw new AppEx(ErrorCode.CANNOT_DELETE_GROUP_IN_USE);
+//            }
+//        }
         groupRepository.deleteAll(groups);
     }
 

@@ -15,6 +15,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Data
 @NoArgsConstructor
@@ -45,6 +47,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "positionId")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Position position;
 
     @Column(nullable = false)
@@ -55,6 +58,7 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "groupId")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private GroupEntity group;
 
     @ManyToMany

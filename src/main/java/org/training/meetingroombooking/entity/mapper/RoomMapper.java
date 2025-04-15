@@ -7,6 +7,7 @@ import org.mapstruct.Named;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
+import org.training.meetingroombooking.entity.models.RoomEquipment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,38 +16,38 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface RoomMapper {
 
-  @Mapping(target = "equipments", source = "equipments", qualifiedByName = "mapEquipmentSetToStringSet")
+  @Mapping(target = "equipments", source = "roomEquipments", qualifiedByName = "mapRoomEquipmentToStringSet")
   RoomDTO toDTO(Room entity);
 
   @Mapping(target = "roomId", source = "roomId")
-  @Mapping(target = "equipments", source = "equipments", qualifiedByName = "mapStringSetToEquipmentSet")
+  @Mapping(target = "roomEquipments", source = "equipments", qualifiedByName = "mapStringSetToRoomEquipmentSet")
   Room toEntity(RoomDTO dto);
 
-  @Mapping(target = "equipments", source = "equipments", qualifiedByName = "mapStringSetToEquipmentSet")
+  @Mapping(target = "roomEquipments", source = "equipments", qualifiedByName = "mapStringSetToRoomEquipmentSet")
   void updateRoom(@MappingTarget Room entity, RoomDTO dto);
 
-  // Chuyển từ Set<Equipment> → Set<String> (lấy equipmentName)
-  @Named("mapEquipmentSetToStringSet")
-  default Set<String> mapEquipmentSetToStringSet(Set<Equipment> equipments) {
-    if (equipments == null) {
+  @Named("mapRoomEquipmentToStringSet")
+  default Set<String> mapRoomEquipmentToStringSet(Set<RoomEquipment> roomEquipments) {
+    if (roomEquipments == null) {
       return new HashSet<>();
     }
-    return equipments.stream()
-            .map(Equipment::getEquipmentName)
+    return roomEquipments.stream()
+            .map(roomEquipment -> roomEquipment.getEquipment().getEquipmentName())
             .collect(Collectors.toSet());
   }
 
-  // Chuyển từ Set<String> → Set<Equipment>
-  @Named("mapStringSetToEquipmentSet")
-  default Set<Equipment> mapStringSetToEquipmentSet(Set<String> equipmentNames) {
+  @Named("mapStringSetToRoomEquipmentSet")
+  default Set<RoomEquipment> mapStringSetToRoomEquipmentSet(Set<String> equipmentNames) {
     if (equipmentNames == null) {
       return new HashSet<>();
     }
     return equipmentNames.stream()
             .map(name -> {
+              RoomEquipment roomEquipment = new RoomEquipment();
               Equipment equipment = new Equipment();
               equipment.setEquipmentName(name);
-              return equipment;
+              roomEquipment.setEquipment(equipment);
+              return roomEquipment;
             })
             .collect(Collectors.toSet());
   }

@@ -33,6 +33,7 @@ import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
+import org.training.meetingroombooking.entity.models.RoomEquipment;
 import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
@@ -60,16 +61,9 @@ public class RoomService {
 
   public RoomDTO create(RoomDTO dto, MultipartFile file) throws IOException {
     Room room = roomMapper.toEntity(dto);
-    Set<Equipment> equipmentSet = new HashSet<>();
-    for (String equipmentName : dto.getEquipments()) {
-      Equipment equipment = equipmentRepository.findById(equipmentName).orElse(null);
-      if (equipment == null) {
-        throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
-      }
-      equipmentSet.add(equipment);
+    if (room.getRoomEquipments() != null) {
+      room.getRoomEquipments().forEach(re -> re.setRoom(room));
     }
-    room.setEquipments(equipmentSet);
-    // Nếu có file, upload file lên S3
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
       if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
@@ -78,11 +72,9 @@ public class RoomService {
       String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
       String fileName = dto.getRoomName().replaceAll("[^a-zA-Z0-9.-]", "_") + fileExtension;
       String s3Key = "rooms/" + fileName;
-      // Upload file lên S3 và nhận lại URL
       String fileUrl = s3Service.uploadFile(s3Key, file);
       room.setImageUrl(fileUrl);
     }
-    // Lưu phòng vào cơ sở dữ liệu
     Room savedRoom = roomRepository.save(room);
     return roomMapper.toDTO(savedRoom);
   }
@@ -238,16 +230,10 @@ public class RoomService {
   public RoomDTO update(Long roomId, RoomDTO dto, MultipartFile file) throws IOException {
     Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-    Set<Equipment> equipmentSet = new HashSet<>();
-    for (String equipmentName : dto.getEquipments()) {
-      Equipment equipment = equipmentRepository.findById(equipmentName).orElse(null);
-      if (equipment == null) {
-        throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
-      }
-      equipmentSet.add(equipment);
-    }
-    room.setEquipments(equipmentSet);
     roomMapper.updateRoom(room, dto);
+    if (room.getRoomEquipments() != null) {
+      room.getRoomEquipments().forEach(re -> re.setRoom(room));
+    }
     if (file != null && !file.isEmpty()) {
       String originalFilename = file.getOriginalFilename();
       if (originalFilename == null || !originalFilename.matches(".*\\.(png|jpg|jpeg)$")) {
@@ -259,10 +245,10 @@ public class RoomService {
       String fileUrl = s3Service.uploadFile(s3Key, file);
       room.setImageUrl(fileUrl);
     }
+
     Room updatedRoom = roomRepository.save(room);
     return roomMapper.toDTO(updatedRoom);
   }
-
 
   public void delete(Long roomId) {
     Optional<Room> roomOptional = roomRepository.findById(roomId);

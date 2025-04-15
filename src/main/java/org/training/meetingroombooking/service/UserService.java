@@ -276,9 +276,15 @@ public class UserService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUserName(username)
                 .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new AppEx(ErrorCode.INVALID_PASSWORD);
         }
+
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new AppEx(ErrorCode.NEW_PASSWORD_MUST_BE_DIFFERENT);
+        }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }

@@ -84,9 +84,9 @@ public class PositionService {
             throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
         }
         Position position = positionOptional.get();
-        if (userRepository.existsByPosition(position)) {
-            throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
-        }
+//        if (userRepository.existsByPosition(position)) {
+//            throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
+//        }
         positionRepository.delete(position);
     }
 
@@ -99,11 +99,11 @@ public class PositionService {
         if (positions.size() != positionName.size()) {
             throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
         }
-        for (Position position : positions) {
-            if (userRepository.existsByPosition(position)) {
-                throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
-            }
-        }
+//        for (Position position : positions) {
+//            if (userRepository.existsByPosition(position)) {
+//                throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
+//            }
+//        }
         positionRepository.deleteAll(positions);
     }
 
