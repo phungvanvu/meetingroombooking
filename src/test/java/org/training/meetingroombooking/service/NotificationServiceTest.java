@@ -61,7 +61,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testCreateNotification() {
+    void ***REMOVED***CreateNotification() {
         when(notificationMapper.toEntity(notificationDTO)).thenReturn(notification);
         when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
         when(notificationMapper.toDTO(notification)).thenReturn(notificationDTO);
@@ -74,7 +74,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testGetAllNotifications() {
+    void ***REMOVED***GetAllNotifications() {
         List<Notification> notifications = Arrays.asList(notification);
         List<NotificationDTO> notificationDTOs = Arrays.asList(notificationDTO);
 
@@ -89,14 +89,14 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testGetNotificationsByUserName() {
+    void ***REMOVED***GetNotificationsByUserName() {
         List<Notification> notifications = Arrays.asList(notification);
         List<NotificationDTO> notificationDTOs = Arrays.asList(notificationDTO);
 
-        when(notificationRepository.findByUser_UserName("testUser")).thenReturn(notifications);
+        when(notificationRepository.findByUser_UserName("***REMOVED***User")).thenReturn(notifications);
         when(notificationMapper.toDTO(any(Notification.class))).thenReturn(notificationDTO);
 
-        List<NotificationDTO> result = notificationService.getNotificationsByUserName("testUser");
+        List<NotificationDTO> result = notificationService.getNotificationsByUserName("***REMOVED***User");
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -104,13 +104,13 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testGetMyNotifications() {
+    void ***REMOVED***GetMyNotifications() {
         Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn("testUser");
+        when(authentication.getName()).thenReturn("***REMOVED***User");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         List<Notification> notifications = Arrays.asList(notification);
-        when(notificationRepository.findByUser_UserName("testUser")).thenReturn(notifications);
+        when(notificationRepository.findByUser_UserName("***REMOVED***User")).thenReturn(notifications);
         when(notificationMapper.toDTO(any(Notification.class))).thenReturn(notificationDTO);
 
         List<NotificationDTO> result = notificationService.getMyNotifications();
@@ -121,7 +121,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testUpdateNotification() {
+    void ***REMOVED***UpdateNotification() {
         when(notificationRepository.findById(1L)).thenReturn(Optional.of(notification));
         when(notificationRepository.save(notification)).thenReturn(notification);
 
@@ -134,7 +134,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testDeleteNotification() {
+    void ***REMOVED***DeleteNotification() {
         when(notificationRepository.existsById(1L)).thenReturn(true);
 
         notificationService.delete(1L);
@@ -143,7 +143,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void testDeleteNotificationNotFound() {
+    void ***REMOVED***DeleteNotificationNotFound() {
         when(notificationRepository.existsById(1L)).thenReturn(false);
 
         Exception exception = assertThrows(AppEx.class, () -> notificationService.delete(1L));

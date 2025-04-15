@@ -49,8 +49,8 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-***REMOVED***</artifactId>
+            <scope>***REMOVED***</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

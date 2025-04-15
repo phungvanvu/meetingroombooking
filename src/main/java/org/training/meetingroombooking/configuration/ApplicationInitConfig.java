@@ -40,8 +40,8 @@ public class ApplicationInitConfig {
                 user.setUserName("admin");
                 user.setFullName("Admin");
                 user.setDepartment("Software Development");
-                user.setPhoneNumber("0332182284");
-                user.setEmail("phungvanvu0@gmail.com");
+                user.setPhoneNumber("***REMOVED***");
+                user.setEmail("***REMOVED***");
                 user.setPassword(passwordEncoder.encode("***REMOVED***"));
                 user.setEnabled(true);
                 user.setRoles(Set.of(adminRole));

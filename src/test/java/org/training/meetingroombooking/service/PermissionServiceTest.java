@@ -44,7 +44,7 @@ class PermissionServiceTest {
     }
 
     @Test
-    void testCreatePermission() {
+    void ***REMOVED***CreatePermission() {
         when(permissionMapper.toEntity(permissionDTO)).thenReturn(permission);
         when(permissionRepository.save(permission)).thenReturn(permission);
         when(permissionMapper.toDTO(permission)).thenReturn(permissionDTO);
@@ -62,7 +62,7 @@ class PermissionServiceTest {
 
 
     @Test
-    void testGetAllPermissions() {
+    void ***REMOVED***GetAllPermissions() {
         when(permissionRepository.findAll()).thenReturn(List.of(permission));
         when(permissionMapper.toDTO(permission)).thenReturn(permissionDTO);
 
@@ -77,7 +77,7 @@ class PermissionServiceTest {
     }
 
     @Test
-    void testUpdatePermission() {
+    void ***REMOVED***UpdatePermission() {
         when(permissionRepository.findById("READ_PRIVILEGES")).thenReturn(java.util.Optional.of(permission));
         doNothing().when(permissionMapper).updateEntity(permission, permissionDTO);
         when(permissionRepository.save(permission)).thenReturn(permission);
@@ -97,7 +97,7 @@ class PermissionServiceTest {
 
 
     @Test
-    void testDeletePermission() {
+    void ***REMOVED***DeletePermission() {
         when(permissionRepository.existsById("READ_PRIVILEGES")).thenReturn(true);
         doNothing().when(permissionRepository).deleteById("READ_PRIVILEGES");
 
@@ -108,13 +108,13 @@ class PermissionServiceTest {
 
 
     @Test
-    void testUpdatePermissionNotFound() {
+    void ***REMOVED***UpdatePermissionNotFound() {
         when(permissionRepository.findById("READ_PRIVILEGES")).thenReturn(java.util.Optional.empty());
         assertThrows(AppEx.class, () -> permissionService.update("READ_PRIVILEGES", permissionDTO));
     }
 
     @Test
-    void testDeletePermissionNotFound() {
+    void ***REMOVED***DeletePermissionNotFound() {
         when(permissionRepository.existsById("READ_PRIVILEGES")).thenReturn(false);
         assertThrows(AppEx.class, () -> permissionService.delete("READ_PRIVILEGES"));
     }

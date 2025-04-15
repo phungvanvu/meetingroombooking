@@ -59,12 +59,12 @@ public class PositionService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Position> spec = Specification.where(null);
         if (positionName != null && !positionName.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("positionName")), "%" + positionName.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("positionName")), "%" + positionName.toLowerCase() + "%"));
         }
         if (description != null && !description.isEmpty()) {
-            spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("description")), "%" + description.toLowerCase() + "%"));
+            spec = spec.and((***REMOVED***, query, cb) ->
+                    cb.like(cb.lower(***REMOVED***.get("description")), "%" + description.toLowerCase() + "%"));
         }
         Page<Position> positionPage = positionRepository.findAll(spec, pageable);
         return positionPage.map(positionMapper::toDTO);
