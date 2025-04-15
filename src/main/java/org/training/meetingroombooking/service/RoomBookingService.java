@@ -97,22 +97,22 @@ public class RoomBookingService {
         String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
         Specification<RoomBooking> spec = Specification.where(
-                (***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("bookedBy").get("userName"), currentUserName)
+                (root, query, cb) -> cb.equal(root.get("bookedBy").get("userName"), currentUserName)
         );
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
         }
         if (status != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
         }
         Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
         return bookingPage.map(roomBookingMapper::toDTO);
@@ -123,24 +123,24 @@ public class RoomBookingService {
         Specification<RoomBooking> spec = Specification.where(null);
 
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
         }
         if (status != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("status"), status));
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
         }
         // Sử dụng userName trong bookedBy vì nó độc nhất.
         if (bookedByName != null && !bookedByName.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<RoomBooking, User> userJoin = ***REMOVED***.join("bookedBy");
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, User> userJoin = root.join("bookedBy");
                 return cb.like(cb.lower(userJoin.get("userName")), "%" + bookedByName.toLowerCase() + "%");
             });
         }
@@ -331,23 +331,23 @@ public class RoomBookingService {
         LocalDateTime now = LocalDateTime.now();
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
         Specification<RoomBooking> spec = Specification.where(
-                (***REMOVED***, query, cb) -> cb.and(
-                        cb.equal(***REMOVED***.get("bookedBy").get("userName"), currentUserName),
-                        cb.equal(***REMOVED***.get("status"), BookingStatus.CONFIRMED),
-                        cb.greaterThan(***REMOVED***.get("startTime"), now)
+                (root, query, cb) -> cb.and(
+                        cb.equal(root.get("bookedBy").get("userName"), currentUserName),
+                        cb.equal(root.get("status"), BookingStatus.CONFIRMED),
+                        cb.greaterThan(root.get("startTime"), now)
                 )
         );
         if (roomName != null && !roomName.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = ***REMOVED***.join("room");
+            spec = spec.and((root, query, cb) -> {
+                Join<RoomBooking, Room> roomJoin = root.join("room");
                 return cb.like(cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
             });
         }
         if (fromTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.greaterThanOrEqualTo(***REMOVED***.get("startTime"), fromTime));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
         }
         if (toTime != null) {
-            spec = spec.and((***REMOVED***, query, cb) -> cb.lessThanOrEqualTo(***REMOVED***.get("endTime"), toTime));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
         }
         Page<RoomBooking> resultPage = roomBookingRepository.findAll(spec, pageable);
         return resultPage.map(roomBookingMapper::toDTO);

@@ -55,7 +55,7 @@ class EmailServiceTest {
         room.setRoomId(1L);
 
         user = new User();
-        user.setEmail("***REMOVED***user@example.com");
+        user.setEmail("testuser@example.com");
         user.setFullName("Test User");
         user.setUserId(1L);
 
@@ -71,13 +71,13 @@ class EmailServiceTest {
     }
 
     @Test
-    void ***REMOVED***SendRoomBookingConfirmationEmail() throws MessagingException, IOException {
+    void testSendRoomBookingConfirmationEmail() throws MessagingException, IOException {
         // Arrange: mock dữ liệu
         Room room = new Room();
         room.setRoomName("Room A");
 
         User user = new User();
-        user.setEmail("***REMOVED***user@example.com");
+        user.setEmail("testuser@example.com");
         user.setFullName("Test User");
 
         RoomBookingDTO roomBookingDTO = new RoomBookingDTO();
@@ -91,7 +91,7 @@ class EmailServiceTest {
         MimeMessage mimeMessage = mock(MimeMessage.class);
 
         // Mock lại hành vi của MimeMessage
-        Address[] addresses = new Address[] { new InternetAddress("***REMOVED***user@example.com") };
+        Address[] addresses = new Address[] { new InternetAddress("testuser@example.com") };
         when(mimeMessage.getRecipients(MimeMessage.RecipientType.TO)).thenReturn(addresses);
         when(mimeMessage.getSubject()).thenReturn("Meeting room booking confirmation successful");
 
@@ -108,7 +108,7 @@ class EmailServiceTest {
         MimeMessage capturedMessage = mimeMessageCaptor.getValue();
 
         // Kiểm tra thông tin trong MimeMessage
-        assertEquals("***REMOVED***user@example.com", capturedMessage.getRecipients(MimeMessage.RecipientType.TO)[0].toString());
+        assertEquals("testuser@example.com", capturedMessage.getRecipients(MimeMessage.RecipientType.TO)[0].toString());
         assertEquals("Meeting room booking confirmation successful", capturedMessage.getSubject());
 
         // Xử lý nội dung của email, có thể ném IOException
@@ -117,7 +117,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void ***REMOVED***SendRoomBookingConfirmationEmail_RoomNotFound() {
+    void testSendRoomBookingConfirmationEmail_RoomNotFound() {
         when(roomRepository.findById(1L)).thenReturn(java.util.Optional.empty());
 
         try {
@@ -129,7 +129,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void ***REMOVED***SendRoomBookingConfirmationEmail_UserNotFound() {
+    void testSendRoomBookingConfirmationEmail_UserNotFound() {
         // Arrange
         when(roomRepository.findById(1L)).thenReturn(java.util.Optional.of(room));
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.empty());
@@ -144,11 +144,11 @@ class EmailServiceTest {
     }
 
     @Test
-    void ***REMOVED***SendMeetingReminderEmail() throws MessagingException {
+    void testSendMeetingReminderEmail() throws MessagingException {
         MimeMessage mimeMessage = Mockito.mock(MimeMessage.class);
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
-        String to = "***REMOVED***user@example.com";
+        String to = "testuser@example.com";
         String userName = "Test User";
         String roomName = "Room A";
         String startTime = "2025-03-28T10:00:00";

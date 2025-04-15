@@ -101,41 +101,41 @@ public class UserService {
         Specification<User> spec = Specification.where(null);
 
         if (fullName != null && !fullName.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) ->
-                    cb.like(cb.lower(***REMOVED***.get("fullName")), "%" + fullName.toLowerCase() + "%")
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("fullName")), "%" + fullName.toLowerCase() + "%")
             );
         }
         if (department != null && !department.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) ->
-                    cb.like(cb.lower(***REMOVED***.get("department")), "%" + department.toLowerCase() + "%")
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("department")), "%" + department.toLowerCase() + "%")
             );
         }
         if (positions != null && !positions.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<User, Position> positionJoin = ***REMOVED***.join("position");
+            spec = spec.and((root, query, cb) -> {
+                Join<User, Position> positionJoin = root.join("position");
                 return positionJoin.get("positionName").in(positions);
             });
-            spec = spec.and((***REMOVED***, query, cb) -> {
+            spec = spec.and((root, query, cb) -> {
                 query.distinct(true);
                 return cb.conjunction();
             });
         }
         if (groups != null && !groups.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<User, GroupEntity> groupJoin = ***REMOVED***.join("group");
+            spec = spec.and((root, query, cb) -> {
+                Join<User, GroupEntity> groupJoin = root.join("group");
                 return groupJoin.get("groupName").in(groups);
             });
-            spec = spec.and((***REMOVED***, query, cb) -> {
+            spec = spec.and((root, query, cb) -> {
                 query.distinct(true);
                 return cb.conjunction();
             });
         }
         if (roles != null && !roles.isEmpty()) {
-            spec = spec.and((***REMOVED***, query, cb) -> {
-                Join<User, Role> roleJoin = ***REMOVED***.join("roles");
+            spec = spec.and((root, query, cb) -> {
+                Join<User, Role> roleJoin = root.join("roles");
                 return roleJoin.get("roleName").in(roles);
             });
-            spec = spec.and((***REMOVED***, query, cb) -> {
+            spec = spec.and((root, query, cb) -> {
                 query.distinct(true);
                 return cb.conjunction();
             });
