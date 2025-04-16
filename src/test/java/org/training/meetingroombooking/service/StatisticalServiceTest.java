@@ -1,25 +1,25 @@
-//package org.training.meetingroombooking.service;
+// package org.training.meetingroombooking.service;
 //
-//import static org.mockito.Mockito.*;
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.*;
-//import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
-//import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
-//import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
-//import org.training.meetingroombooking.entity.enums.ErrorCode;
-//import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
-//import org.training.meetingroombooking.exception.AppEx;
-//import org.training.meetingroombooking.repository.RoomBookingRepository;
-//import org.training.meetingroombooking.repository.RoomRepository;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.*;
+// import org.training.meetingroombooking.entity.dto.Summary.RoomStatisticsDTO;
+// import org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO;
+// import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
+// import org.training.meetingroombooking.entity.enums.ErrorCode;
+// import org.training.meetingroombooking.entity.mapper.RoomBookingMapper;
+// import org.training.meetingroombooking.exception.AppEx;
+// import org.training.meetingroombooking.repository.RoomBookingRepository;
+// import org.training.meetingroombooking.repository.RoomRepository;
 //
-//import java.time.LocalDate;
-//import java.util.List;
-//import java.util.Optional;
+// import java.time.LocalDate;
+// import java.util.List;
+// import java.util.Optional;
 //
-//class StatisticalServiceTest {
+// class StatisticalServiceTest {
 //
 //    @Mock
 //    private RoomBookingRepository roomBookingRepository;
@@ -32,7 +32,8 @@
 //    @BeforeEach
 //    void setUp() {
 //        MockitoAnnotations.openMocks(this);
-//        statisticalService = new StatisticalService(roomBookingRepository, roomBookingMapper, roomRepository);
+//        statisticalService = new StatisticalService(roomBookingRepository, roomBookingMapper,
+// roomRepository);
 //    }
 //
 //    @Test
@@ -67,7 +68,8 @@
 //                .thenReturn(Optional.empty());
 //
 //        // Act & Assert
-//        AppEx exception = assertThrows(AppEx.class, () -> statisticalService.getMostBookedRoomOfMonth());
+//        AppEx exception = assertThrows(AppEx.class, () ->
+// statisticalService.getMostBookedRoomOfMonth());
 //        assertEquals(ErrorCode.ROOM_BOOKING_NOT_FOUND, exception.getErrorCode());
 //    }
 //
@@ -78,7 +80,8 @@
 //        int month = currentDate.getMonthValue();
 //        int year = currentDate.getYear();
 //        long expectedBookingCount = 25L;
-//        when(roomBookingRepository.countBookingsByMonth(month, year)).thenReturn(expectedBookingCount);
+//        when(roomBookingRepository.countBookingsByMonth(month,
+// year)).thenReturn(expectedBookingCount);
 //
 //        // Act
 //        long result = statisticalService.getCurrentMonthBookingCount();
@@ -115,7 +118,8 @@
 //        int week = 1;
 //        int year = 2025;
 //        long expectedBookingCount = 50L;
-//        when(roomBookingRepository.countBookingsByWeek(week, year)).thenReturn(expectedBookingCount);
+//        when(roomBookingRepository.countBookingsByWeek(week,
+// year)).thenReturn(expectedBookingCount);
 //
 //        // Act
 //        long result = statisticalService.getWeeklyBookingCount(week, year);
@@ -131,7 +135,8 @@
 //        int quarter = 1;
 //        int year = 2025;
 //        long expectedBookingCount = 100L;
-//        when(roomBookingRepository.countBookingsByQuarter(quarter, year)).thenReturn(expectedBookingCount);
+//        when(roomBookingRepository.countBookingsByQuarter(quarter,
+// year)).thenReturn(expectedBookingCount);
 //
 //        // Act
 //        long result = statisticalService.getQuarterlyBookingCount(quarter, year);
@@ -166,4 +171,4 @@
 //        verify(roomRepository).countByAvailable(false);
 //    }
 //
-//}
+// }

@@ -6,7 +6,9 @@ import org.mapstruct.MappingTarget;
 import org.training.meetingroombooking.entity.dto.NotificationDTO;
 import org.training.meetingroombooking.entity.models.Notification;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(
+    componentModel = "spring",
+    uses = {UserMapper.class})
 public interface NotificationMapper {
 
   @Mapping(source = "userId", target = "user.userId")
@@ -17,5 +19,3 @@ public interface NotificationMapper {
 
   void updateEntity(@MappingTarget Notification entity, NotificationDTO dto);
 }
-
-

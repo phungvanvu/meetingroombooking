@@ -3,10 +3,9 @@ package org.training.meetingroombooking.entity.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-
 import java.util.List;
 import java.util.Set;
+import lombok.*;
 
 @Getter
 @Setter

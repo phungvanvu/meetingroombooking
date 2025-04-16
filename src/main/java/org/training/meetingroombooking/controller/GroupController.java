@@ -2,7 +2,6 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +10,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.GroupService;
 
 @RestController
-@RequestMapping("/group")
+@RequestMapping("/group/v1.0")
 public class GroupController {
 
   private final GroupService groupService;
@@ -23,37 +22,28 @@ public class GroupController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<GroupDTO> create(@Valid @RequestBody GroupDTO request) {
-    return ApiResponse.<GroupDTO>builder()
-        .success(true)
-        .data(groupService.create(request))
-        .build();
+    return ApiResponse.<GroupDTO>builder().success(true).data(groupService.create(request)).build();
   }
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<GroupDTO>> getGroups() {
-    return ApiResponse.<List<GroupDTO>>builder()
-        .success(true)
-        .data(groupService.getAll())
-        .build();
+    return ApiResponse.<List<GroupDTO>>builder().success(true).data(groupService.getAll()).build();
   }
 
   @GetMapping("/search")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Page<GroupDTO>> searchGroups(
-          @RequestParam(value = "groupName", required = false) String groupName,
-          @RequestParam(value = "location", required = false) String location,
-          @RequestParam(value = "division", required = false) String division,
-          @RequestParam(value = "page", defaultValue = "0") int page,
-          @RequestParam(value = "size", defaultValue = "10") int size,
-          @RequestParam(value = "sortBy", defaultValue = "groupName") String sortBy,
-          @RequestParam(value = "sortDirection", defaultValue = "ASC") String sortDirection
-  ) {
-    Page<GroupDTO> pageResult = groupService.getGroups(groupName, location, division, page, size, sortBy, sortDirection);
-    return ApiResponse.<Page<GroupDTO>>builder()
-            .success(true)
-            .data(pageResult)
-            .build();
+      @RequestParam(value = "groupName", required = false) String groupName,
+      @RequestParam(value = "location", required = false) String location,
+      @RequestParam(value = "division", required = false) String division,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size,
+      @RequestParam(value = "sortBy", defaultValue = "groupName") String sortBy,
+      @RequestParam(value = "sortDirection", defaultValue = "ASC") String sortDirection) {
+    Page<GroupDTO> pageResult =
+        groupService.getGroups(groupName, location, division, page, size, sortBy, sortDirection);
+    return ApiResponse.<Page<GroupDTO>>builder().success(true).data(pageResult).build();
   }
 
   @GetMapping("/{groupName}")
@@ -67,8 +57,8 @@ public class GroupController {
 
   @PutMapping("/{groupName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<GroupDTO> update(@PathVariable("groupName") String groupName,
-      @Valid @RequestBody GroupDTO request) {
+  public ApiResponse<GroupDTO> update(
+      @PathVariable("groupName") String groupName, @Valid @RequestBody GroupDTO request) {
     return ApiResponse.<GroupDTO>builder()
         .success(true)
         .data(groupService.update(groupName, request))

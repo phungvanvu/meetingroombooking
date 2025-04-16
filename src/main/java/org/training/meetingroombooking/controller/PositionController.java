@@ -10,79 +10,71 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PositionService;
 
 @RestController
-@RequestMapping("/position")
+@RequestMapping("/position/v1.0")
 public class PositionController {
 
-    private final PositionService positionService;
+  private final PositionService positionService;
 
-    public PositionController(PositionService positionService) {
-        this.positionService = positionService;
-    }
+  public PositionController(PositionService positionService) {
+    this.positionService = positionService;
+  }
 
-    @PostMapping
-    public ApiResponse<PositionDTO> createPosition(@Valid @RequestBody PositionDTO positionDTO) {
-        return ApiResponse.<PositionDTO>builder()
-                .success(true)
-                .data(positionService.create(positionDTO))
-                .build();
-    }
+  @PostMapping
+  public ApiResponse<PositionDTO> createPosition(@Valid @RequestBody PositionDTO positionDTO) {
+    return ApiResponse.<PositionDTO>builder()
+        .success(true)
+        .data(positionService.create(positionDTO))
+        .build();
+  }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<PositionDTO>> getPositions() {
-        return ApiResponse.<List<PositionDTO>>builder()
-                .success(true)
-                .data(positionService.getAll())
-                .build();
-    }
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<List<PositionDTO>> getPositions() {
+    return ApiResponse.<List<PositionDTO>>builder()
+        .success(true)
+        .data(positionService.getAll())
+        .build();
+  }
 
-    @GetMapping("/search")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<PositionDTO>> searchPositions(
-            @RequestParam(value = "positionName", required = false) String positionName,
-            @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "positionName") String sortBy,
-            @RequestParam(value = "sortDirection", defaultValue = "ASC") String sortDirection
-    ) {
-        Page<PositionDTO> pageResult = positionService.getPositions(positionName, description, page, size, sortBy, sortDirection);
-        return ApiResponse.<Page<PositionDTO>>builder()
-                .success(true)
-                .data(pageResult)
-                .build();
-    }
+  @GetMapping("/search")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<Page<PositionDTO>> searchPositions(
+      @RequestParam(value = "positionName", required = false) String positionName,
+      @RequestParam(value = "description", required = false) String description,
+      @RequestParam(value = "page", defaultValue = "0") int page,
+      @RequestParam(value = "size", defaultValue = "10") int size,
+      @RequestParam(value = "sortBy", defaultValue = "positionName") String sortBy,
+      @RequestParam(value = "sortDirection", defaultValue = "ASC") String sortDirection) {
+    Page<PositionDTO> pageResult =
+        positionService.getPositions(positionName, description, page, size, sortBy, sortDirection);
+    return ApiResponse.<Page<PositionDTO>>builder().success(true).data(pageResult).build();
+  }
 
-    @PutMapping("/{positionName}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<PositionDTO> updatePosition(
-            @PathVariable String positionName,
-            @Valid @RequestBody PositionDTO positionDTO
-    ) {
-        PositionDTO updatedPosition = positionService.update(positionName, positionDTO);
-        return ApiResponse.<PositionDTO>builder()
-                .success(true)
-                .data(updatedPosition)
-                .build();
-    }
+  @PutMapping("/{positionName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<PositionDTO> updatePosition(
+      @PathVariable String positionName, @Valid @RequestBody PositionDTO positionDTO) {
+    PositionDTO updatedPosition = positionService.update(positionName, positionDTO);
+    return ApiResponse.<PositionDTO>builder().success(true).data(updatedPosition).build();
+  }
 
-    @DeleteMapping("/{positionName}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<String> deletePosition(@PathVariable String positionName) {
-        positionService.deletePosition(positionName);
-        return ApiResponse.<String>builder()
-                .success(true)
-                .data("Position has been deleted successfully")
-                .build();
-    }
+  @DeleteMapping("/{positionName}")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<String> deletePosition(@PathVariable String positionName) {
+    positionService.deletePosition(positionName);
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("Position has been deleted successfully")
+        .build();
+  }
 
-    @DeleteMapping("/delete-multiple")
-    @PreAuthorize("hasRole('ADMIN')")
-    ApiResponse<String> deleteMultiplePosition(@RequestBody List<String> positionNames) {
-        positionService.deleteMultiplePositions(positionNames);
-        return ApiResponse.<String>builder()
-            .success(true)
-            .data("Selected positions have been deleted successfully.")
-            .build();
-    }
+  @DeleteMapping("/delete-multiple")
+  @PreAuthorize("hasRole('ADMIN')")
+  ApiResponse<String> deleteMultiplePosition(@RequestBody List<String> positionNames) {
+    positionService.deleteMultiplePositions(positionNames);
+    return ApiResponse.<String>builder()
+        .success(true)
+        .data("Selected positions have been deleted successfully.")
+        .build();
+  }
 }

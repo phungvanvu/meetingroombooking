@@ -1,13 +1,11 @@
 package org.training.meetingroombooking.entity.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,21 +15,21 @@ import java.time.LocalDateTime;
 @Table(name = "`groups`")
 public class GroupEntity {
 
-    @Id
-    @Column(nullable = false, length = 50)
-    private String groupName;
+  @Id
+  @Column(nullable = false, length = 50)
+  private String groupName;
 
-    @Column(length = 100)
-    private String location;
+  @Column(length = 100)
+  private String location;
 
-    @Column(length = 50)
-    private String division;
+  @Column(length = 50)
+  private String division;
 
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
+  @Column(name = "created_date")
+  private LocalDateTime createdDate;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdDate = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    this.createdDate = LocalDateTime.now();
+  }
 }

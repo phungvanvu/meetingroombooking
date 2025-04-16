@@ -2,9 +2,6 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +18,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.EquipmentService;
 
 @RestController
-@RequestMapping("/equipment")
+@RequestMapping("/equipment/v1.0")
 public class EquipmentController {
 
   private final EquipmentService equipmentService;
@@ -58,8 +55,8 @@ public class EquipmentController {
 
   @PutMapping("/{equipmentName}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<EquipmentDTO> updateEquipment(@PathVariable String equipmentName,
-      @Valid @RequestBody EquipmentDTO dto) {
+  public ApiResponse<EquipmentDTO> updateEquipment(
+      @PathVariable String equipmentName, @Valid @RequestBody EquipmentDTO dto) {
     return ApiResponse.<EquipmentDTO>builder()
         .success(true)
         .data(equipmentService.update(equipmentName, dto))
@@ -70,11 +67,9 @@ public class EquipmentController {
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<String> deleteEquipment(@PathVariable String equipmentName) {
     equipmentService.delete(equipmentName);
-    return ApiResponse.<String>builder()
-        .success(true)
-        .data("equipment has been deleted")
-        .build();
+    return ApiResponse.<String>builder().success(true).data("equipment has been deleted").build();
   }
+
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
   ApiResponse<String> deleteMultipleEquipments(@RequestBody List<String> equipmentNames) {
@@ -84,6 +79,7 @@ public class EquipmentController {
         .data("Selected equipments have been deleted successfully.")
         .build();
   }
+
   // Endpoint: tìm kiếm, phân trang và sắp xếp Equipment
   @GetMapping("/search")
   @PreAuthorize("hasRole('ADMIN')")
@@ -95,10 +91,9 @@ public class EquipmentController {
       @RequestParam(defaultValue = "10") int size,
       @RequestParam(defaultValue = "equipmentName") String sortBy,
       @RequestParam(defaultValue = "ASC") String sortDirection) {
-    Page<EquipmentDTO> result = equipmentService.getEquipments(equipmentName, description, available, page, size, sortBy, sortDirection);
-    return ApiResponse.<Page<EquipmentDTO>>builder()
-        .success(true)
-        .data(result)
-        .build();
+    Page<EquipmentDTO> result =
+        equipmentService.getEquipments(
+            equipmentName, description, available, page, size, sortBy, sortDirection);
+    return ApiResponse.<Page<EquipmentDTO>>builder().success(true).data(result).build();
   }
 }

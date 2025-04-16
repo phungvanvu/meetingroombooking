@@ -1,7 +1,13 @@
 package org.training.meetingroombooking.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,157 +26,154 @@ import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.InvalidatedTokenRepository;
 import org.training.meetingroombooking.repository.UserRepository;
 
-import java.text.ParseException;
-import java.util.Optional;
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @InjectMocks
-    private AuthService authService;
+  @InjectMocks private AuthService authService;
 
-    @Mock
-    private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-    @Mock
-    private InvalidatedTokenRepository invalidatedTokenRepository;
+  @Mock private InvalidatedTokenRepository invalidatedTokenRepository;
 
-    private static final String SECRET_KEY = "***REMOVED***";
+  private static final String SECRET_KEY =
+      "***REMOVED***";
 
-    @BeforeEach
-    void setUp() throws Exception {
-        // Gán SECRETKEY bằng Reflection
-        var secretKeyField = AuthService.class.getDeclaredField("SECRETKEY");
-        secretKeyField.setAccessible(true);
-        secretKeyField.set(authService, SECRET_KEY);
-    }
-    @Test
-    void authenticate_ShouldReturnTokens_WhenValidCredentials() {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
-        user.setPassword(new BCryptPasswordEncoder().encode("password"));
+  @BeforeEach
+  void setUp() throws Exception {
+    // Gán SECRETKEY bằng Reflection
+    var secretKeyField = AuthService.class.getDeclaredField("SECRETKEY");
+    secretKeyField.setAccessible(true);
+    secretKeyField.set(authService, SECRET_KEY);
+  }
 
-        AuthRequest request = new AuthRequest("***REMOVED***User", "password");
+  @Test
+  void authenticate_ShouldReturnTokens_WhenValidCredentials() {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
+    user.setPassword(new BCryptPasswordEncoder().encode("password"));
 
-        when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.of(user));
+    AuthRequest request = new AuthRequest("***REMOVED***User", "password");
 
-        AuthResponse response = authService.authenticate(request);
+    when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.of(user));
 
-        assertThat(response).isNotNull();
-        assertThat(response.getAccessToken()).isNotEmpty();
-        assertThat(response.getRefreshToken()).isNotEmpty();
-    }
+    AuthResponse response = authService.authenticate(request);
 
-    @Test
-    void authenticate_ShouldThrowException_WhenInvalidCredentials() {
-        AuthRequest request = new AuthRequest("***REMOVED***User", "wrongPassword");
-        when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.empty());
+    assertThat(response).isNotNull();
+    assertThat(response.getAccessToken()).isNotEmpty();
+    assertThat(response.getRefreshToken()).isNotEmpty();
+  }
 
-        assertThrows(AppEx.class, () -> authService.authenticate(request));
-    }
-    @Test
-    void introspect_ShouldReturnValidResponse_WhenTokenIsValid() throws Exception {
-        String validToken = authService.generateToken(new User(), 30);
-        IntrospectRequest request = new IntrospectRequest(validToken);
+  @Test
+  void authenticate_ShouldThrowException_WhenInvalidCredentials() {
+    AuthRequest request = new AuthRequest("***REMOVED***User", "wrongPassword");
+    when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.empty());
 
-        assertThat(authService.introspect(request).isValid()).isTrue();
-    }
-    @Test
-    void logout_ShouldInvalidateToken_WhenTokenIsValid() throws Exception {
-        String token = authService.generateToken(new User(), 30);
-        LogoutRequest request = new LogoutRequest(token);
-        SignedJWT signedJWT = SignedJWT.parse(token);
+    assertThrows(AppEx.class, () -> authService.authenticate(request));
+  }
 
-        when(invalidatedTokenRepository.save(any(InvalidatedToken.class))).thenReturn(null);
+  @Test
+  void introspect_ShouldReturnValidResponse_WhenTokenIsValid() throws Exception {
+    String validToken = authService.generateToken(new User(), 30);
+    IntrospectRequest request = new IntrospectRequest(validToken);
 
-        authService.logout(request);
+    assertThat(authService.introspect(request).isValid()).isTrue();
+  }
 
-        verify(invalidatedTokenRepository, times(1)).save(any(InvalidatedToken.class));
-    }
-    @Test
-    void refreshToken_ShouldReturnNewToken_WhenValid() throws Exception {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
+  @Test
+  void logout_ShouldInvalidateToken_WhenTokenIsValid() throws Exception {
+    String token = authService.generateToken(new User(), 30);
+    LogoutRequest request = new LogoutRequest(token);
+    SignedJWT signedJWT = SignedJWT.parse(token);
 
-        String oldToken = authService.generateToken(user, 30);
-        RefreshRequest request = new RefreshRequest(oldToken);
+    when(invalidatedTokenRepository.save(any(InvalidatedToken.class))).thenReturn(null);
 
-        when(userRepository.findByUserName(anyString())).thenReturn(Optional.of(user));
-        when(invalidatedTokenRepository.existsById(anyString())).thenReturn(false);
+    authService.logout(request);
 
-        AuthResponse response = authService.refreshToken(request);
+    verify(invalidatedTokenRepository, times(1)).save(any(InvalidatedToken.class));
+  }
 
-        assertThat(response).isNotNull();
-        assertThat(response.getAccessToken()).isNotEmpty();
-    }
+  @Test
+  void refreshToken_ShouldReturnNewToken_WhenValid() throws Exception {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
 
-    @Test
-    void refreshToken_ShouldThrowException_WhenTokenIsInvalid() {
-        RefreshRequest request = new RefreshRequest("invalidToken");
+    String oldToken = authService.generateToken(user, 30);
+    RefreshRequest request = new RefreshRequest(oldToken);
 
-        assertThrows(AppEx.class, () -> authService.refreshToken(request));
-    }
-    @Test
-    void verifyToken_ShouldThrowException_WhenTokenIsInvalid() {
-        assertThrows(AppEx.class, () -> authService.verifyToken("invalidToken"));
-    }
-    @Test
-    void generateToken_ShouldReturnValidToken() throws ParseException, JOSEException {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
+    when(userRepository.findByUserName(anyString())).thenReturn(Optional.of(user));
+    when(invalidatedTokenRepository.existsById(anyString())).thenReturn(false);
 
-        String token = authService.generateToken(user, 30);
-        SignedJWT signedJWT = SignedJWT.parse(token);
+    AuthResponse response = authService.refreshToken(request);
 
-        assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
-        assertThat(signedJWT.getJWTClaimsSet().getIssuer()).isEqualTo("meeting-room-booking");
-    }
-    @Test
-    void verifyToken_ShouldReturnSignedJWT_WhenTokenIsValid() throws Exception {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
+    assertThat(response).isNotNull();
+    assertThat(response.getAccessToken()).isNotEmpty();
+  }
 
-        String token = authService.generateToken(user, 30);
-        SignedJWT signedJWT = authService.verifyToken(token);
+  @Test
+  void refreshToken_ShouldThrowException_WhenTokenIsInvalid() {
+    RefreshRequest request = new RefreshRequest("invalidToken");
 
-        assertThat(signedJWT).isNotNull();
-        assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
-    }
-    @Test
-    void verifyToken_ShouldThrowException_WhenTokenIsExpired() {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
+    assertThrows(AppEx.class, () -> authService.refreshToken(request));
+  }
 
-        String expiredToken = authService.generateToken(user, -1); // Token hết hạn
-        assertThrows(AppEx.class, () -> authService.verifyToken(expiredToken));
-    }
-    @Test
-    void logout_ShouldNotSaveInvalidatedToken_WhenTokenIsExpired() throws Exception {
-        String expiredToken = authService.generateToken(new User(), -1); // Token hết hạn
-        LogoutRequest request = new LogoutRequest(expiredToken);
+  @Test
+  void verifyToken_ShouldThrowException_WhenTokenIsInvalid() {
+    assertThrows(AppEx.class, () -> authService.verifyToken("invalidToken"));
+  }
 
-        authService.logout(request);
+  @Test
+  void generateToken_ShouldReturnValidToken() throws ParseException, JOSEException {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
 
-        verify(invalidatedTokenRepository, never()).save(any(InvalidatedToken.class));
-    }
-    @Test
-    void refreshToken_ShouldThrowException_WhenTokenIsBlacklisted() throws Exception {
-        User user = new User();
-        user.setUserName("***REMOVED***User");
+    String token = authService.generateToken(user, 30);
+    SignedJWT signedJWT = SignedJWT.parse(token);
 
-        String token = authService.generateToken(user, 30);
-        RefreshRequest request = new RefreshRequest(token);
+    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+    assertThat(signedJWT.getJWTClaimsSet().getIssuer()).isEqualTo("meeting-room-booking");
+  }
 
-        when(invalidatedTokenRepository.existsById(anyString())).thenReturn(true);
+  @Test
+  void verifyToken_ShouldReturnSignedJWT_WhenTokenIsValid() throws Exception {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
 
-        assertThrows(AppEx.class, () -> authService.refreshToken(request));
-    }
+    String token = authService.generateToken(user, 30);
+    SignedJWT signedJWT = authService.verifyToken(token);
+
+    assertThat(signedJWT).isNotNull();
+    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+  }
+
+  @Test
+  void verifyToken_ShouldThrowException_WhenTokenIsExpired() {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
+
+    String expiredToken = authService.generateToken(user, -1); // Token hết hạn
+    assertThrows(AppEx.class, () -> authService.verifyToken(expiredToken));
+  }
+
+  @Test
+  void logout_ShouldNotSaveInvalidatedToken_WhenTokenIsExpired() throws Exception {
+    String expiredToken = authService.generateToken(new User(), -1); // Token hết hạn
+    LogoutRequest request = new LogoutRequest(expiredToken);
+
+    authService.logout(request);
+
+    verify(invalidatedTokenRepository, never()).save(any(InvalidatedToken.class));
+  }
+
+  @Test
+  void refreshToken_ShouldThrowException_WhenTokenIsBlacklisted() throws Exception {
+    User user = new User();
+    user.setUserName("***REMOVED***User");
+
+    String token = authService.generateToken(user, 30);
+    RefreshRequest request = new RefreshRequest(token);
+
+    when(invalidatedTokenRepository.existsById(anyString())).thenReturn(true);
+
+    assertThrows(AppEx.class, () -> authService.refreshToken(request));
+  }
 }
-
-
-
-
-

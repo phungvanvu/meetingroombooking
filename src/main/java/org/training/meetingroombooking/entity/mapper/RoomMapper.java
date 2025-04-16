@@ -1,5 +1,8 @@
 package org.training.meetingroombooking.entity.mapper;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -9,21 +12,26 @@ import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomEquipment;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Mapper(componentModel = "spring")
 public interface RoomMapper {
 
-  @Mapping(target = "equipments", source = "roomEquipments", qualifiedByName = "mapRoomEquipmentToStringSet")
+  @Mapping(
+      target = "equipments",
+      source = "roomEquipments",
+      qualifiedByName = "mapRoomEquipmentToStringSet")
   RoomDTO toDTO(Room entity);
 
   @Mapping(target = "roomId", source = "roomId")
-  @Mapping(target = "roomEquipments", source = "equipments", qualifiedByName = "mapStringSetToRoomEquipmentSet")
+  @Mapping(
+      target = "roomEquipments",
+      source = "equipments",
+      qualifiedByName = "mapStringSetToRoomEquipmentSet")
   Room toEntity(RoomDTO dto);
 
-  @Mapping(target = "roomEquipments", source = "equipments", qualifiedByName = "mapStringSetToRoomEquipmentSet")
+  @Mapping(
+      target = "roomEquipments",
+      source = "equipments",
+      qualifiedByName = "mapStringSetToRoomEquipmentSet")
   void updateRoom(@MappingTarget Room entity, RoomDTO dto);
 
   @Named("mapRoomEquipmentToStringSet")
@@ -32,8 +40,8 @@ public interface RoomMapper {
       return new HashSet<>();
     }
     return roomEquipments.stream()
-            .map(roomEquipment -> roomEquipment.getEquipment().getEquipmentName())
-            .collect(Collectors.toSet());
+        .map(roomEquipment -> roomEquipment.getEquipment().getEquipmentName())
+        .collect(Collectors.toSet());
   }
 
   @Named("mapStringSetToRoomEquipmentSet")
@@ -42,15 +50,17 @@ public interface RoomMapper {
       return new HashSet<>();
     }
     return equipmentNames.stream()
-            .map(name -> {
+        .map(
+            name -> {
               RoomEquipment roomEquipment = new RoomEquipment();
               Equipment equipment = new Equipment();
               equipment.setEquipmentName(name);
               roomEquipment.setEquipment(equipment);
               return roomEquipment;
             })
-            .collect(Collectors.toSet());
+        .collect(Collectors.toSet());
   }
+
   // Map từ Room → roomId
   @Named("mapRoomToRoomId")
   default Long mapRoomToRoomId(Room room) {
@@ -67,4 +77,3 @@ public interface RoomMapper {
     return room;
   }
 }
-

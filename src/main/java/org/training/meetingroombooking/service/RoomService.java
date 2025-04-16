@@ -1,18 +1,13 @@
 package org.training.meetingroombooking.service;
 
+import jakarta.persistence.criteria.Join;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.persistence.criteria.Join;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -26,15 +21,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.mapper.RoomMapper;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
-import org.training.meetingroombooking.entity.models.RoomEquipment;
-import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.EquipmentRepository;
 import org.training.meetingroombooking.repository.RoomBookingRepository;
@@ -49,9 +41,12 @@ public class RoomService {
   private final RoomBookingRepository roomBookingRepository;
   private final S3Service s3Service;
 
-  public RoomService(RoomRepository roomRepository, RoomMapper roomMapper,
-                     EquipmentRepository equipmentRepository, S3Service s3Service,
-                     RoomBookingRepository roomBookingRepository) {
+  public RoomService(
+      RoomRepository roomRepository,
+      RoomMapper roomMapper,
+      EquipmentRepository equipmentRepository,
+      S3Service s3Service,
+      RoomBookingRepository roomBookingRepository) {
     this.roomRepository = roomRepository;
     this.roomMapper = roomMapper;
     this.equipmentRepository = equipmentRepository;
@@ -81,107 +76,109 @@ public class RoomService {
 
   public RoomDTO findById(Long roomId) {
     Optional<Room> room = roomRepository.findById(roomId);
-    return room.map(roomMapper::toDTO).orElseThrow(
-        () -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    return room.map(roomMapper::toDTO).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
   }
 
   public List<RoomDTO> getAll() {
     List<Room> rooms = roomRepository.findAll();
-    return rooms.stream()
-        .map(roomMapper::toDTO)
-        .collect(Collectors.toList());
+    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
   }
 
   public List<RoomDTO> getAllAvailable() {
     List<Room> rooms = roomRepository.findAllByAvailableTrue();
-    return rooms.stream()
-            .map(roomMapper::toDTO)
-            .collect(Collectors.toList());
+    return rooms.stream().map(roomMapper::toDTO).collect(Collectors.toList());
   }
 
   /**
-   * Lấy danh sách phòng với phân trang và lọc theo:
-   * - roomName: tìm kiếm theo tên (không phân biệt chữ hoa thường)
-   * - locations: danh sách địa điểm
-   * - available: trạng thái (Available hay Unavailable)
-   * - capacities: danh sách sức chứa
-   * - equipments: tập hợp tên thiết bị
-   * Sắp xếp theo thứ tự giảm dần (mới nhất hiển thị đầu tiên)
+   * Lấy danh sách phòng với phân trang và lọc theo: - roomName: tìm kiếm theo tên (không phân biệt
+   * chữ hoa thường) - locations: danh sách địa điểm - available: trạng thái (Available hay
+   * Unavailable) - capacities: danh sách sức chứa - equipments: tập hợp tên thiết bị Sắp xếp theo
+   * thứ tự giảm dần (mới nhất hiển thị đầu tiên)
    */
-  public Page<RoomDTO> getRooms(String roomName, List<String> locations, Boolean available,
-                                List<Integer> capacities, Set<String> equipments, int page, int size) {
+  public Page<RoomDTO> getRooms(
+      String roomName,
+      List<String> locations,
+      Boolean available,
+      List<Integer> capacities,
+      Set<String> equipments,
+      int page,
+      int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "roomId"));
     Specification<Room> spec = Specification.where(null);
 
     if (roomName != null && !roomName.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
-      );
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) ->
+                  cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%"));
     }
     if (locations != null && !locations.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("location").in(locations)
-      );
+      spec = spec.and((***REMOVED***, query, cb) -> ***REMOVED***.get("location").in(locations));
     }
     if (available != null) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.equal(***REMOVED***.get("available"), available)
-      );
+      spec = spec.and((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("available"), available));
     }
     if (capacities != null && !capacities.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("capacity").in(capacities)
-      );
+      spec = spec.and((***REMOVED***, query, cb) -> ***REMOVED***.get("capacity").in(capacities));
     }
     if (equipments != null && !equipments.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
-        return equipmentJoin.get("equipmentName").in(equipments);
-      });
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        query.distinct(true);
-        return cb.conjunction();
-      });
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) -> {
+                Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
+                return equipmentJoin.get("equipmentName").in(equipments);
+              });
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) -> {
+                query.distinct(true);
+                return cb.conjunction();
+              });
     }
     Page<Room> roomsPage = roomRepository.findAll(spec, pageable);
     return roomsPage.map(roomMapper::toDTO);
   }
 
-  public Page<RoomDTO> getAvailableRooms(String roomName, List<String> locations,
-                                         List<Integer> capacities, Set<String> equipments,
-                                         int page, int size) {
+  public Page<RoomDTO> getAvailableRooms(
+      String roomName,
+      List<String> locations,
+      List<Integer> capacities,
+      Set<String> equipments,
+      int page,
+      int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "roomId"));
-    Specification<Room> spec = Specification.where((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("available"), true));
+    Specification<Room> spec =
+        Specification.where((***REMOVED***, query, cb) -> cb.equal(***REMOVED***.get("available"), true));
 
     if (roomName != null && !roomName.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%")
-      );
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) ->
+                  cb.like(cb.lower(***REMOVED***.get("roomName")), "%" + roomName.toLowerCase() + "%"));
     }
     if (locations != null && !locations.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("location").in(locations)
-      );
+      spec = spec.and((***REMOVED***, query, cb) -> ***REMOVED***.get("location").in(locations));
     }
     if (capacities != null && !capacities.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) ->
-              ***REMOVED***.get("capacity").in(capacities)
-      );
+      spec = spec.and((***REMOVED***, query, cb) -> ***REMOVED***.get("capacity").in(capacities));
     }
     if (equipments != null && !equipments.isEmpty()) {
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
-        return equipmentJoin.get("equipmentName").in(equipments);
-      });
-      spec = spec.and((***REMOVED***, query, cb) -> {
-        query.distinct(true);
-        return cb.conjunction();
-      });
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) -> {
+                Join<Room, Equipment> equipmentJoin = ***REMOVED***.join("equipments");
+                return equipmentJoin.get("equipmentName").in(equipments);
+              });
+      spec =
+          spec.and(
+              (***REMOVED***, query, cb) -> {
+                query.distinct(true);
+                return cb.conjunction();
+              });
     }
     Page<Room> roomsPage = roomRepository.findAll(spec, pageable);
     return roomsPage.map(roomMapper::toDTO);
   }
-
 
   public ByteArrayOutputStream exportRoomsToExcel() throws IOException {
     List<RoomDTO> rooms = getAll();
@@ -192,11 +189,12 @@ public class RoomService {
     } else {
       workbook = new XSSFWorkbook();
     }
-    Sheet sheet = workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : workbook.createSheet("Rooms");
+    Sheet sheet =
+        workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : workbook.createSheet("Rooms");
     if (sheet.getPhysicalNumberOfRows() == 0) {
       Row headerRow = sheet.createRow(0);
       String[] headers = {"Room Name", "Location", "Capacity", "Note", "isAvailable"};
-//          , "ImageUrl"};
+      //          , "ImageUrl"};
       for (int i = 0; i < headers.length; i++) {
         Cell cell = headerRow.createCell(i);
         cell.setCellValue(headers[i]);
@@ -212,10 +210,12 @@ public class RoomService {
       Row row = sheet.createRow(rowNum++);
       row.createCell(0).setCellValue(room.getRoomName() != null ? room.getRoomName() : "N/A");
       row.createCell(1).setCellValue(room.getLocation() != null ? room.getLocation() : "N/A");
-      row.createCell(2).setCellValue(room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
+      row.createCell(2)
+          .setCellValue(room.getCapacity() != null ? room.getCapacity().toString() : "N/A");
       row.createCell(3).setCellValue(room.getNote() != null ? room.getNote() : "N/A");
       row.createCell(4).setCellValue(room.isAvailable());
-//      row.createCell(5).setCellValue(room.getImageUrl() != null ? room.getImageUrl() : "N/A");
+      //      row.createCell(5).setCellValue(room.getImageUrl() != null ? room.getImageUrl() :
+      // "N/A");
     }
     int headerCount = 7;
     for (int i = 0; i < headerCount; i++) {
@@ -228,8 +228,8 @@ public class RoomService {
   }
 
   public RoomDTO update(Long roomId, RoomDTO dto, MultipartFile file) throws IOException {
-    Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    Room room =
+        roomRepository.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     roomMapper.updateRoom(room, dto);
     if (room.getRoomEquipments() != null) {
       room.getRoomEquipments().forEach(re -> re.setRoom(room));
@@ -277,5 +277,4 @@ public class RoomService {
     }
     roomRepository.deleteAll(rooms);
   }
-
 }

@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class BookingSummaryDTO {
-    private int period;
-    private int bookings;
+  private int period;
+  private int bookings;
 }
