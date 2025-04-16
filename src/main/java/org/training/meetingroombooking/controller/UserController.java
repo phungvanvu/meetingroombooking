@@ -21,7 +21,7 @@ import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.service.UserService;
 
 @RestController
-@RequestMapping("/user/v1.0")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
   private final UserService userService;

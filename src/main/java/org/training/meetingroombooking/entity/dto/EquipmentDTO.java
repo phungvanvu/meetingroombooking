@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class EquipmentDTO {
 
-  @NotBlank(message = "Device name cannot be Null")
-  @Size(max = 50, message = "Device name cannot exceed 50 characters")
+  @NotBlank(message = "{equipment.name.notblank}")
+  @Size(max = 50, message = "{equipment.name.maxsize}")
   private String equipmentName;
 
-  @Size(max = 255, message = "Device description cannot exceed 255 characters")
+  @Size(max = 255, message = "{equipment.description.maxsize}")
   private String description;
 }

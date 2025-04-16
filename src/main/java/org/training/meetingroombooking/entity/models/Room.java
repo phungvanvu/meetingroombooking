@@ -13,7 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Rooms")
+@Table(name = "rooms")
 public class Room {
 
   @Id
@@ -39,7 +39,7 @@ public class Room {
   private Set<RoomEquipment> roomEquipments;
 
   @Size(max = 255)
-  @Column(length = 255)
+  @Column(columnDefinition = "TEXT", length = 255)
   private String note;
 
   @Column(length = 255)

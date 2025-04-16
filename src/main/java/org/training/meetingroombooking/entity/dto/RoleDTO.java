@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class RoleDTO {
 
-  @NotBlank(message = "Role name cannot be blank")
-  @Size(max = 50, message = "Role names cannot exceed 50 characters.")
+  @NotBlank(message = "{role.name.notblank}")
+  @Size(max = 50, message = "{role.name.maxsize}")
   private String roleName;
 
-  @Size(max = 255, message = "Description must not exceed 255 characters")
+  @Size(max = 255, message = "{role.description.maxsize}")
   private String description;
 
   private Set<String> permissions;

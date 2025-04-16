@@ -20,7 +20,7 @@ import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.service.RoomBookingService;
 
 @RestController
-@RequestMapping("/roombooking/v1.0")
+@RequestMapping("/api/v1/roombooking")
 public class RoomBookingController {
 
   private final RoomBookingService roomBookingService;

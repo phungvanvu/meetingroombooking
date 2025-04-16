@@ -16,17 +16,17 @@ import org.training.meetingroombooking.entity.enums.NotificationType;
 @Builder
 public class NotificationDTO {
 
-  @NotBlank(message = "Notification content cannot be blank")
-  @Size(max = 255, message = "Notification content name cannot exceed 255 characters")
+  @NotBlank(message = "{notification.content.notblank}")
+  @Size(max = 255, message = "{notification.content.maxsize}")
   private String content;
 
-  @NotNull(message = "Notification type cannot be null")
+  @NotNull(message = "{notification.type.notnull}")
   private NotificationType type;
 
-  @NotNull(message = "Read status cannot be null")
+  @NotNull(message = "{notification.read.notnull}")
   private Boolean hasRead;
 
-  @NotNull(message = "Notification recipient ID cannot be null")
+  @NotNull(message = "{notification.userId.notnull}")
   private Long userId;
 
   private LocalDateTime createdAt;

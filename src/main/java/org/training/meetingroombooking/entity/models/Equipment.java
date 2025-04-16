@@ -12,15 +12,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Equipments")
+@Table(name = "equipments")
 public class Equipment {
 
   @Id
   @Column(nullable = false, length = 50)
-  private String equipmentName; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
+  private String equipmentName;
 
-  @Column(length = 255)
-  private String description; // Mô tả thiết bị (VD: Máy chiếu 4K)
+  @Column(columnDefinition = "TEXT", length = 255)
+  private String description;
 
   @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<RoomEquipment> roomEquipments;

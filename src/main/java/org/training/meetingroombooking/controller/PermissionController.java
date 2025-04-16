@@ -9,7 +9,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PermissionService;
 
 @RestController
-@RequestMapping("/permission/v1.0")
+@RequestMapping("/api/v1/permission")
 public class PermissionController {
 
   private final PermissionService permissionService;

@@ -11,7 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Room_Equipment")
+@Table(name = "room_Equipment")
 public class RoomEquipment {
 
   @Id

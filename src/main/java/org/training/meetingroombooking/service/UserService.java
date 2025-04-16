@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.Cell;
@@ -279,14 +278,17 @@ public class UserService {
   }
 
   public void delete(Long userId) {
-    Optional<User> userOptional = userRepository.findById(userId);
-    if (!userOptional.isPresent()) {
-      throw new AppEx(ErrorCode.USER_NOT_FOUND);
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+    User user =
+        userRepository.findById(userId).orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+    if (user.getUserName().equals(currentUsername)) {
+      throw new AppEx(ErrorCode.CANNOT_DELETE_CURRENT_USER);
     }
-    User user = userOptional.get();
+
     if (roomBookingRepository.existsByBookedBy(user)) {
       throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
     }
+
     userRepository.deleteById(userId);
   }
 
@@ -295,11 +297,15 @@ public class UserService {
     if (userIds == null || userIds.isEmpty()) {
       throw new AppEx(ErrorCode.INVALID_INPUT);
     }
+    String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
     List<User> users = userRepository.findAllById(userIds);
     if (users.size() != userIds.size()) {
       throw new AppEx(ErrorCode.USER_NOT_FOUND);
     }
     for (User user : users) {
+      if (user.getUserName().equals(currentUsername)) {
+        throw new AppEx(ErrorCode.CANNOT_DELETE_CURRENT_USER);
+      }
       if (roomBookingRepository.existsByBookedBy(user)) {
         throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
       }

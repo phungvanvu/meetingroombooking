@@ -19,7 +19,7 @@ import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.service.RoomService;
 
 @RestController
-@RequestMapping("/room/v1.0")
+@RequestMapping("/api/v1/room")
 public class RoomController {
 
   private final RoomService roomService;

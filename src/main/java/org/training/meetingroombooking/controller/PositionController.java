@@ -10,7 +10,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.PositionService;
 
 @RestController
-@RequestMapping("/position/v1.0")
+@RequestMapping("/api/v1/position")
 public class PositionController {
 
   private final PositionService positionService;

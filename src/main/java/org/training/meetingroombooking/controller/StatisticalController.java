@@ -15,7 +15,7 @@ import org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO;
 import org.training.meetingroombooking.service.StatisticalService;
 
 @RestController
-@RequestMapping("/statistical/v1.0")
+@RequestMapping("/api/v1/statistical")
 public class StatisticalController {
 
   private final StatisticalService statisticalService;

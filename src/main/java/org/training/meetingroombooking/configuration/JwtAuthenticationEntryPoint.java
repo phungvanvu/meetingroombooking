@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
       throws IOException {
     ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
 
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
     ApiResponse<?> apiResponse =

@@ -9,7 +9,7 @@ import org.training.meetingroombooking.entity.dto.RoleDTO;
 import org.training.meetingroombooking.service.RoleService;
 
 @RestController
-@RequestMapping("/role/v1.0")
+@RequestMapping("/api/v1/role")
 public class RoleController {
 
   private final RoleService roleService;

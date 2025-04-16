@@ -10,7 +10,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.GroupService;
 
 @RestController
-@RequestMapping("/group/v1.0")
+@RequestMapping("/api/v1/group")
 public class GroupController {
 
   private final GroupService groupService;

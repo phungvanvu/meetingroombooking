@@ -11,4 +11,9 @@ public class AppEx extends RuntimeException {
     super(errorCode.getMessage());
     this.errorCode = errorCode;
   }
+
+  public AppEx(ErrorCode errorCode, String customMessage) {
+    super(customMessage);
+    this.errorCode = errorCode;
+  }
 }

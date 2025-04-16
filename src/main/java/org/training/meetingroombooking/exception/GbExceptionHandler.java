@@ -11,20 +11,16 @@ import org.training.meetingroombooking.entity.enums.ErrorCode;
 @ControllerAdvice
 public class GbExceptionHandler {
 
-  @ExceptionHandler(value = AppEx.class)
-  public ResponseEntity<ApiResponse<?>> handleAppException(AppEx ex) {
-    return ResponseEntity.status(ex.getErrorCode().getStatus()) // Lấy mã HTTP từ ErrorCode
-        .body(ApiResponse.error(ex.getErrorCode().toApiError(ex.getMessage())));
+  @ExceptionHandler(AppEx.class)
+  public ResponseEntity<ApiResponse<?>> handleAppEx(AppEx ex) {
+    return ResponseEntity.status(ex.getErrorCode().getStatus())
+        .body(ApiResponse.error(new ApiError(ex.getMessage())));
   }
 
-  @ExceptionHandler(value = MethodArgumentNotValidException.class)
-  public ResponseEntity<ApiResponse<?>> handleValidationException(
-      MethodArgumentNotValidException ex) {
-    return ResponseEntity.badRequest()
-        .body(
-            ApiResponse.error(
-                ErrorCode.VALIDATION_ERROR.toApiError(
-                    Objects.requireNonNull(ex.getFieldError()).getDefaultMessage())));
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiResponse<?>> handleValidation(MethodArgumentNotValidException ex) {
+    String message = Objects.requireNonNull(ex.getFieldError()).getDefaultMessage();
+    return ResponseEntity.badRequest().body(ApiResponse.error(new ApiError(message)));
   }
 
   @ExceptionHandler(value = Exception.class)
