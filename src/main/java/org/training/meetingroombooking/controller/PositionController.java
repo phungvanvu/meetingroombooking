@@ -70,7 +70,7 @@ public class PositionController {
 
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> deleteMultiplePosition(@RequestBody List<String> positionNames) {
+  public ApiResponse<String> deleteMultiplePosition(@RequestBody List<String> positionNames) {
     positionService.deleteMultiplePositions(positionNames);
     return ApiResponse.<String>builder()
         .success(true)
