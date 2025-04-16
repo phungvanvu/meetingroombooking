@@ -1,25 +1,25 @@
-//package org.training.meetingroombooking.service;
+// package org.training.meetingroombooking.service;
 //
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.boot.***REMOVED***.context.SpringBootTest;
-//import org.training.meetingroombooking.entity.dto.EquipmentDTO;
-//import org.training.meetingroombooking.entity.models.Equipment;
-//import org.training.meetingroombooking.exception.AppEx;
-//import org.training.meetingroombooking.repository.EquipmentRepository;
-//import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.MockitoAnnotations;
+// import org.springframework.boot.***REMOVED***.context.SpringBootTest;
+// import org.training.meetingroombooking.entity.dto.EquipmentDTO;
+// import org.training.meetingroombooking.entity.models.Equipment;
+// import org.training.meetingroombooking.exception.AppEx;
+// import org.training.meetingroombooking.repository.EquipmentRepository;
+// import org.training.meetingroombooking.entity.mapper.EquipmentMapper;
 //
-//import java.util.Optional;
-//import java.util.List;
+// import java.util.Optional;
+// import java.util.List;
 //
-//import static org.mockito.Mockito.*;
-//import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
 //
-//@SpringBootTest
-//public class EquipmentServiceTest {
+// @SpringBootTest
+// public class EquipmentServiceTest {
 //
 //    @Mock
 //    private EquipmentRepository equipmentRepository;
@@ -162,4 +162,4 @@
 //        AppEx exception = assertThrows(AppEx.class, () -> equipmentService.delete(1L));
 //        assertEquals("EQUIPMENT_NOT_FOUND", exception.getErrorCode().name());
 //    }
-//}
+// }

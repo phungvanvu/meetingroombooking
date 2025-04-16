@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository;
 import org.training.meetingroombooking.entity.models.Permission;
 
 @Repository
-public interface PermissionRepository extends JpaRepository<Permission, String> {
-}
+public interface PermissionRepository extends JpaRepository<Permission, String> {}

@@ -3,12 +3,12 @@ package org.training.meetingroombooking.entity.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.NotificationType;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -31,4 +31,3 @@ public class NotificationDTO {
 
   private LocalDateTime createdAt;
 }
-

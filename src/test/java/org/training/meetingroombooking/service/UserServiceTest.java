@@ -1,5 +1,12 @@
 package org.training.meetingroombooking.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,36 +28,22 @@ import org.training.meetingroombooking.entity.models.User;
 import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.RoleRepository;
 import org.training.meetingroombooking.repository.UserRepository;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
-  @Mock
-  private UserRepository userRepository;
+  @Mock private UserRepository userRepository;
 
-  @Mock
-  private RoleRepository roleRepository;
+  @Mock private RoleRepository roleRepository;
 
-  @Mock
-  private UserMapper userMapper;
+  @Mock private UserMapper userMapper;
 
-  @Mock
-  private PasswordEncoder passwordEncoder;
+  @Mock private PasswordEncoder passwordEncoder;
 
-  @Mock
-  private Authentication authentication;
+  @Mock private Authentication authentication;
 
-  @Mock
-  private SecurityContext securityContext;
+  @Mock private SecurityContext securityContext;
 
-  @InjectMocks
-  private UserService userService;
+  @InjectMocks private UserService userService;
 
   private User user;
   private UserRequest request;
@@ -105,7 +98,7 @@ public class UserServiceTest {
   void createUser_Success() {
     when(userRepository.existsByUserName(request.getUserName())).thenReturn(false);
     when(roleRepository.findByRoleNameIn(anySet()))
-            .thenReturn(Set.of(Role.builder().roleName("HR").build()));
+        .thenReturn(Set.of(Role.builder().roleName("HR").build()));
     when(userMapper.toEntity(any(UserRequest.class))).thenReturn(user);
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
@@ -118,7 +111,6 @@ public class UserServiceTest {
     verify(userRepository).save(any(User.class));
     verify(userMapper).toUserResponse(any(User.class));
   }
-
 
   @Test
   void createUser_UserAlreadyExists_ThrowsException() {
@@ -157,12 +149,11 @@ public class UserServiceTest {
     assertThrows(AppEx.class, () -> userService.getById(1L));
   }
 
-
   @Test
   void updateUser_Success() {
     when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     when(roleRepository.findAllById(anySet()))
-            .thenReturn(List.of(Role.builder().roleName("HR").build()));
+        .thenReturn(List.of(Role.builder().roleName("HR").build()));
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(userMapper.toUserResponse(any(User.class))).thenReturn(response);
 
@@ -174,7 +165,6 @@ public class UserServiceTest {
     verify(userRepository).save(any(User.class));
     verify(userMapper).toUserResponse(any(User.class));
   }
-
 
   @Test
   void updateUser_UserNotFound_ThrowsException() {
@@ -243,5 +233,4 @@ public class UserServiceTest {
     assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     verify(userRepository).findByUserName("unknownUser");
   }
-
 }

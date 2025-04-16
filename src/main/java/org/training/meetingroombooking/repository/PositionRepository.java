@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import org.training.meetingroombooking.entity.models.Position;
 
 @Repository
-public interface PositionRepository extends JpaRepository<Position, String>, JpaSpecificationExecutor<Position> {
-}
+public interface PositionRepository
+    extends JpaRepository<Position, String>, JpaSpecificationExecutor<Position> {}

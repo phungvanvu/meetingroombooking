@@ -2,7 +2,6 @@ package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
-
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +10,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.NotificationService;
 
 @RestController
-@RequestMapping("/notification")
+@RequestMapping("/notification/v1.0")
 public class NotificationController {
 
   private final NotificationService notificationService;
@@ -57,8 +56,8 @@ public class NotificationController {
 
   @PutMapping("/{notificationId}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<NotificationDTO> updateNotification(@PathVariable Long notificationId,
-      @RequestBody NotificationDTO request) {
+  public ApiResponse<NotificationDTO> updateNotification(
+      @PathVariable Long notificationId, @RequestBody NotificationDTO request) {
     return ApiResponse.<NotificationDTO>builder()
         .success(true)
         .data(notificationService.update(notificationId, request))
@@ -74,5 +73,4 @@ public class NotificationController {
         .data("Notification has been deleted")
         .build();
   }
-
 }

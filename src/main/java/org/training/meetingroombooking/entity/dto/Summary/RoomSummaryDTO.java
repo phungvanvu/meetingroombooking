@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RoomSummaryDTO {
-    private Long roomId;
-    private String roomName;
-    private long bookingCount;
+  private Long roomId;
+  private String roomName;
+  private long bookingCount;
 }

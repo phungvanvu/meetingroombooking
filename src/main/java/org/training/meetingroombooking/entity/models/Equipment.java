@@ -1,13 +1,11 @@
 package org.training.meetingroombooking.entity.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -17,13 +15,13 @@ import java.util.Set;
 @Table(name = "Equipments")
 public class Equipment {
 
-    @Id
-    @Column(nullable = false, length = 50)
-    private String equipmentName; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
+  @Id
+  @Column(nullable = false, length = 50)
+  private String equipmentName; // Tên thiết bị (VD: Máy chiếu, Loa, Bàn,...)
 
-    @Column(length = 255)
-    private String description; // Mô tả thiết bị (VD: Máy chiếu 4K)
+  @Column(length = 255)
+  private String description; // Mô tả thiết bị (VD: Máy chiếu 4K)
 
-    @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<RoomEquipment> roomEquipments;
+  @OneToMany(mappedBy = "equipment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Set<RoomEquipment> roomEquipments;
 }

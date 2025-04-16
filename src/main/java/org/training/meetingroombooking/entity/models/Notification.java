@@ -1,12 +1,12 @@
 package org.training.meetingroombooking.entity.models;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.NotificationType;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -44,5 +44,4 @@ public class Notification {
     }
     this.createdAt = LocalDateTime.now();
   }
-
 }

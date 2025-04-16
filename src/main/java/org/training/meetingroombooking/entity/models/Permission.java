@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,10 +14,10 @@ import java.util.Set;
 @Table(name = "Permissions")
 public class Permission {
 
-    @Id
-    @Column(nullable = false, unique = true, length = 50)
-    private String permissionName;
+  @Id
+  @Column(nullable = false, unique = true, length = 50)
+  private String permissionName;
 
-    @Column(columnDefinition = "TEXT", length = 255)
-    private String description;
+  @Column(columnDefinition = "TEXT", length = 255)
+  private String description;
 }
