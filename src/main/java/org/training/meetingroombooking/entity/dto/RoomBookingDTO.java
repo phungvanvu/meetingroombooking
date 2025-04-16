@@ -19,32 +19,32 @@ public class RoomBookingDTO {
 
   private Long bookingId;
 
-  @NotNull(message = "Room cannot be null")
+  @NotNull(message = "{roomBooking.roomId.notnull}")
   private Long roomId;
 
   private String roomName;
 
   private String userEmail;
 
-  @NotNull(message = "The person placing the order cannot be left blank.")
+  @NotNull(message = "{roomBooking.bookedById.notnull}")
   private Long bookedById;
 
   private String userName;
 
-  @FutureOrPresent(message = "The start time must be present or in the future.")
-  @NotNull(message = "Start time cannot be null")
+  @FutureOrPresent(message = "{roomBooking.startTime.futureOrPresent}")
+  @NotNull(message = "{roomBooking.startTime.notnull}")
   private LocalDateTime startTime;
 
-  @FutureOrPresent(message = "The end time must be present or in the future.")
-  @NotNull(message = "End time cannot be null")
+  @FutureOrPresent(message = "{roomBooking.endTime.futureOrPresent}")
+  @NotNull(message = "{roomBooking.endTime.notnull}")
   private LocalDateTime endTime;
 
-  @NotNull(message = "You need to specify the purpose of the booking.")
+  @NotNull(message = "{roomBooking.purpose.notnull}")
   private Purpose purpose;
 
   private BookingStatus status;
 
-  @Size(max = 255, message = "Description must not exceed 255 characters")
+  @Size(max = 255, message = "{roomBooking.description.maxsize}")
   private String description;
 
   private LocalDateTime createdAt;

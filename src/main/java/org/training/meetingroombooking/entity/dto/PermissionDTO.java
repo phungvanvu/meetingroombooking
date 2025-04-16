@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PermissionDTO {
 
-  @NotBlank(message = "permissionName cannot be blank")
-  @Size(max = 50, message = "permissionName cannot exceed 50 characters")
+  @NotBlank(message = "{permission.name.notblank}")
+  @Size(max = 50, message = "{permission.name.maxsize}")
   private String permissionName;
 
-  @Size(max = 255, message = "description cannot exceed 255 characters")
+  @Size(max = 255, message = "{permission.description.maxsize}")
   private String description;
 }

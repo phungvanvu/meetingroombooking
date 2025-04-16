@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.controller;
 
 import com.nimbusds.jose.JOSEException;
+
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,7 +18,7 @@ import org.training.meetingroombooking.service.AuthService;
 import org.training.meetingroombooking.service.PasswordResetService;
 
 @RestController
-@RequestMapping("/auth/v1.0")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
   private final AuthService authService;
@@ -45,7 +46,6 @@ public class AuthController {
   public ApiResponse<IntrospectResponse> auth(@RequestBody IntrospectRequest request)
       throws ParseException, JOSEException {
     var result = authService.introspect(request);
-
     return ApiResponse.<IntrospectResponse>builder().success(true).data(result).build();
   }
 

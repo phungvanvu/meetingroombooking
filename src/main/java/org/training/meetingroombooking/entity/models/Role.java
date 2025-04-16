@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Roles")
+@Table(name = "roles")
 public class Role {
 
   @Id
   @Column(nullable = false, unique = true, length = 50)
   private String roleName;
 
-  @Column(length = 255)
+  @Column(columnDefinition = "TEXT", length = 255)
   private String description;
 
   @ManyToMany

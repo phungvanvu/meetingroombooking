@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.service.S3Service;
 
 @RestController
-@RequestMapping("/files/v1.0")
+@RequestMapping("/api/v1/files")
 public class FileController {
 
   private final S3Service s3Service;

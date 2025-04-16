@@ -18,7 +18,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.EquipmentService;
 
 @RestController
-@RequestMapping("/equipment/v1.0")
+@RequestMapping("/api/v1/equipment")
 public class EquipmentController {
 
   private final EquipmentService equipmentService;

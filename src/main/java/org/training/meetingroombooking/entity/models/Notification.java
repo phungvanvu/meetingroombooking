@@ -19,19 +19,19 @@ public class Notification {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long notificationId;
 
-  @Column(length = 255)
+  @Column(columnDefinition = "TEXT", length = 255)
   private String content;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private NotificationType type; // Loại thông báo (INFO, WARNING, ERROR)
+  private NotificationType type; // (INFO, WARNING, ERROR)
 
   @Column(nullable = false)
   private Boolean hasRead;
 
   @ManyToOne
   @JoinColumn(name = "user_id")
-  private User user; // Người nhận thông báo
+  private User user;
 
   @Column(name = "created_at")
   @Temporal(TemporalType.TIMESTAMP)

@@ -28,6 +28,7 @@ public enum ErrorCode {
   EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "Email already exists."),
   ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
   BATCH_CANCELLATION_FAILED(HttpStatus.CONFLICT, "Some bookings could not be cancelled."),
+  CANNOT_DELETE_CURRENT_USER(HttpStatus.CONFLICT, "Cannot delete your own account."),
 
   // Các lỗi 401 Unauthorized
   INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),

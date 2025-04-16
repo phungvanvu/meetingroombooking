@@ -15,7 +15,7 @@ import org.training.meetingroombooking.entity.enums.Purpose;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "RoomBookings")
+@Table(name = "roomBookings")
 public class RoomBooking {
 
   @Id

@@ -18,22 +18,22 @@ public class RoomDTO {
 
   private Long roomId;
 
-  @NotBlank(message = "Room name cannot be left blank")
-  @Size(max = 100, message = "Room name cannot exceed 100 characters")
+  @NotBlank(message = "{room.name.notblank}")
+  @Size(max = 100, message = "{room.name.maxsize}")
   private String roomName;
 
-  @NotBlank(message = "Location cannot be left blank")
-  @Size(max = 255, message = "Location must not exceed 255 characters")
+  @NotBlank(message = "{room.location.notblank}")
+  @Size(max = 255, message = "{room.location.maxsize}")
   private String location;
 
-  @NotNull(message = "Capacity cannot be null")
-  @PositiveOrZero(message = "Capacity must be non-negative")
+  @NotNull(message = "{room.capacity.notnull}")
+  @PositiveOrZero(message = "{room.capacity.positive}")
   private Integer capacity;
 
-  @NotNull(message = "Available cannot be null")
+  @NotNull(message = "{room.available.notnull}")
   private boolean available;
 
-  @Size(max = 255, message = "Notes cannot exceed 255 characters")
+  @Size(max = 255, message = "{room.note.maxsize}")
   private String note;
 
   private String imageUrl;

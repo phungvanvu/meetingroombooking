@@ -17,8 +17,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "password_reset_otps")
 public class PasswordResetOtp {
   @Id private String otp;
-
   private String email;
-
   private LocalDateTime expiryDate;
 }

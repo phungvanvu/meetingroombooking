@@ -10,7 +10,7 @@ import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.service.NotificationService;
 
 @RestController
-@RequestMapping("/notification/v1.0")
+@RequestMapping("/api/v1/notification")
 public class NotificationController {
 
   private final NotificationService notificationService;

@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class GroupDTO {
 
-  @NotBlank(message = "Group name cannot be blank")
-  @Size(max = 50, message = "Group name cannot exceed 50 characters")
+  @NotBlank(message = "{group.notblank}")
+  @Size(max = 50, message = "{group.name.maxsize}")
   private String groupName;
 
-  @Size(max = 100, message = "Location must not exceed 100 characters")
+  @Size(max = 100, message = "{group.location.maxsize}")
   private String location;
 
-  @Size(max = 50, message = "Division must not exceed 100 characters.")
+  @Size(max = 50, message = "{group.division.maxsize}")
   private String division;
 
   private LocalDateTime createdDate;
