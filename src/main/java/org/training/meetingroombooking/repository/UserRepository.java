@@ -3,12 +3,8 @@ package org.training.meetingroombooking.repository;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
-import org.training.meetingroombooking.entity.models.GroupEntity;
-import org.training.meetingroombooking.entity.models.Position;
 import org.training.meetingroombooking.entity.models.User;
 
-@Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
   Optional<User> findByUserName(String userName);
 
@@ -17,8 +13,4 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
   boolean existsByUserName(String userName);
 
   boolean existsByEmail(String email);
-
-  boolean existsByPosition(Position position);
-
-  boolean existsByGroup(GroupEntity group);
 }

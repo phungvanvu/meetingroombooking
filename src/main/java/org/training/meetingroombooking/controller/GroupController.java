@@ -77,7 +77,7 @@ public class GroupController {
 
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> deleteMultipleGroups(@RequestBody List<String> groupNames) {
+  public ApiResponse<String> deleteMultipleGroups(@RequestBody List<String> groupNames) {
     groupService.deleteMultipleGroups(groupNames);
     return ApiResponse.<String>builder()
         .success(true)

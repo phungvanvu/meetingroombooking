@@ -104,7 +104,7 @@ public class RoomController {
 
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> deleteMultipleRoom(@RequestBody List<Long> roomIds) {
+  public ApiResponse<String> deleteMultipleRoom(@RequestBody List<Long> roomIds) {
     roomService.deleteMultipleRooms(roomIds);
     return ApiResponse.<String>builder()
         .success(true)

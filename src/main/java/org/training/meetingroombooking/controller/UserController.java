@@ -32,7 +32,7 @@ public class UserController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+  public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
         .success(true)
         .data(userService.createUser(request))
@@ -55,7 +55,7 @@ public class UserController {
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<List<UserResponse>> getUsers() {
+  public ApiResponse<List<UserResponse>> getUsers() {
     return ApiResponse.<List<UserResponse>>builder()
         .success(true)
         .data(userService.getAll())
@@ -64,7 +64,7 @@ public class UserController {
 
   @GetMapping("/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
+  public ApiResponse<UserResponse> getUser(@PathVariable("userId") Long userId) {
     return ApiResponse.<UserResponse>builder()
         .success(true)
         .data(userService.getById(userId))
@@ -79,7 +79,7 @@ public class UserController {
 
   @PutMapping("/{userId}")
   @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
-  ApiResponse<UserResponse> updateUser(
+  public ApiResponse<UserResponse> updateUser(
       @PathVariable Long userId, @Valid @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
         .success(true)
@@ -89,14 +89,14 @@ public class UserController {
 
   @DeleteMapping("/{userId}")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> deleteUser(@PathVariable Long userId) {
+  public ApiResponse<String> deleteUser(@PathVariable Long userId) {
     userService.delete(userId);
     return ApiResponse.<String>builder().success(true).data("User has been deleted").build();
   }
 
   @DeleteMapping("/delete-multiple")
   @PreAuthorize("hasRole('ADMIN')")
-  ApiResponse<String> deleteMultipleUsers(@RequestBody List<Long> userIds) {
+  public ApiResponse<String> deleteMultipleUsers(@RequestBody List<Long> userIds) {
     userService.deleteMultipleUsers(userIds);
     return ApiResponse.<String>builder()
         .success(true)
