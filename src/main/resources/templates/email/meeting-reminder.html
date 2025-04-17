@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Upcoming Meeting Reminder</title>
+</head>
+<body>
+<h3>Hello, <span th:text="${userName}">[User Name]</span>,</h3>
+<p>You have an upcoming meeting. Please find the details below:</p>
+<ul>
+    <li><b>Room:</b> <span th:text="${roomName}">[Room Name]</span></li>
+    <li><b>Time:</b> <span th:text="${startTime}">[Start Time]</span> - <span th:text="${endTime}">[End Time]</span></li>
+</ul>
+<p>Please be sure to arrive on time!</p>
+</body>
+</html>

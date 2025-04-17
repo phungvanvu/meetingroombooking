@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-  private final String[] PUBLIC_ENDPOINTS = {"/uploads/**", "/auth/**", "/ws/**"};
+  private final String[] PUBLIC_ENDPOINTS = {"/api/v1/uploads/**", "/api/v1/auth/**", "/ws/**"};
 
   private final JwtDecoder jwtDecoder;
 

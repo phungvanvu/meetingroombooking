@@ -5,17 +5,13 @@ import jakarta.persistence.criteria.Join;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,450 +38,357 @@ import org.training.meetingroombooking.service.EmailService;
 import org.training.meetingroombooking.service.NotificationService;
 import org.training.meetingroombooking.service.RoomBookingService;
 
+/** Service implementation for managing room bookings. */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RoomBookingServiceImpl implements RoomBookingService {
 
-  private final RoomBookingRepository roomBookingRepository;
-  private final RoomBookingMapper roomBookingMapper;
+  private static final long REMINDER_INTERVAL_MS = 3_600_000; // 1 hour
+
+  private final RoomBookingRepository roomBookingRepo;
+
+  @Qualifier("roomBookingMapperImpl")
+  private final RoomBookingMapper mapper;
+
   private final EmailService emailService;
-  private final RoomRepository roomRepository;
-  private final UserRepository userRepository;
+  private final RoomRepository roomRepo;
+  private final UserRepository userRepo;
   private final NotificationService notificationService;
 
-  public RoomBookingServiceImpl(
-      RoomBookingRepository roomBookingRepository,
-      RoomBookingMapper roomBookingMapper,
-      EmailService emailService,
-      RoomRepository roomRepository,
-      UserRepository userRepository,
-      NotificationService notificationService) {
-    this.roomBookingRepository = roomBookingRepository;
-    this.roomBookingMapper = roomBookingMapper;
-    this.emailService = emailService;
-    this.roomRepository = roomRepository;
-    this.userRepository = userRepository;
-    this.notificationService = notificationService;
-  }
-
+  @Override
   public RoomBookingDTO create(RoomBookingDTO dto) {
     Room room =
-        roomRepository
-            .findById(dto.getRoomId())
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+        roomRepo.findById(dto.getRoomId()).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     User user =
-        userRepository
+        userRepo
             .findById(dto.getBookedById())
             .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-    boolean isOverlap =
-        roomBookingRepository.existsByRoomAndTimeOverlap(
-            dto.getRoomId(), dto.getStartTime(), dto.getEndTime());
-    if (isOverlap) {
+
+    if (roomBookingRepo.existsByRoomAndTimeOverlap(
+        dto.getRoomId(), dto.getStartTime(), dto.getEndTime())) {
       throw new AppEx(ErrorCode.ALREADY_BOOKED);
     }
-    RoomBooking roomBooking = roomBookingMapper.toEntity(dto);
-    roomBooking.setRoom(room);
-    roomBooking.setBookedBy(user);
-    RoomBooking savedRoomBooking = roomBookingRepository.save(roomBooking);
-    RoomBookingDTO savedDTO = roomBookingMapper.toDTO(savedRoomBooking);
-    // Gửi email xác nhận
-    emailService.sendRoomBookingConfirmationEmail(savedDTO);
-    // Tạo thông báo
-    NotificationDTO notificationDTO =
-        NotificationDTO.builder()
-            .content(
-                "Room '"
-                    + room.getRoomName()
-                    + "' booking successfully from "
-                    + dto.getStartTime()
-                    + " to "
-                    + dto.getEndTime())
-            .type(NotificationType.INFO)
-            .userId(user.getUserId())
-            .build();
-    notificationService.create(notificationDTO);
-    return savedDTO;
+
+    RoomBooking entity = mapper.toEntity(dto);
+    entity.setRoom(room);
+    entity.setBookedBy(user);
+
+    RoomBooking saved = roomBookingRepo.save(entity);
+    RoomBookingDTO result = mapper.toDTO(saved);
+
+    notifyOnCreate(result);
+    return result;
   }
 
-  /**
-   * Lấy danh sách RoomBooking của người dùng hiện hành theo các tiêu chí: - roomName: tìm kiếm theo
-   * tên phòng (không phân biệt chữ hoa chữ thường) - fromTime: thời gian bắt đầu (startTime) từ -
-   * toTime: thời gian kết thúc (endTime) đến - status: trạng thái đặt phòng - Phân trang theo thứ
-   * tự giảm dần của bookingId
-   */
+  private void notifyOnCreate(RoomBookingDTO dto) {
+    emailService.sendRoomBookingConfirmationEmail(dto);
+    String content =
+        String.format(
+            "Room '%s' booked from %s to %s",
+            dto.getRoomName(), dto.getStartTime(), dto.getEndTime());
+    sendNotification(dto.getBookedById(), content, NotificationType.INFO);
+  }
+
+  @Override
   public Page<RoomBookingDTO> searchMyBookings(
       String roomName,
-      LocalDateTime fromTime,
-      LocalDateTime toTime,
+      LocalDateTime from,
+      LocalDateTime to,
       BookingStatus status,
       int page,
       int size) {
-    String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+    Pageable pageable = PageRequest.of(page, size, Sort.by("bookingId").descending());
     Specification<RoomBooking> spec =
-        Specification.where(
-            (root, query, cb) -> cb.equal(root.get("bookedBy").get("userName"), currentUserName));
-    if (roomName != null && !roomName.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
-                return cb.like(
-                    cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
-              });
-    }
-    if (fromTime != null) {
-      spec =
-          spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
-    }
-    if (toTime != null) {
-      spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
-    }
-    if (status != null) {
-      spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
-    }
-    Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
-    return bookingPage.map(roomBookingMapper::toDTO);
+        specByUser(currentUser)
+            .and(specByRoomName(roomName))
+            .and(specByTimeRange(from, to))
+            .and(specByStatus(status));
+    return roomBookingRepo.findAll(spec, pageable).map(mapper::toDTO);
   }
 
+  @Override
   public Page<RoomBookingDTO> searchBookings(
       String roomName,
-      LocalDateTime fromTime,
-      LocalDateTime toTime,
+      LocalDateTime from,
+      LocalDateTime to,
       BookingStatus status,
-      String bookedByName,
+      String userName,
       int page,
       int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by("bookingId").descending());
+    Specification<RoomBooking> spec =
+        specByRoomName(roomName)
+            .and(specByTimeRange(from, to))
+            .and(specByStatus(status))
+            .and(specByBookedByName(userName));
+    return roomBookingRepo.findAll(spec, pageable).map(mapper::toDTO);
+  }
+
+  // Specification helpers
+  private Specification<RoomBooking> specByUser(String userName) {
+    return (root, q, cb) -> cb.equal(root.get("bookedBy").get("userName"), userName);
+  }
+
+  private Specification<RoomBooking> specByRoomName(String roomName) {
+    if (roomName == null || roomName.isBlank()) return Specification.where(null);
+    return (root, q, cb) -> {
+      Join<RoomBooking, Room> room = root.join("room");
+      return cb.like(cb.lower(room.get("roomName")), "%" + roomName.toLowerCase() + "%");
+    };
+  }
+
+  private Specification<RoomBooking> specByTimeRange(LocalDateTime from, LocalDateTime to) {
     Specification<RoomBooking> spec = Specification.where(null);
-
-    if (roomName != null && !roomName.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
-                return cb.like(
-                    cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
-              });
-    }
-    if (fromTime != null) {
-      spec =
-          spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
-    }
-    if (toTime != null) {
-      spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
-    }
-    if (status != null) {
-      spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
-    }
-    // Sử dụng userName trong bookedBy vì nó độc nhất.
-    if (bookedByName != null && !bookedByName.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) -> {
-                Join<RoomBooking, User> userJoin = root.join("bookedBy");
-                return cb.like(
-                    cb.lower(userJoin.get("userName")), "%" + bookedByName.toLowerCase() + "%");
-              });
-    }
-
-    Page<RoomBooking> bookingPage = roomBookingRepository.findAll(spec, pageable);
-    return bookingPage.map(roomBookingMapper::toDTO);
+    if (from != null)
+      spec = spec.and((r, q, cb) -> cb.greaterThanOrEqualTo(r.get("startTime"), from));
+    if (to != null) spec = spec.and((r, q, cb) -> cb.lessThanOrEqualTo(r.get("endTime"), to));
+    return spec;
   }
 
+  private Specification<RoomBooking> specByStatus(BookingStatus status) {
+    return status == null
+        ? Specification.where(null)
+        : (root, q, cb) -> cb.equal(root.get("status"), status);
+  }
+
+  private Specification<RoomBooking> specByBookedByName(String userName) {
+    if (userName == null || userName.isBlank()) return Specification.where(null);
+    return (root, q, cb) -> {
+      Join<RoomBooking, User> user = root.join("bookedBy");
+      return cb.like(cb.lower(user.get("userName")), "%" + userName.toLowerCase() + "%");
+    };
+  }
+
+  @Override
   public List<RoomBookingDTO> getAll() {
-    List<RoomBooking> roomBookings = roomBookingRepository.findAll();
-    return roomBookings.stream().map(roomBookingMapper::toDTO).collect(Collectors.toList());
+    return roomBookingRepo.findAll().stream().map(mapper::toDTO).collect(Collectors.toList());
   }
 
+  @Override
   public List<RoomBookingDTO> getBookingsByUserName(String userName) {
-    List<RoomBooking> roomBookings = roomBookingRepository.findByBookedBy_UserName(userName);
-    return roomBookings.stream().map(roomBookingMapper::toDTO).collect(Collectors.toList());
-  }
-
-  public RoomBookingDTO update(Long bookingId, RoomBookingDTO dto) {
-    RoomBooking roomBooking =
-        roomBookingRepository
-            .findById(bookingId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
-    roomBookingMapper.updateEntity(roomBooking, dto);
-
-    if (dto.getRoomId() != null) {
-      Room room =
-          roomRepository
-              .findById(dto.getRoomId())
-              .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-      roomBooking.setRoom(room);
-    }
-    if (dto.getBookedById() != null) {
-      User user =
-          userRepository
-              .findById(dto.getBookedById())
-              .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-      roomBooking.setBookedBy(user);
-    }
-    if (dto.getStartTime() != null && dto.getEndTime() != null) {
-      // Kiểm tra hợp lệ: startTime không được sau endTime
-      if (dto.getStartTime().isAfter(dto.getEndTime())) {
-        throw new AppEx(ErrorCode.INVALID_TIME_RANGE);
-      }
-      boolean isOverlap =
-          roomBookingRepository.existsByRoomAndTimeOverlapExcludingId(
-              dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), bookingId);
-      if (isOverlap) {
-        throw new AppEx(ErrorCode.ALREADY_BOOKED);
-      }
-      roomBooking.setStartTime(dto.getStartTime());
-      roomBooking.setEndTime(dto.getEndTime());
-    }
-    if (dto.getStatus() != null) {
-      roomBooking.setStatus(dto.getStatus());
-    }
-    RoomBooking updatedRoomBooking = roomBookingRepository.save(roomBooking);
-    RoomBookingDTO updatedDTO = roomBookingMapper.toDTO(updatedRoomBooking);
-
-    User bookingUser = updatedRoomBooking.getBookedBy();
-    NotificationDTO notificationDTO =
-        NotificationDTO.builder()
-            .content(
-                "Your booking for room '"
-                    + updatedRoomBooking.getRoom().getRoomName()
-                    + "' has been updated. New time: "
-                    + updatedRoomBooking.getStartTime()
-                    + " - "
-                    + updatedRoomBooking.getEndTime())
-            .type(NotificationType.INFO)
-            .userId(bookingUser.getUserId())
-            .build();
-    notificationService.create(notificationDTO);
-
-    return updatedDTO;
-  }
-
-  public void delete(Long bookingId) {
-    RoomBooking roomBooking =
-        roomBookingRepository
-            .findById(bookingId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
-
-    String roomName = roomBooking.getRoom().getRoomName();
-    LocalDateTime startTime = roomBooking.getStartTime();
-    LocalDateTime endTime = roomBooking.getEndTime();
-    Long userId = roomBooking.getBookedBy().getUserId();
-    roomBookingRepository.deleteById(bookingId);
-    NotificationDTO notificationDTO =
-        NotificationDTO.builder()
-            .content(
-                "Your booking for room '"
-                    + roomName
-                    + "' from "
-                    + startTime
-                    + " to "
-                    + endTime
-                    + " has been deleted.")
-            .type(NotificationType.WARNING)
-            .userId(userId)
-            .build();
-    notificationService.create(notificationDTO);
-  }
-
-  public ByteArrayOutputStream exportBookingsToExcel() throws IOException {
-    List<RoomBookingDTO> bookings = getAll();
-    try (Workbook workbook = new XSSFWorkbook();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-      Sheet sheet = workbook.createSheet("Bookings");
-      // Tạo hàng tiêu đề
-      Row headerRow = sheet.createRow(0);
-      String[] headers = {
-        "Room ID", "Room Name", "Booked By", "Start Time", "End Time", "Status", "Description"
-      };
-      for (int i = 0; i < headers.length; i++) {
-        Cell cell = headerRow.createCell(i);
-        cell.setCellValue(headers[i]);
-        CellStyle style = workbook.createCellStyle();
-        Font font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        cell.setCellStyle(style);
-      }
-      int rowNum = 1;
-      for (RoomBookingDTO booking : bookings) {
-        Row row = sheet.createRow(rowNum++);
-        if (booking.getRoomId() != null) {
-          row.createCell(0).setCellValue(booking.getRoomId());
-        } else {
-          row.createCell(0).setCellValue("N/A");
-        }
-        row.createCell(1)
-            .setCellValue(booking.getRoomName() != null ? booking.getRoomName() : "N/A");
-        row.createCell(2)
-            .setCellValue(booking.getUserName() != null ? booking.getUserName() : "N/A");
-        row.createCell(3)
-            .setCellValue(
-                booking.getStartTime() != null ? booking.getStartTime().toString() : "N/A");
-        row.createCell(4)
-            .setCellValue(booking.getEndTime() != null ? booking.getEndTime().toString() : "N/A");
-        row.createCell(5)
-            .setCellValue(booking.getStatus() != null ? booking.getStatus().toString() : "N/A");
-        row.createCell(6)
-            .setCellValue(booking.getDescription() != null ? booking.getDescription() : "N/A");
-      }
-      for (int i = 0; i < headers.length; i++) {
-        sheet.autoSizeColumn(i);
-      }
-      workbook.write(outputStream);
-      return outputStream;
-    }
-  }
-
-  @Scheduled(fixedRate = 3600000) // 1h
-  @Transactional
-  public void sendMeetingReminderEmails() {
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime HoursLater = now.plusHours(1);
-    List<RoomBooking> upcomingMeetings = roomBookingRepository.findMeetingsBetween(now, HoursLater);
-    for (RoomBooking booking : upcomingMeetings) {
-      try {
-        emailService.sendMeetingReminderEmail(
-            booking.getBookedBy().getEmail(),
-            booking.getBookedBy().getUserName(),
-            booking.getRoom().getRoomName(),
-            booking.getStartTime().toString(),
-            booking.getEndTime().toString());
-      } catch (MessagingException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
-    Room room =
-        roomRepository.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-    List<RoomBooking> roomBookings = room.getBookings();
-    if (roomBookings.isEmpty()) {
-      return Collections.emptyList();
-    }
-    return roomBookings.stream()
-        .filter(booking -> booking.getStatus() == BookingStatus.CONFIRMED)
-        .map(roomBookingMapper::toDTO)
+    return roomBookingRepo.findByBookedBy_UserName(userName).stream()
+        .map(mapper::toDTO)
         .collect(Collectors.toList());
   }
 
+  @Override
+  public RoomBookingDTO update(Long id, RoomBookingDTO dto) {
+    RoomBooking booking =
+        roomBookingRepo.findById(id).orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+    mapper.updateEntity(booking, dto);
+    applyRoomAndUser(dto, booking);
+    validateAndApplyTime(dto, id, booking);
+    RoomBooking saved = roomBookingRepo.save(booking);
+    notifyOnUpdate(saved);
+    return mapper.toDTO(saved);
+  }
+
+  private void applyRoomAndUser(RoomBookingDTO dto, RoomBooking booking) {
+    if (dto.getRoomId() != null) {
+      Room room =
+          roomRepo.findById(dto.getRoomId()).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+      booking.setRoom(room);
+    }
+    if (dto.getBookedById() != null) {
+      User user =
+          userRepo
+              .findById(dto.getBookedById())
+              .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
+      booking.setBookedBy(user);
+    }
+  }
+
+  private void validateAndApplyTime(RoomBookingDTO dto, Long id, RoomBooking booking) {
+    if (dto.getStartTime() != null && dto.getEndTime() != null) {
+      if (dto.getStartTime().isAfter(dto.getEndTime())) {
+        throw new AppEx(ErrorCode.INVALID_TIME_RANGE);
+      }
+      boolean overlap =
+          roomBookingRepo.existsByRoomAndTimeOverlapExcludingId(
+              dto.getRoomId(), dto.getStartTime(), dto.getEndTime(), id);
+      if (overlap) throw new AppEx(ErrorCode.ALREADY_BOOKED);
+      booking.setStartTime(dto.getStartTime());
+      booking.setEndTime(dto.getEndTime());
+    }
+  }
+
+  private void notifyOnUpdate(RoomBooking booking) {
+    String content =
+        String.format(
+            "Your booking for room '%s' has been updated to %s - %s",
+            booking.getRoom().getRoomName(), booking.getStartTime(), booking.getEndTime());
+    sendNotification(booking.getBookedBy().getUserId(), content, NotificationType.INFO);
+  }
+
+  @Override
+  public void delete(Long id) {
+    RoomBooking booking =
+        roomBookingRepo.findById(id).orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+    roomBookingRepo.deleteById(id);
+    String content =
+        String.format(
+            "Your booking for room '%s' from %s to %s has been deleted.",
+            booking.getRoom().getRoomName(), booking.getStartTime(), booking.getEndTime());
+    sendNotification(booking.getBookedBy().getUserId(), content, NotificationType.WARNING);
+  }
+
+  @Override
+  public ByteArrayOutputStream exportBookingsToExcel() throws IOException {
+    try (Workbook wb = new XSSFWorkbook();
+        ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+      createSheetWithData(wb, getAll());
+      wb.write(out);
+      return out;
+    }
+  }
+
+  private void createSheetWithData(Workbook wb, List<RoomBookingDTO> bookings) {
+    Sheet sheet = wb.createSheet("Bookings");
+    String[] headers = {
+      "Room ID", "Room Name", "Booked By", "Start Time", "End Time", "Status", "Description"
+    };
+    Font bold = wb.createFont();
+    bold.setBold(true);
+    CellStyle hdrStyle = wb.createCellStyle();
+    hdrStyle.setFont(bold);
+    Row hdr = sheet.createRow(0);
+    for (int i = 0; i < headers.length; i++) {
+      Cell c = hdr.createCell(i);
+      c.setCellValue(headers[i]);
+      c.setCellStyle(hdrStyle);
+      sheet.autoSizeColumn(i);
+    }
+    int r = 1;
+    for (RoomBookingDTO dto : bookings) {
+      Row row = sheet.createRow(r++);
+      row.createCell(0).setCellValue(dto.getRoomId());
+      row.createCell(1).setCellValue(dto.getRoomName());
+      row.createCell(2).setCellValue(dto.getUserName());
+      row.createCell(3).setCellValue(dto.getStartTime().toString());
+      row.createCell(4).setCellValue(dto.getEndTime().toString());
+      row.createCell(5).setCellValue(dto.getStatus().name());
+      row.createCell(6).setCellValue(dto.getDescription());
+    }
+  }
+
+  @Override
+  @Scheduled(fixedRate = REMINDER_INTERVAL_MS)
+  @Transactional
+  public void sendMeetingReminderEmails() {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime nextHour = now.plusHours(1);
+    roomBookingRepo.findMeetingsBetween(now, nextHour).forEach(this::sendReminderEmailSafely);
+  }
+
+  private void sendReminderEmailSafely(RoomBooking booking) {
+    try {
+      emailService.sendMeetingReminderEmail(
+          booking.getBookedBy().getEmail(),
+          booking.getBookedBy().getUserName(),
+          booking.getRoom().getRoomName(),
+          booking.getStartTime().toString(),
+          booking.getEndTime().toString());
+    } catch (MessagingException e) {
+      log.error("Failed to send reminder for booking {}", booking.getBookingId(), e);
+    }
+  }
+
+  @Override
+  public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
+    Room room = roomRepo.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    return room.getBookings().stream()
+        .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+        .map(mapper::toDTO)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<RoomBookingDTO> getUpcomingBookings() {
     LocalDateTime now = LocalDateTime.now();
-    List<RoomBooking> upcomingBookings =
-        roomBookingRepository.findByStatusAndStartTimeAfter(BookingStatus.CONFIRMED, now);
-    return upcomingBookings.stream().map(roomBookingMapper::toDTO).collect(Collectors.toList());
+    return roomBookingRepo.findByStatusAndStartTimeAfter(BookingStatus.CONFIRMED, now).stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList());
   }
 
+  @Override
   public List<RoomBookingDTO> getUpcomingBookingsByUserName(String userName) {
     LocalDateTime now = LocalDateTime.now();
-    List<RoomBooking> upcomingBookings =
-        roomBookingRepository.findByBookedBy_UserNameAndStatusAndStartTimeAfter(
-            userName, BookingStatus.CONFIRMED, now);
-    return upcomingBookings.stream().map(roomBookingMapper::toDTO).collect(Collectors.toList());
+    return roomBookingRepo
+        .findByBookedBy_UserNameAndStatusAndStartTimeAfter(userName, BookingStatus.CONFIRMED, now)
+        .stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList());
   }
 
+  @Override
   public List<RoomBookingDTO> getUpcomingBookingsByRoomId(Long roomId) {
     LocalDateTime now = LocalDateTime.now();
-    List<RoomBooking> upcomingBookings =
-        roomBookingRepository.findByRoom_roomIdAndStatusAndStartTimeAfter(
-            roomId, BookingStatus.CONFIRMED, now);
-    return upcomingBookings.stream().map(roomBookingMapper::toDTO).collect(Collectors.toList());
+    return roomBookingRepo
+        .findByRoom_roomIdAndStatusAndStartTimeAfter(roomId, BookingStatus.CONFIRMED, now)
+        .stream()
+        .map(mapper::toDTO)
+        .collect(Collectors.toList());
   }
 
-  /**
-   * Lấy danh sách các booking sắp tới (startTime > hiện tại) của người dùng hiện tại, có: -
-   * roomName: tìm kiếm tên phòng (không phân biệt chữ hoa thường) - fromTime: thời gian bắt đầu từ
-   * - toTime: thời gian kết thúc đến - Phân trang theo thứ tự giảm dần bookingId
-   */
+  @Override
   public Page<RoomBookingDTO> getMyUpcomingBookings(
-      String roomName, LocalDateTime fromTime, LocalDateTime toTime, int page, int size) {
-    String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
+      String roomName, LocalDateTime from, LocalDateTime to, int page, int size) {
+    String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
     LocalDateTime now = LocalDateTime.now();
-    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "bookingId"));
+    Pageable pageable = PageRequest.of(page, size, Sort.by("bookingId").descending());
     Specification<RoomBooking> spec =
-        Specification.where(
-            (root, query, cb) ->
-                cb.and(
-                    cb.equal(root.get("bookedBy").get("userName"), currentUserName),
-                    cb.equal(root.get("status"), BookingStatus.CONFIRMED),
-                    cb.greaterThan(root.get("startTime"), now)));
-    if (roomName != null && !roomName.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) -> {
-                Join<RoomBooking, Room> roomJoin = root.join("room");
-                return cb.like(
-                    cb.lower(roomJoin.get("roomName")), "%" + roomName.toLowerCase() + "%");
-              });
-    }
-    if (fromTime != null) {
-      spec =
-          spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startTime"), fromTime));
-    }
-    if (toTime != null) {
-      spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toTime));
-    }
-    Page<RoomBooking> resultPage = roomBookingRepository.findAll(spec, pageable);
-    return resultPage.map(roomBookingMapper::toDTO);
+        specByUser(currentUser)
+            .and((r, q, cb) -> cb.equal(r.get("status"), BookingStatus.CONFIRMED))
+            .and((r, q, cb) -> cb.greaterThan(r.get("startTime"), now))
+            .and(specByRoomName(roomName))
+            .and(specByTimeRange(from, to));
+    return roomBookingRepo.findAll(spec, pageable).map(mapper::toDTO);
   }
 
-  public RoomBookingDTO cancelBooking(Long bookingId) {
-    RoomBooking roomBooking =
-        roomBookingRepository
-            .findById(bookingId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
-    if (roomBooking.getStatus() == BookingStatus.CANCELLED) {
-      return roomBookingMapper.toDTO(roomBooking);
-    }
-    roomBooking.setStatus(BookingStatus.CANCELLED);
-    RoomBooking cancelledBooking = roomBookingRepository.save(roomBooking);
-    NotificationDTO notificationDTO =
-        NotificationDTO.builder()
-            .content(
-                "Your booking for room '"
-                    + cancelledBooking.getRoom().getRoomName()
-                    + "' from "
-                    + cancelledBooking.getStartTime()
-                    + " to "
-                    + cancelledBooking.getEndTime()
-                    + " has been cancelled.")
-            .type(NotificationType.WARNING)
-            .userId(cancelledBooking.getBookedBy().getUserId())
-            .build();
-    notificationService.create(notificationDTO);
-    return roomBookingMapper.toDTO(cancelledBooking);
-  }
-
+  @Override
   @Transactional
-  public void cancelMultipleBookings(List<Long> bookingIds) {
-    if (bookingIds == null || bookingIds.isEmpty()) {
-      throw new IllegalArgumentException("Booking ids list cannot be empty");
+  public RoomBookingDTO cancelBooking(Long id) {
+    RoomBooking booking =
+        roomBookingRepo.findById(id).orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
+    if (booking.getStatus() != BookingStatus.CANCELLED) {
+      booking.setStatus(BookingStatus.CANCELLED);
+      roomBookingRepo.save(booking);
+      String content =
+          String.format(
+              "Your booking for room '%s' from %s to %s has been cancelled.",
+              booking.getRoom().getRoomName(), booking.getStartTime(), booking.getEndTime());
+      sendNotification(booking.getBookedBy().getUserId(), content, NotificationType.WARNING);
     }
-    List<RoomBooking> bookings = roomBookingRepository.findAllById(bookingIds);
-    if (bookings.size() != bookingIds.size()) {
+    return mapper.toDTO(booking);
+  }
+
+  @Override
+  @Transactional
+  public void cancelMultipleBookings(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      throw new IllegalArgumentException("Booking IDs cannot be empty");
+    }
+    List<RoomBooking> bookings = roomBookingRepo.findAllById(ids);
+    if (bookings.size() != ids.size()) {
       throw new AppEx(ErrorCode.BATCH_CANCELLATION_FAILED);
     }
-    for (RoomBooking booking : bookings) {
-      booking.setStatus(BookingStatus.CANCELLED);
-    }
-    roomBookingRepository.saveAll(bookings);
-    for (RoomBooking booking : bookings) {
-      NotificationDTO notificationDTO =
-          NotificationDTO.builder()
-              .content(
-                  "Your booking for room '"
-                      + booking.getRoom().getRoomName()
-                      + "' from "
-                      + booking.getStartTime()
-                      + " to "
-                      + booking.getEndTime()
-                      + " has been cancelled.")
-              .type(NotificationType.WARNING)
-              .userId(booking.getBookedBy().getUserId())
-              .build();
-      notificationService.create(notificationDTO);
-    }
+    bookings.forEach(b -> b.setStatus(BookingStatus.CANCELLED));
+    roomBookingRepo.saveAll(bookings);
+    bookings.forEach(
+        b -> {
+          String content =
+              String.format(
+                  "Your booking for room '%s' from %s to %s has been cancelled.",
+                  b.getRoom().getRoomName(), b.getStartTime(), b.getEndTime());
+          sendNotification(b.getBookedBy().getUserId(), content, NotificationType.WARNING);
+        });
+  }
+
+  private void sendNotification(Long userId, String content, NotificationType type) {
+    NotificationDTO dto =
+        NotificationDTO.builder().userId(userId).content(content).type(type).build();
+    notificationService.create(dto);
   }
 }

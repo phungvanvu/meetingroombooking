@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Meeting Room Booking Confirmation</title>
+    <style>
+        body, p, table { margin:0; padding:0; border-collapse: collapse; }
+        body {
+            background: #f0f2f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            padding: 20px;
+        }
+        .email-wrap {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg,#5567dd,#33aaff);
+            color: #fff;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .header h1 { font-size: 24px; margin:0; }
+        .body {
+            padding: 30px 20px;
+        }
+        .body h2 { font-size: 20px; margin-bottom:16px; }
+        .body p { margin-bottom:20px; font-size:15px; line-height:1.6; }
+        table.details {
+            width: 100%;
+            table-layout: fixed;
+            background: #f7f9fc;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        table.details th, table.details td {
+            padding: 12px;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+        table.details th {
+            text-align: left;
+            background: #eef2f5;
+            font-weight: bold;
+            font-size: 13px;
+            color: #555;
+            width: 25%;
+        }
+        table.details td {
+            font-size: 14px;
+            color: #333;
+        }
+        .cta {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .cta a {
+            background: #33aaff;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .cta a:hover { background: #2196f3; }
+        .footer {
+            background: #edf2f7;
+            padding: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+        }
+        @media (max-width:600px) {
+            table.details, table.details tr, table.details th, table.details td {
+                display: block; width: 100%;
+            }
+            table.details th {
+                background: transparent; padding-top:10px;
+            }
+            table.details td { padding-bottom:10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrap">
+    <div class="header">
+        <h1>🎉 Booking Confirmed!</h1>
+    </div>
+    <div class="body">
+        <h2>Hello <span th:text="${userName}">User</span>,</h2>
+        <p>Your meeting room booking is confirmed. Details below:</p>
+
+        <table class="details">
+            <!-- Row 1: Room / Purpose -->
+            <tr>
+                <th>🏢 Room</th>
+                <td th:text="${roomName}"></td>
+                <th>🎯 Purpose</th>
+                <td th:text="${purpose}"></td>
+            </tr>
+            <!-- Row 2: Status / Start Time -->
+            <tr>
+                <th>⌚️ Start Time</th>
+                <td th:text="${startTime}"></td>
+                <th>⌚️ End Time</th>
+                <td th:text="${endTime}"></td>
+            </tr>
+            <!-- Row 3: End Time / Created At -->
+            <tr>
+                <th>📌 Status</th>
+                <td th:text="${status}">CONFIRMED</td>
+                <th>📅 Created At</th>
+                <td th:text="${createdAt}"></td>
+            </tr>
+            <!-- Row 4: Description full width -->
+            <tr>
+                <th>Description</th>
+                <td th:colspan="3" th:text="${description}">
+                </td>
+            </tr>
+        </table>
+
+        <div class="cta">
+            <a th:href="@{'http://localhost:3000/MyBookings'}">View My Bookings</a>
+        </div>
+
+        <p>Thank you for choosing our Meeting Room Booking service!</p>
+    </div>
+    <div class="footer">
+        &copy; 2025 MeetingRoomBooking. All rights reserved.
+    </div>
+</div>
+</body>
+</html>

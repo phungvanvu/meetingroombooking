@@ -2,10 +2,13 @@ package org.training.meetingroombooking.service.impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.time.format.DateTimeFormatter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.models.Room;
@@ -21,16 +24,21 @@ public class EmailServiceImpl implements EmailService {
   private final JavaMailSender mailSender;
   private final RoomRepository roomRepository;
   private final UserRepository userRepository;
+  private final TemplateEngine templateEngine;
 
   public EmailServiceImpl(
-      JavaMailSender mailSender, RoomRepository roomRepository, UserRepository userRepository) {
+      JavaMailSender mailSender,
+      RoomRepository roomRepository,
+      UserRepository userRepository,
+      TemplateEngine templateEngine) {
     this.mailSender = mailSender;
     this.roomRepository = roomRepository;
     this.userRepository = userRepository;
+    this.templateEngine = templateEngine;
   }
 
-  // Phương thức chung để gửi email HTML
   @Async
+  @Override
   public void sendHtmlEmail(String to, String subject, String htmlBody) throws MessagingException {
     MimeMessage message = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -42,6 +50,7 @@ public class EmailServiceImpl implements EmailService {
   }
 
   @Async
+  @Override
   public void sendRoomBookingConfirmationEmail(RoomBookingDTO dto) {
     try {
       Room room =
@@ -52,65 +61,38 @@ public class EmailServiceImpl implements EmailService {
           userRepository
               .findById(dto.getBookedById())
               .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-
-      String userEmail = user.getEmail();
-      System.out.println("Sending email to: " + userEmail);
-
-      String subject = "Meeting room booking confirmation successful";
-      String htmlBody =
-          "<h3>Greet "
-              + (user.getFullName() != null ? user.getFullName() : "N/A")
-              + ",</h3>"
-              + "<p>You have successfully booked a meeting room!</p>"
-              + "<ul>"
-              + "<li><b>Title:</b> "
-              + (dto.getPurpose() != null ? dto.getPurpose().toString() : "N/A")
-              + "</li>"
-              + "<li><b>Room:</b> "
-              + (room.getRoomName() != null ? room.getRoomName() : "N/A")
-              + "</li>"
-              + "<li><b>Time:</b> "
-              + (dto.getStartTime() != null ? dto.getStartTime().toString() : "N/A")
-              + " - "
-              + (dto.getEndTime() != null ? dto.getEndTime().toString() : "N/A")
-              + "</li>"
-              + "<li><b>Status:</b> "
-              + (dto.getStatus() != null ? dto.getStatus().toString() : "N/A")
-              + "</li>"
-              + "<li><b>Description:</b> "
-              + (dto.getDescription() != null ? dto.getDescription() : "N/A")
-              + "</li>"
-              + "<li><b>Created at:</b> "
-              + (dto.getCreatedAt() != null ? dto.getCreatedAt().toString() : "N/A")
-              + "</li>"
-              + "</ul>"
-              + "<p>Thank you for using our service!</p>";
-      sendHtmlEmail(userEmail, subject, htmlBody);
+      DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+      Context ctx = new Context();
+      ctx.setVariable("userName", user.getFullName());
+      ctx.setVariable("roomName", room.getRoomName());
+      ctx.setVariable("purpose", dto.getPurpose());
+      ctx.setVariable("status", dto.getStatus());
+      ctx.setVariable("description", dto.getDescription());
+      ctx.setVariable("startTime", dto.getStartTime().format(fmt));
+      ctx.setVariable("endTime", dto.getEndTime().format(fmt));
+      ctx.setVariable("createdAt", dto.getCreatedAt().format(fmt));
+      String htmlContent = templateEngine.process("booking-confirmation", ctx);
+      sendHtmlEmail(user.getEmail(), "Meeting room booking confirmation", htmlContent);
     } catch (MessagingException e) {
       System.err.println("Failed to send email: " + e.getMessage());
     }
   }
 
+  @Async
+  @Override
   public void sendMeetingReminderEmail(
       String to, String userName, String roomName, String startTime, String endTime)
       throws MessagingException {
-    String subject = "Upcoming meeting reminder";
-    String htmlBody =
-        "<h3>Greet "
-            + userName
-            + ",</h3>"
-            + "<p>You have a meeting coming up.</p>"
-            + "<ul>"
-            + "<li><b>Room:</b> "
-            + roomName
-            + "</li>"
-            + "<li><b>Time:</b> "
-            + startTime
-            + " - "
-            + endTime
-            + "</li>"
-            + "</ul>"
-            + "<p>Please arrive on time!</p>";
-    sendHtmlEmail(to, subject, htmlBody);
+    try {
+      Context context = new Context();
+      context.setVariable("userName", userName);
+      context.setVariable("roomName", roomName);
+      context.setVariable("startTime", startTime);
+      context.setVariable("endTime", endTime);
+      String htmlContent = templateEngine.process("meeting-reminder", context);
+      sendHtmlEmail(to, "Upcoming Meeting Reminder", htmlContent);
+    } catch (MessagingException e) {
+      System.err.println("Failed to send email: " + e.getMessage());
+    }
   }
 }

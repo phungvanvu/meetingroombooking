@@ -24,6 +24,5 @@ public interface RoomBookingMapper {
 
   @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")
   @Mapping(target = "room", source = "roomId", qualifiedByName = "mapRoomIdToRoom")
-  @Mapping(target = "status", ignore = true)
   void updateEntity(@MappingTarget RoomBooking entity, RoomBookingDTO dto);
 }

@@ -24,6 +24,42 @@ public class GroupServiceImpl implements GroupService {
     this.groupMapper = groupMapper;
   }
 
+  private Sort getSort(String sortBy, String sortDirection) {
+    return sortDirection.equalsIgnoreCase("DESC")
+        ? Sort.by(sortBy).descending()
+        : Sort.by(sortBy).ascending();
+  }
+
+  private Specification<GroupEntity> createSearchSpecification(
+      String groupName, String location, String division) {
+    Specification<GroupEntity> spec = Specification.where(null);
+    if (groupName != null && !groupName.isEmpty()) {
+      spec =
+          spec.and(
+              (root, query, cb) ->
+                  cb.like(cb.lower(root.get("groupName")), "%" + groupName.toLowerCase() + "%"));
+    }
+    if (location != null && !location.isEmpty()) {
+      spec =
+          spec.and(
+              (root, query, cb) ->
+                  cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%"));
+    }
+    if (division != null && !division.isEmpty()) {
+      spec =
+          spec.and(
+              (root, query, cb) ->
+                  cb.like(cb.lower(root.get("division")), "%" + division.toLowerCase() + "%"));
+    }
+    return spec;
+  }
+
+  private void checkGroupExistence(String groupName) {
+    if (!groupRepository.existsById(groupName)) {
+      throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
+    }
+  }
+
   @Override
   public GroupDTO create(GroupDTO dto) {
     if (groupRepository.existsById(dto.getGroupName())) {
@@ -47,55 +83,32 @@ public class GroupServiceImpl implements GroupService {
       int size,
       String sortBy,
       String sortDirection) {
-    Sort sort =
-        sortDirection.equalsIgnoreCase("DESC")
-            ? Sort.by(sortBy).descending()
-            : Sort.by(sortBy).ascending();
-    Pageable pageable = PageRequest.of(page, size, sort);
-
-    Specification<GroupEntity> spec = Specification.where(null);
-    if (groupName != null && !groupName.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) ->
-                  cb.like(cb.lower(root.get("groupName")), "%" + groupName.toLowerCase() + "%"));
-    }
-    if (location != null && !location.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) ->
-                  cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%"));
-    }
-    if (division != null && !division.isEmpty()) {
-      spec =
-          spec.and(
-              (root, query, cb) ->
-                  cb.like(cb.lower(root.get("division")), "%" + division.toLowerCase() + "%"));
-    }
-
+    Pageable pageable = PageRequest.of(page, size, getSort(sortBy, sortDirection));
+    Specification<GroupEntity> spec = createSearchSpecification(groupName, location, division);
     return groupRepository.findAll(spec, pageable).map(groupMapper::toDTO);
   }
 
   @Override
   public GroupDTO getById(String groupName) {
-    GroupEntity entity =
-        groupRepository.findById(groupName).orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
-    return groupMapper.toDTO(entity);
+    checkGroupExistence(groupName);
+    return groupRepository
+        .findById(groupName)
+        .map(groupMapper::toDTO)
+        .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
   }
 
   @Override
   public GroupDTO update(String groupName, GroupDTO dto) {
-    GroupEntity entity =
-        groupRepository.findById(groupName).orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
+    checkGroupExistence(groupName);
+    GroupEntity entity = groupRepository.findById(groupName).get();
     groupMapper.updateEntity(entity, dto);
     return groupMapper.toDTO(groupRepository.save(entity));
   }
 
   @Override
   public void delete(String groupName) {
-    GroupEntity entity =
-        groupRepository.findById(groupName).orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
-    groupRepository.delete(entity);
+    checkGroupExistence(groupName);
+    groupRepository.deleteById(groupName);
   }
 
   @Override
@@ -104,12 +117,10 @@ public class GroupServiceImpl implements GroupService {
     if (groupNames == null || groupNames.isEmpty()) {
       throw new AppEx(ErrorCode.INVALID_INPUT);
     }
-
     List<GroupEntity> groups = groupRepository.findAllById(groupNames);
     if (groups.size() != groupNames.size()) {
       throw new AppEx(ErrorCode.GROUP_NOT_FOUND);
     }
-
     groupRepository.deleteAll(groups);
   }
 }
