@@ -36,7 +36,6 @@ class GroupServiceTest {
             .groupName("Test Group")
             .location("Test Location")
             .division("Test Division")
-            .department("Test Department")
             .createdDate(null)
             .build();
 
@@ -45,13 +44,12 @@ class GroupServiceTest {
             .groupName("Test Group")
             .location("Test Location")
             .division("Test Division")
-            .department("Test Department")
             .createdDate(null)
             .build();
   }
 
   @Test
-  void ***REMOVED***CreateGroup() {
+  void testCreateGroup() {
     // Arrange
     when(groupMapper.toEntity(groupDTO)).thenReturn(groupEntity);
     when(groupRepository.save(groupEntity)).thenReturn(groupEntity);
@@ -67,7 +65,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***GetAllGroups() {
+  void testGetAllGroups() {
     // Arrange
     List<GroupEntity> groupEntities = List.of(groupEntity);
     when(groupRepository.findAll()).thenReturn(groupEntities);
@@ -83,7 +81,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***GetGroupById() {
+  void testGetGroupById() {
     // Arrange
     when(groupRepository.findById("Test Group")).thenReturn(Optional.of(groupEntity));
     when(groupMapper.toDTO(groupEntity)).thenReturn(groupDTO);
@@ -97,7 +95,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***GetGroupByIdNotFound() {
+  void testGetGroupByIdNotFound() {
     // Arrange
     when(groupRepository.findById("Non Existent Group")).thenReturn(Optional.empty());
 
@@ -107,14 +105,13 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***UpdateGroup() {
+  void testUpdateGroup() {
     // Arrange
     GroupDTO updatedGroupDTO =
         GroupDTO.builder()
             .groupName("Test Group")
             .location("Updated Location")
             .division("Updated Division")
-            .department("Updated Department")
             .createdDate(null)
             .build();
 
@@ -123,7 +120,6 @@ class GroupServiceTest {
             .groupName("Test Group")
             .location("Updated Location")
             .division("Updated Division")
-            .department("Updated Department")
             .createdDate(null)
             .build();
 
@@ -148,7 +144,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***DeleteGroup() {
+  void testDeleteGroup() {
     // Arrange
     when(groupRepository.existsById("Test Group")).thenReturn(true);
 
@@ -160,7 +156,7 @@ class GroupServiceTest {
   }
 
   @Test
-  void ***REMOVED***DeleteGroupNotFound() {
+  void testDeleteGroupNotFound() {
     // Arrange
     when(groupRepository.existsById("Non Existent Group")).thenReturn(false);
 
