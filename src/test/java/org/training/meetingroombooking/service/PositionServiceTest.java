@@ -34,7 +34,7 @@ class PositionServiceTest {
   }
 
   @Test
-  void ***REMOVED***CreatePosition() {
+  void testCreatePosition() {
     when(positionMapper.toEntity(positionDTO)).thenReturn(position);
     when(positionRepository.save(position)).thenReturn(position);
     when(positionMapper.toDTO(position)).thenReturn(positionDTO);
@@ -47,7 +47,7 @@ class PositionServiceTest {
   }
 
   @Test
-  void ***REMOVED***GetAllPositions() {
+  void testGetAllPositions() {
     when(positionRepository.findAll()).thenReturn(List.of(position));
     when(positionMapper.toDTO(position)).thenReturn(positionDTO);
 
@@ -59,7 +59,7 @@ class PositionServiceTest {
   }
 
   @Test
-  void ***REMOVED***UpdatePosition() {
+  void testUpdatePosition() {
     when(positionRepository.findById("Manager")).thenReturn(Optional.of(position));
 
     doNothing().when(positionMapper).updatePosition(position, positionDTO);
@@ -75,14 +75,14 @@ class PositionServiceTest {
   }
 
   @Test
-  void ***REMOVED***UpdatePositionNotFound() {
+  void testUpdatePositionNotFound() {
     when(positionRepository.findById("Manager")).thenReturn(Optional.empty());
 
     assertThrows(AppEx.class, () -> positionService.update("Manager", positionDTO));
   }
 
   @Test
-  void ***REMOVED***DeletePosition() {
+  void testDeletePosition() {
     when(positionRepository.existsById("Manager")).thenReturn(true);
 
     positionService.deletePosition("Manager");
@@ -91,7 +91,7 @@ class PositionServiceTest {
   }
 
   @Test
-  void ***REMOVED***DeletePositionNotFound() {
+  void testDeletePositionNotFound() {
     when(positionRepository.existsById("Manager")).thenReturn(false);
 
     assertThrows(AppEx.class, () -> positionService.deletePosition("Manager"));

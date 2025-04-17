@@ -49,12 +49,12 @@
 //  @Test
 //  void authenticate_ShouldReturnTokens_WhenValidCredentials() {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //    user.setPassword(new BCryptPasswordEncoder().encode("password"));
 //
-//    AuthRequest request = new AuthRequest("***REMOVED***User", "password");
+//    AuthRequest request = new AuthRequest("testUser", "password");
 //
-//    when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.of(user));
+//    when(userRepository.findByUserName("testUser")).thenReturn(Optional.of(user));
 //
 //    AuthResponse response = authService.authenticate(request);
 //
@@ -65,8 +65,8 @@
 //
 //  @Test
 //  void authenticate_ShouldThrowException_WhenInvalidCredentials() {
-//    AuthRequest request = new AuthRequest("***REMOVED***User", "wrongPassword");
-//    when(userRepository.findByUserName("***REMOVED***User")).thenReturn(Optional.empty());
+//    AuthRequest request = new AuthRequest("testUser", "wrongPassword");
+//    when(userRepository.findByUserName("testUser")).thenReturn(Optional.empty());
 //
 //    assertThrows(AppEx.class, () -> authService.authenticate(request));
 //  }
@@ -95,7 +95,7 @@
 //  @Test
 //  void refreshToken_ShouldReturnNewToken_WhenValid() throws Exception {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //
 //    String oldToken = authService.generateToken(user, 30);
 //    RefreshRequest request = new RefreshRequest(oldToken);
@@ -124,31 +124,31 @@
 //  @Test
 //  void generateToken_ShouldReturnValidToken() throws ParseException, JOSEException {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //
 //    String token = authService.generateToken(user, 30);
 //    SignedJWT signedJWT = SignedJWT.parse(token);
 //
-//    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+//    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testUser");
 //    assertThat(signedJWT.getJWTClaimsSet().getIssuer()).isEqualTo("meeting-room-booking");
 //  }
 //
 //  @Test
 //  void verifyToken_ShouldReturnSignedJWT_WhenTokenIsValid() throws Exception {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //
 //    String token = authService.generateToken(user, 30);
 //    SignedJWT signedJWT = authService.verifyToken(token);
 //
 //    assertThat(signedJWT).isNotNull();
-//    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("***REMOVED***User");
+//    assertThat(signedJWT.getJWTClaimsSet().getSubject()).isEqualTo("testUser");
 //  }
 //
 //  @Test
 //  void verifyToken_ShouldThrowException_WhenTokenIsExpired() {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //
 //    String expiredToken = authService.generateToken(user, -1); // Token hết hạn
 //    assertThrows(AppEx.class, () -> authService.verifyToken(expiredToken));
@@ -167,7 +167,7 @@
 //  @Test
 //  void refreshToken_ShouldThrowException_WhenTokenIsBlacklisted() throws Exception {
 //    User user = new User();
-//    user.setUserName("***REMOVED***User");
+//    user.setUserName("testUser");
 //
 //    String token = authService.generateToken(user, 30);
 //    RefreshRequest request = new RefreshRequest(token);
