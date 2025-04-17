@@ -25,7 +25,7 @@ public interface UserService {
 
   ByteArrayOutputStream exportUserToExcel() throws IOException;
 
-  UserResponse getById(long userId);
+  UserResponse getById(Long userId);
 
   UserResponse getMyInfo();
 

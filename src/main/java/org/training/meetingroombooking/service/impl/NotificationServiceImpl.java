@@ -32,6 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     this.userRepository = userRepository;
   }
 
+  @Override
   public NotificationDTO create(NotificationDTO dto) {
     User user =
         userRepository
@@ -43,16 +44,19 @@ public class NotificationServiceImpl implements NotificationService {
     return notificationMapper.toDTO(savedNotification);
   }
 
+  @Override
   public List<NotificationDTO> getAll() {
     List<Notification> notifications = notificationRepository.findAll();
     return notifications.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
   }
 
+  @Override
   public List<NotificationDTO> getNotificationsByUserName(String userName) {
     List<Notification> notifications = notificationRepository.findByUser_UserName(userName);
     return notifications.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
   }
 
+  @Override
   public List<NotificationDTO> getMyNotifications() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     String username = authentication.getName();
@@ -61,6 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
     return notifications.stream().map(notificationMapper::toDTO).collect(Collectors.toList());
   }
 
+  @Override
   public NotificationDTO update(Long id, NotificationDTO dto) {
     Notification existingNotification =
         notificationRepository
@@ -78,6 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
     return notificationMapper.toDTO(updatedNotification);
   }
 
+  @Override
   public void delete(Long id) {
     if (!notificationRepository.existsById(id)) {
       throw new AppEx(ErrorCode.NOTIFICATION_NOT_FOUND);

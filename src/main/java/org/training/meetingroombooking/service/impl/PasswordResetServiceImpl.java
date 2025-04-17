@@ -35,6 +35,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     this.passwordEncoder = new BCryptPasswordEncoder(10);
   }
 
+  @Override
   public String initiatePasswordReset(String email) throws MessagingException {
     Optional<User> optionalUser = userRepository.findByEmail(email);
     if (optionalUser.isPresent()) {
@@ -59,6 +60,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     return "If an account with that email exists, an OTP has been sent to your email address.";
   }
 
+  @Override
   public void resetPassword(String email, String otpCode, String newPassword) {
     PasswordResetOtp passwordResetOtp =
         otpRepository

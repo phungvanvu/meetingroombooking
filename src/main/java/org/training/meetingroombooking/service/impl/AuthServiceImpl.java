@@ -56,18 +56,19 @@ public class AuthServiceImpl implements AuthService {
     this.invalidatedTokenRepository = invalidatedTokenRepository;
   }
 
+  @Override
   public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException {
     var token = request.getToken();
     verifyToken(token, ACCESS_SECRET);
     return IntrospectResponse.builder().valid(true).build();
   }
 
+  @Override
   public AuthResponse authenticate(AuthRequest request) {
     var user =
         userRepository
             .findByUserName(request.getUsername())
             .orElseThrow(() -> new AppEx(ErrorCode.INVALID_LOGIN));
-
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
       throw new AppEx(ErrorCode.INVALID_LOGIN);
@@ -81,18 +82,29 @@ public class AuthServiceImpl implements AuthService {
     return AuthResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
   }
 
+  @Override
   public void logout(LogoutRequest request) throws ParseException, JOSEException {
     try {
-      var signedJWT = verifyToken(request.getToken(), REFRESH_SECRET);
-      String jit = signedJWT.getJWTClaimsSet().getJWTID();
-      Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-      invalidatedTokenRepository.save(
-          InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build());
+      if (request.getRefreshToken() != null) {
+        var refreshJWT = verifyToken(request.getRefreshToken(), REFRESH_SECRET);
+        String refreshJit = refreshJWT.getJWTClaimsSet().getJWTID();
+        Date refreshExp = refreshJWT.getJWTClaimsSet().getExpirationTime();
+        invalidatedTokenRepository.save(
+            InvalidatedToken.builder().id(refreshJit).expiryTime(refreshExp).build());
+      }
+      if (request.getAccessToken() != null) {
+        var accessJWT = verifyToken(request.getAccessToken(), ACCESS_SECRET);
+        String accessJit = accessJWT.getJWTClaimsSet().getJWTID();
+        Date accessExp = accessJWT.getJWTClaimsSet().getExpirationTime();
+        invalidatedTokenRepository.save(
+            InvalidatedToken.builder().id(accessJit).expiryTime(accessExp).build());
+      }
     } catch (AppEx e) {
-      log.info("Token already expired");
+      log.info("Token already expired or invalid");
     }
   }
 
+  @Override
   public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
     var signedJWT = verifyToken(request.getToken(), REFRESH_SECRET);
 

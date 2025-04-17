@@ -1,7 +1,6 @@
 package org.training.meetingroombooking.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,33 +32,14 @@ public class EquipmentServiceImpl implements EquipmentService {
     this.roomEquipmentRepository = roomEquipmentRepository;
   }
 
-  public EquipmentDTO create(EquipmentDTO equipmentDTO) {
-    boolean exists = equipmentRepository.existsById(equipmentDTO.getEquipmentName());
-    if (exists) {
-      throw new AppEx(ErrorCode.EQUIPMENT_ALREADY_EXISTS);
-    }
-    Equipment entity = equipmentMapper.toEntity(equipmentDTO);
-    Equipment savedEquipment = equipmentRepository.save(entity);
-    return equipmentMapper.toDTO(savedEquipment);
+  private Sort getSort(String sortBy, String sortDirection) {
+    return sortDirection.equalsIgnoreCase("DESC")
+        ? Sort.by(sortBy).descending()
+        : Sort.by(sortBy).ascending();
   }
 
-  public List<EquipmentDTO> getAll() {
-    return equipmentRepository.findAll().stream().map(equipmentMapper::toDTO).toList();
-  }
-
-  public Page<EquipmentDTO> getEquipments(
-      String equipmentName,
-      String description,
-      Boolean available,
-      int page,
-      int size,
-      String sortBy,
-      String sortDirection) {
-    Sort sort =
-        sortDirection.equalsIgnoreCase("DESC")
-            ? Sort.by(sortBy).descending()
-            : Sort.by(sortBy).ascending();
-    Pageable pageable = PageRequest.of(page, size, sort);
+  private Specification<Equipment> createSearchSpecification(
+      String equipmentName, String description, Boolean available) {
     Specification<Equipment> spec = Specification.where(null);
     if (equipmentName != null && !equipmentName.isEmpty()) {
       spec =
@@ -79,35 +59,71 @@ public class EquipmentServiceImpl implements EquipmentService {
     if (available != null) {
       spec = spec.and((root, query, cb) -> cb.equal(root.get("available"), available));
     }
+    return spec;
+  }
+
+  private void checkEquipmentExistence(String equipmentName) {
+    if (!equipmentRepository.existsById(equipmentName)) {
+      throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+    }
+  }
+
+  @Override
+  public EquipmentDTO create(EquipmentDTO equipmentDTO) {
+    if (equipmentRepository.existsById(equipmentDTO.getEquipmentName())) {
+      throw new AppEx(ErrorCode.EQUIPMENT_ALREADY_EXISTS);
+    }
+    Equipment entity = equipmentMapper.toEntity(equipmentDTO);
+    Equipment savedEquipment = equipmentRepository.save(entity);
+    return equipmentMapper.toDTO(savedEquipment);
+  }
+
+  @Override
+  public List<EquipmentDTO> getAll() {
+    return equipmentRepository.findAll().stream().map(equipmentMapper::toDTO).toList();
+  }
+
+  @Override
+  public Page<EquipmentDTO> getEquipments(
+      String equipmentName,
+      String description,
+      Boolean available,
+      int page,
+      int size,
+      String sortBy,
+      String sortDirection) {
+    Pageable pageable = PageRequest.of(page, size, getSort(sortBy, sortDirection));
+    Specification<Equipment> spec =
+        createSearchSpecification(equipmentName, description, available);
     Page<Equipment> equipmentPage = equipmentRepository.findAll(spec, pageable);
     return equipmentPage.map(equipmentMapper::toDTO);
   }
 
+  @Override
   public EquipmentDTO getById(String equipmentName) {
-    Optional<Equipment> equipment = equipmentRepository.findById(equipmentName);
-    return equipment
+    checkEquipmentExistence(equipmentName);
+    return equipmentRepository
+        .findById(equipmentName)
         .map(equipmentMapper::toDTO)
         .orElseThrow(() -> new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND));
   }
 
+  @Override
   public EquipmentDTO update(String equipmentName, EquipmentDTO equipmentDTO) {
-    Optional<Equipment> existingEquipment = equipmentRepository.findById(equipmentName);
-    if (existingEquipment.isPresent()) {
-      Equipment equipment = existingEquipment.get();
-      equipmentMapper.updateEntity(equipment, equipmentDTO);
-      Equipment updatedEquipment = equipmentRepository.save(equipment);
-      return equipmentMapper.toDTO(updatedEquipment);
-    }
-    throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
+    checkEquipmentExistence(equipmentName);
+    Equipment existingEquipment = equipmentRepository.findById(equipmentName).get();
+    equipmentMapper.updateEntity(existingEquipment, equipmentDTO);
+    Equipment updatedEquipment = equipmentRepository.save(existingEquipment);
+    return equipmentMapper.toDTO(updatedEquipment);
   }
 
+  @Override
   public void delete(String equipmentName) {
-    if (!equipmentRepository.existsById(equipmentName)) {
-      throw new AppEx(ErrorCode.EQUIPMENT_NOT_FOUND);
-    }
+    checkEquipmentExistence(equipmentName);
     equipmentRepository.deleteById(equipmentName);
   }
 
+  @Override
   public void deleteMultipleEquipments(List<String> equipmentNames) {
     if (equipmentNames == null || equipmentNames.isEmpty()) {
       throw new AppEx(ErrorCode.INVALID_INPUT);

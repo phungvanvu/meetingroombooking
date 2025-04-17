@@ -1,7 +1,7 @@
 package org.training.meetingroombooking.service.impl;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +19,7 @@ import org.training.meetingroombooking.service.PositionService;
 
 @Service
 public class PositionServiceImpl implements PositionService {
+
   private final PositionRepository positionRepository;
   private final PositionMapper positionMapper;
 
@@ -27,9 +28,9 @@ public class PositionServiceImpl implements PositionService {
     this.positionMapper = positionMapper;
   }
 
+  @Override
   public PositionDTO create(PositionDTO dto) {
-    boolean exists = positionRepository.existsById(dto.getPositionName());
-    if (exists) {
+    if (positionRepository.existsById(dto.getPositionName())) {
       throw new AppEx(ErrorCode.POSITION_ALREADY_EXISTS);
     }
     Position entity = positionMapper.toEntity(dto);
@@ -37,11 +38,14 @@ public class PositionServiceImpl implements PositionService {
     return positionMapper.toDTO(savedPosition);
   }
 
+  @Override
   public List<PositionDTO> getAll() {
-    List<Position> positions = positionRepository.findAll();
-    return positions.stream().map(positionMapper::toDTO).toList();
+    return positionRepository.findAll().stream()
+        .map(positionMapper::toDTO)
+        .collect(Collectors.toList());
   }
 
+  @Override
   public Page<PositionDTO> getPositions(
       String positionName,
       String description,
@@ -49,11 +53,19 @@ public class PositionServiceImpl implements PositionService {
       int size,
       String sortBy,
       String sortDirection) {
-    Sort sort =
-        sortDirection.equalsIgnoreCase("DESC")
-            ? Sort.by(sortBy).descending()
-            : Sort.by(sortBy).ascending();
-    Pageable pageable = PageRequest.of(page, size, sort);
+    Pageable pageable = PageRequest.of(page, size, getSort(sortBy, sortDirection));
+    Specification<Position> spec = createSearchSpecification(positionName, description);
+    Page<Position> positionPage = positionRepository.findAll(spec, pageable);
+    return positionPage.map(positionMapper::toDTO);
+  }
+
+  private Sort getSort(String sortBy, String sortDirection) {
+    return Sort.by(
+        sortDirection.equalsIgnoreCase("DESC") ? Sort.Order.desc(sortBy) : Sort.Order.asc(sortBy));
+  }
+
+  private Specification<Position> createSearchSpecification(
+      String positionName, String description) {
     Specification<Position> spec = Specification.where(null);
     if (positionName != null && !positionName.isEmpty()) {
       spec =
@@ -69,46 +81,42 @@ public class PositionServiceImpl implements PositionService {
                   cb.like(
                       cb.lower(root.get("description")), "%" + description.toLowerCase() + "%"));
     }
-    Page<Position> positionPage = positionRepository.findAll(spec, pageable);
-    return positionPage.map(positionMapper::toDTO);
+    return spec;
   }
 
+  @Override
   public PositionDTO update(String positionName, PositionDTO dto) {
     Position position =
         positionRepository
             .findById(positionName)
             .orElseThrow(() -> new AppEx(ErrorCode.POSITION_NOT_FOUND));
+
     positionMapper.updatePosition(position, dto);
     Position updatedPosition = positionRepository.save(position);
     return positionMapper.toDTO(updatedPosition);
   }
 
+  @Override
   public void deletePosition(String positionName) {
-    Optional<Position> positionOptional = positionRepository.findById(positionName);
-    if (!positionOptional.isPresent()) {
-      throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
-    }
-    Position position = positionOptional.get();
-    //        if (userRepository.existsByPosition(position)) {
-    //            throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
-    //        }
-    positionRepository.delete(position);
+    positionRepository
+        .findById(positionName)
+        .ifPresentOrElse(
+            positionRepository::delete,
+            () -> {
+              throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
+            });
   }
 
+  @Override
   @Transactional
-  public void deleteMultiplePositions(List<String> positionName) {
-    if (positionName == null || positionName.isEmpty()) {
+  public void deleteMultiplePositions(List<String> positionNames) {
+    if (positionNames == null || positionNames.isEmpty()) {
       throw new AppEx(ErrorCode.INVALID_INPUT);
     }
-    List<Position> positions = positionRepository.findAllById(positionName);
-    if (positions.size() != positionName.size()) {
+    List<Position> positions = positionRepository.findAllById(positionNames);
+    if (positions.size() != positionNames.size()) {
       throw new AppEx(ErrorCode.POSITION_NOT_FOUND);
     }
-    //        for (Position position : positions) {
-    //            if (userRepository.existsByPosition(position)) {
-    //                throw new AppEx(ErrorCode.CANNOT_DELETE_POSITION_IN_USE);
-    //            }
-    //        }
     positionRepository.deleteAll(positions);
   }
 }

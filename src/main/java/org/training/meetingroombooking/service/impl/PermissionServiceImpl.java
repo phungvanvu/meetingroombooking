@@ -22,6 +22,7 @@ public class PermissionServiceImpl implements PermissionService {
     this.permissionMapper = permissionMapper;
   }
 
+  @Override
   public PermissionDTO create(PermissionDTO permissionDTO) {
     boolean exists = permissionRepository.existsById(permissionDTO.getPermissionName());
     if (exists) {
@@ -32,11 +33,13 @@ public class PermissionServiceImpl implements PermissionService {
     return permissionMapper.toDTO(savedPermission);
   }
 
+  @Override
   public List<PermissionDTO> getAll() {
     var permissions = permissionRepository.findAll();
     return permissions.stream().map(permissionMapper::toDTO).toList();
   }
 
+  @Override
   public PermissionDTO update(String permissionName, PermissionDTO dto) {
     Permission permission =
         permissionRepository
@@ -47,6 +50,7 @@ public class PermissionServiceImpl implements PermissionService {
     return permissionMapper.toDTO(updatedPermission);
   }
 
+  @Override
   public void delete(String permission) {
     if (!permissionRepository.existsById(permission)) {
       throw new AppEx(ErrorCode.PERMISSION_NOT_FOUND);

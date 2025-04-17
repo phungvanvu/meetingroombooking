@@ -37,7 +37,6 @@ public class StatisticalServiceImpl implements StatisticalService {
     this.roomBookingMapper = roomBookingMapper;
   }
 
-  // Top người dùng đặt phòng nhiều nhất
   public List<UserSummaryDTO> getTopUsers(int limit) {
     return roomBookingRepository.findTopUsers(limit).stream()
         .map(
