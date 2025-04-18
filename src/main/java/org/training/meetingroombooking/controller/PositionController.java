@@ -20,6 +20,7 @@ public class PositionController {
   }
 
   @PostMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<PositionDTO> createPosition(@Valid @RequestBody PositionDTO positionDTO) {
     return ApiResponse.<PositionDTO>builder()
         .success(true)
@@ -28,7 +29,6 @@ public class PositionController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<PositionDTO>> getPositions() {
     return ApiResponse.<List<PositionDTO>>builder()
         .success(true)

@@ -26,7 +26,6 @@ public class GroupController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<GroupDTO>> getGroups() {
     return ApiResponse.<List<GroupDTO>>builder().success(true).data(groupService.getAll()).build();
   }

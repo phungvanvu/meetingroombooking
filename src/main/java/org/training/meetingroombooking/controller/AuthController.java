@@ -62,7 +62,6 @@ public class AuthController {
     var result = authService.refreshToken(request);
     return ApiResponse.<AuthResponse>builder().success(true).data(result).build();
   }
-
   /**
    * Endpoint gửi OTP đến email của người dùng để reset mật khẩu.
    *
@@ -85,7 +84,6 @@ public class AuthController {
 
   /**
    * Endpoint reset mật khẩu sau khi người dùng xác thực OTP.
-   *
    * @param email Email của người dùng
    * @param otp Mã OTP nhận được
    * @param newPassword Mật khẩu mới

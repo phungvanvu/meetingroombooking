@@ -38,6 +38,7 @@ public class RoomBookingController {
   }
 
   @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getRoomBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -46,6 +47,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/user/{userName}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByUserName(@PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -54,6 +56,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/by-room-id/{roomId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByRoomId(@PathVariable Long roomId) {
     List<RoomBookingDTO> bookings = roomBookingService.getBookingsByRoomId(roomId);
     return ApiResponse.<List<RoomBookingDTO>>builder().success(true).data(bookings).build();
@@ -79,6 +82,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/upcoming")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getUpcomingBookings() {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)
@@ -87,6 +91,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/upcoming/user/{userName}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByUserName(
       @PathVariable String userName) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
@@ -96,6 +101,7 @@ public class RoomBookingController {
   }
 
   @GetMapping("/upcoming/room/{roomId}")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getUpcomingBookingsByRoomId(@PathVariable Long roomId) {
     return ApiResponse.<List<RoomBookingDTO>>builder()
         .success(true)

@@ -94,7 +94,7 @@
         <h1>🎉 Booking Confirmed!</h1>
     </div>
     <div class="body">
-        <h2>Hello <span th:text="${userName}">User</span>,</h2>
+        <h2>Hello <span th:text="${userName}"></span>,</h2>
         <p>Your meeting room booking is confirmed. Details below:</p>
 
         <table class="details">
@@ -115,7 +115,7 @@
             <!-- Row 3: End Time / Created At -->
             <tr>
                 <th>📌 Status</th>
-                <td th:text="${status}">CONFIRMED</td>
+                <td th:text="${status}"></td>
                 <th>📅 Created At</th>
                 <td th:text="${createdAt}"></td>
             </tr>
