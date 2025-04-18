@@ -51,6 +51,7 @@ public class RoomController {
   }
 
   @GetMapping("/search")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Page<RoomDTO>> searchRooms(
       @RequestParam(value = "roomName", required = false) String roomName,
       @RequestParam(value = "locations", required = false) List<String> locations,

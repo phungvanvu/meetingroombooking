@@ -40,6 +40,7 @@ public class UserController {
   }
 
   @GetMapping("/search")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Page<UserResponse>> searchUsers(
       @RequestParam(value = "fullName", required = false) String fullName,
       @RequestParam(value = "department", required = false) String department,
@@ -72,7 +73,6 @@ public class UserController {
   }
 
   @GetMapping("/my-info")
-  @PostAuthorize("returnObject.data.userName == authentication.name")
   public ApiResponse<UserResponse> getMyInfo() {
     return ApiResponse.<UserResponse>builder().success(true).data(userService.getMyInfo()).build();
   }

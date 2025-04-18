@@ -20,7 +20,6 @@ public class NotificationController {
   }
 
   @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<NotificationDTO> create(@Valid @RequestBody NotificationDTO request) {
     return ApiResponse.<NotificationDTO>builder()
         .success(true)

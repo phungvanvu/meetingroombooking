@@ -35,6 +35,7 @@ public class StatisticalController {
   }
 
   @GetMapping("/statistics")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<ApiResponse<RoomStatisticsDTO>> getRoomStatistics() {
     RoomStatisticsDTO stats = statisticalService.getRoomStatistics();
     ApiResponse<RoomStatisticsDTO> response =
@@ -44,6 +45,7 @@ public class StatisticalController {
 
   // Endpoint: Lấy phòng được đặt nhiều nhất
   @GetMapping("/most-booked-room")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomSummaryDTO> getMostBookedRoom() {
     return ApiResponse.<RoomSummaryDTO>builder()
         .success(true)
@@ -53,6 +55,7 @@ public class StatisticalController {
 
   // Endpoint: Lấy số lượt đặt phòng theo quý
   @GetMapping("/quarterly-bookings")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<BookingSummaryDTO>> getQuarterlyBookings() {
     return ApiResponse.<List<BookingSummaryDTO>>builder()
         .success(true)
@@ -62,6 +65,7 @@ public class StatisticalController {
 
   // Endpoint: Lấy số lượt đặt phòng theo tuần
   @GetMapping("/weekly-bookings")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<BookingSummaryDTO>> getWeeklyBookings() {
     return ApiResponse.<List<BookingSummaryDTO>>builder()
         .success(true)
@@ -71,6 +75,7 @@ public class StatisticalController {
 
   // Endpoint: Lấy số lượt đặt phòng theo tháng
   @GetMapping("/monthly-bookings")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<BookingSummaryDTO>> getMonthlyBookings() {
     return ApiResponse.<List<BookingSummaryDTO>>builder()
         .success(true)
@@ -80,6 +85,7 @@ public class StatisticalController {
 
   // Endpoint: Lấy số lượt đặt phòng trong tháng hiện tại
   @GetMapping("/current-month-bookings")
+  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<BookingSummaryDTO> getCurrentMonthBookings() {
     return ApiResponse.<BookingSummaryDTO>builder()
         .success(true)
