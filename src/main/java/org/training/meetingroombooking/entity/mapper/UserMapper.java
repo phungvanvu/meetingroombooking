@@ -31,16 +31,6 @@ public interface UserMapper {
   @Mapping(target = "group", source = "group", qualifiedByName = "mapStringToGroup")
   void updateEntity(@MappingTarget User user, UserRequest request);
 
-  @Named("mapUserIdToUser")
-  default User mapUserIdToUser(Long userId) {
-    if (userId == null) {
-      return null;
-    }
-    User user = new User();
-    user.setUserId(userId);
-    return user;
-  }
-
   @Named("mapUserToUserId")
   default Long mapUserToUserId(User user) {
     return user != null ? user.getUserId() : null;

@@ -7,14 +7,10 @@ import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 
 @Mapper(
-    componentModel = "spring",
-    uses = {UserMapper.class, RoomMapper.class})
+    componentModel = "spring")
 public interface RoomBookingMapper {
-  @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")
-  @Mapping(target = "room", source = "roomId", qualifiedByName = "mapRoomIdToRoom")
   RoomBooking toEntity(RoomBookingDTO dto);
 
-  @Mapping(target = "bookingId", source = "bookingId")
   @Mapping(target = "bookedById", source = "bookedBy.userId")
   @Mapping(target = "userName", source = "bookedBy.userName")
   @Mapping(target = "roomId", source = "room.roomId")
@@ -22,7 +18,5 @@ public interface RoomBookingMapper {
   @Mapping(target = "userEmail", source = "bookedBy.email")
   RoomBookingDTO toDTO(RoomBooking entity);
 
-  @Mapping(target = "bookedBy", source = "bookedById", qualifiedByName = "mapUserIdToUser")
-  @Mapping(target = "room", source = "roomId", qualifiedByName = "mapRoomIdToRoom")
   void updateEntity(@MappingTarget RoomBooking entity, RoomBookingDTO dto);
 }

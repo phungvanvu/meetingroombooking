@@ -3,119 +3,138 @@ package org.training.meetingroombooking.repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.training.meetingroombooking.entity.dto.Summary.*;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 import org.training.meetingroombooking.entity.models.User;
 
 public interface RoomBookingRepository
-    extends JpaRepository<RoomBooking, Long>, JpaSpecificationExecutor<RoomBooking> {
+        extends JpaRepository<RoomBooking, Long>, JpaSpecificationExecutor<RoomBooking> {
 
+  // Lấy booking theo trạng thái và thời gian bắt đầu
   List<RoomBooking> findByStatusAndStartTimeAfter(BookingStatus status, LocalDateTime time);
 
+  // Lấy booking theo userName, trạng thái và thời gian bắt đầu
   List<RoomBooking> findByBookedBy_UserNameAndStatusAndStartTimeAfter(
-      String userName, BookingStatus status, LocalDateTime time);
+          String userName, BookingStatus status, LocalDateTime time);
 
+  // Lấy booking theo phòng, trạng thái và thời gian bắt đầu
   List<RoomBooking> findByRoom_roomIdAndStatusAndStartTimeAfter(
-      Long roomId, BookingStatus status, LocalDateTime time);
+          Long roomId, BookingStatus status, LocalDateTime time);
 
+  // Lấy booking đặt theo userName
   List<RoomBooking> findByBookedBy_UserName(String userName);
 
+  // Đếm tổng số lượt đặt phòng
+  @Query("SELECT COUNT(rb) FROM RoomBooking rb")
+  long countTotalBookings();
+
+  // Đếm số cuộc họp diễn ra trong hôm nay
+  @Query("SELECT COUNT(rb) FROM RoomBooking rb WHERE DATE(rb.startTime) = :today")
+  long countBookingsToday(@Param("today") LocalDate today);
+
+  // Lấy danh sách cuộc họp diễn ra trong hôm nay
+  @Query("SELECT rb FROM RoomBooking rb WHERE DATE(rb.startTime) = :today")
+  List<RoomBooking> findBookingsToday(@Param("today") LocalDate today);
+
+  // Lấy các booking diễn ra trong một khoảng thời gian cụ thể
   @Query("SELECT r FROM RoomBooking r WHERE r.startTime BETWEEN :start AND :end")
   List<RoomBooking> findMeetingsBetween(LocalDateTime start, LocalDateTime end);
 
-  @Query(
-      "SELECT rb.bookedBy.userId, rb.bookedBy.userName, COUNT(rb) AS booking_count "
-          + "FROM RoomBooking rb "
-          + "GROUP BY rb.bookedBy.userId, rb.bookedBy.userName "
-          + "ORDER BY booking_count DESC")
-  List<Object[]> findTopUsers(int limit);
+  // Thống kê top users
+  @Query("""
+    SELECT new org.training.meetingroombooking.entity.dto.Summary.UserSummaryDTO(
+      rb.bookedBy.userId, rb.bookedBy.userName, COUNT(rb))
+    FROM RoomBooking rb
+    GROUP BY rb.bookedBy.userId, rb.bookedBy.userName
+    ORDER BY COUNT(rb) DESC
+  """)
+  List<UserSummaryDTO> findTopUsers(Pageable pageable);
 
-  // Đếm số phòng hợp diễn ra hôm nay
-  @Query("SELECT COUNT(b) FROM RoomBooking b WHERE DATE(b.startTime) = :bookingDate")
-  long countByBookingDate(@Param("bookingDate") LocalDate bookingDate);
-
-  // kiểm tra xem có bản ghi đặt phòng nào đã tồn tại cho cùng khoảng thời gian/phòng không
+  // Kiểm tra xem đã có phòng nào được đặt trong khoảng thời gian đó chưa (tránh trùng lịch)
   @Query(
-      """
-    SELECT COUNT(rb) > 0 FROM RoomBooking rb
-    WHERE rb.room.roomId = :roomId
-    AND rb.status = 'CONFIRMED'
-    AND (rb.startTime < :endTime AND rb.endTime > :startTime)
-    """)
+          """
+        SELECT COUNT(rb) > 0 FROM RoomBooking rb
+        WHERE rb.room.roomId = :roomId
+        AND rb.status = 'CONFIRMED'
+        AND (rb.startTime < :endTime AND rb.endTime > :startTime)
+        """)
   boolean existsByRoomAndTimeOverlap(
-      @Param("roomId") Long roomId,
-      @Param("startTime") LocalDateTime startTime,
-      @Param("endTime") LocalDateTime endTime);
+          @Param("roomId") Long roomId,
+          @Param("startTime") LocalDateTime startTime,
+          @Param("endTime") LocalDateTime endTime);
 
+  // Kiểm tra trùng lịch nhưng loại trừ chính bản ghi hiện tại (dùng khi cập nhật)
   @Query(
-      """
-    SELECT COUNT(rb) > 0 FROM RoomBooking rb
-    WHERE rb.room.roomId = :roomId
-    AND rb.status = 'CONFIRMED'
-    AND rb.startTime < :endTime AND rb.endTime > :startTime
-    AND rb.bookingId <> :bookingId
-    """)
+          """
+        SELECT COUNT(rb) > 0 FROM RoomBooking rb
+        WHERE rb.room.roomId = :roomId
+        AND rb.status = 'CONFIRMED'
+        AND rb.startTime < :endTime AND rb.endTime > :startTime
+        AND rb.bookingId <> :bookingId
+        """)
   boolean existsByRoomAndTimeOverlapExcludingId(
-      @Param("roomId") Long roomId,
-      @Param("startTime") LocalDateTime startTime,
-      @Param("endTime") LocalDateTime endTime,
-      @Param("bookingId") Long bookingId);
+          @Param("roomId") Long roomId,
+          @Param("startTime") LocalDateTime startTime,
+          @Param("endTime") LocalDateTime endTime,
+          @Param("bookingId") Long bookingId);
 
-  // Đếm số lượt đặt theo tuần
-  @Query(
-      value =
-          "SELECT WEEK(created_at) as period, COUNT(*) as bookings "
-              + "FROM room_bookings "
-              + "GROUP BY WEEK(created_at)",
-      nativeQuery = true)
-  List<Object[]> findWeeklyBookings();
+  // Thống kê theo tuần
+  @Query(value = """
+      SELECT WEEK(created_at) AS period,
+             COUNT(*)       AS bookings
+      FROM room_bookings
+      GROUP BY WEEK(created_at)
+    """, nativeQuery = true)
+  List<BookingSummaryProjection> findWeeklyBookingsNative();
 
-  @Query(
-      value =
-          "SELECT MONTH(created_at) as period, COUNT(*) as bookings "
-              + "FROM room_bookings "
-              + "GROUP BY MONTH(created_at)",
-      nativeQuery = true)
-  List<Object[]> findMonthlyBookings();
+  // Thống kê theo tháng
+  @Query("""
+      SELECT new org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO(
+        MONTH(rb.createdAt), COUNT(rb)
+      )
+      FROM RoomBooking rb
+      GROUP BY MONTH(rb.createdAt)
+    """)
+  List<BookingSummaryDTO> findMonthlyBookings();
 
-  // Đếm số lượt đặt theo quý
-  @Query(
-      value =
-          "SELECT QUARTER(created_at) as period, COUNT(*) as bookings "
-              + "FROM room_bookings "
-              + "GROUP BY QUARTER(created_at)",
-      nativeQuery = true)
-  List<Object[]> findQuarterlyBookings();
+  // Thống kê theo quý
+  @Query("""
+      SELECT new org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO(
+        ((MONTH(rb.createdAt)-1)/3)+1, COUNT(rb)
+      )
+      FROM RoomBooking rb
+      GROUP BY ((MONTH(rb.createdAt)-1)/3)+1
+    """)
+  List<BookingSummaryDTO> findQuarterlyBookings();
 
-  // Đếm số lượt đặt trong tháng hiện tại
+  // Đếm số lượt đặt trong tháng (theo tháng truyền vào)
   @Query(
-      value = "SELECT COUNT(*) FROM room_bookings WHERE MONTH(created_at) = :month",
-      nativeQuery = true)
+          value = "SELECT COUNT(*) FROM room_bookings WHERE MONTH(created_at) = :month",
+          nativeQuery = true)
   long countByMonth(@Param("month") int month);
 
-  @Query(
-      value =
-          "SELECT rb.room_id, r.room_name, COUNT(rb.booking_id) AS booking_count "
-              + "FROM room_bookings rb "
-              + "JOIN rooms r ON rb.room_id = r.room_id "
-              + "GROUP BY rb.room_id, r.room_name "
-              + "ORDER BY booking_count DESC "
-              + "LIMIT 1",
-      nativeQuery = true)
-  Object[] findMostBookedRoom();
+  // Top booked rooms
+  @Query("""
+      SELECT new org.training.meetingroombooking.entity.dto.Summary.RoomSummaryDTO(
+        rb.room.roomId, rb.room.roomName, COUNT(rb)
+      )
+      FROM RoomBooking rb
+      GROUP BY rb.room.roomId, rb.room.roomName
+      ORDER BY COUNT(rb) DESC
+    """)
+  List<RoomSummaryDTO> findTopBookedRooms(Pageable pageable);
 
+  // Kiểm tra xem người dùng có từng đặt phòng chưa
   boolean existsByBookedBy(User user);
 
+  // Kiểm tra xem phòng này đã từng có ai đặt chưa
   boolean existsByRoom(Room room);
-
-  @Modifying
-  @Query("UPDATE RoomBooking rb SET rb.status = :status WHERE rb.bookingId IN :bookingIds")
-  int updateStatusForBookings(
-      @Param("bookingIds") List<Long> bookingIds, @Param("status") BookingStatus status);
 }
+

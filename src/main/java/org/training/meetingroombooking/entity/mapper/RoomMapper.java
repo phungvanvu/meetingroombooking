@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.entity.mapper;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
@@ -11,17 +12,21 @@ import org.training.meetingroombooking.entity.dto.RoomDTO;
 import org.training.meetingroombooking.entity.models.Equipment;
 import org.training.meetingroombooking.entity.models.Room;
 import org.training.meetingroombooking.entity.models.RoomEquipment;
+import org.training.meetingroombooking.entity.models.RoomImage;
 
 @Mapper(componentModel = "spring")
 public interface RoomMapper {
 
   @Mapping(
-      target = "equipments",
-      source = "roomEquipments",
-      qualifiedByName = "mapRoomEquipmentToStringSet")
+          target = "equipments",
+          source = "roomEquipments",
+          qualifiedByName = "mapRoomEquipmentToStringSet")
+  @Mapping(
+          target = "imageUrls",
+          source = "images",
+          qualifiedByName = "mapRoomImageToStringList")
   RoomDTO toDTO(Room entity);
 
-  @Mapping(target = "roomId", source = "roomId")
   @Mapping(
       target = "roomEquipments",
       source = "equipments",
@@ -29,9 +34,9 @@ public interface RoomMapper {
   Room toEntity(RoomDTO dto);
 
   @Mapping(
-      target = "roomEquipments",
-      source = "equipments",
-      qualifiedByName = "mapStringSetToRoomEquipmentSet")
+          target = "roomEquipments",
+          source = "equipments",
+          qualifiedByName = "mapStringSetToRoomEquipmentSet")
   void updateRoom(@MappingTarget Room entity, RoomDTO dto);
 
   @Named("mapRoomEquipmentToStringSet")
@@ -75,5 +80,11 @@ public interface RoomMapper {
     Room room = new Room();
     room.setRoomId(roomId);
     return room;
+  }
+
+  @Named("mapRoomImageToStringList")
+  default List<String> mapRoomImageToStringList(List<RoomImage> images) {
+    if (images == null) return List.of();
+    return images.stream().map(RoomImage::getUrl).collect(Collectors.toList());
   }
 }

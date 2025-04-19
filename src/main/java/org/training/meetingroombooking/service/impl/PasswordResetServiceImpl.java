@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 import org.training.meetingroombooking.entity.enums.ErrorCode;
 import org.training.meetingroombooking.entity.models.PasswordResetOtp;
 import org.training.meetingroombooking.entity.models.User;
@@ -24,14 +26,17 @@ public class PasswordResetServiceImpl implements PasswordResetService {
   private final PasswordResetOtpRepository otpRepository;
   private final EmailService emailService;
   private final PasswordEncoder passwordEncoder;
+  private final TemplateEngine templateEngine;
 
   public PasswordResetServiceImpl(
       UserRepository userRepository,
       PasswordResetOtpRepository otpRepository,
-      EmailService emailService) {
+      EmailService emailService,
+      TemplateEngine templateEngine) {
     this.userRepository = userRepository;
     this.otpRepository = otpRepository;
     this.emailService = emailService;
+    this.templateEngine = templateEngine;
     this.passwordEncoder = new BCryptPasswordEncoder(10);
   }
 
@@ -46,19 +51,15 @@ public class PasswordResetServiceImpl implements PasswordResetService {
       otp.setEmail(email);
       otp.setExpiryDate(LocalDateTime.now().plusMinutes(5));
       otpRepository.save(otp);
-      String subject = "Password Reset OTP";
-      String htmlBody =
-          "<h3>Hello "
-              + user.getFullName()
-              + ",</h3>"
-              + "<p>Your OTP code is: <b>"
-              + otpCode
-              + "</b></p>"
-              + "<p>This OTP is valid for 5 minutes only.</p>";
-      emailService.sendHtmlEmail(email, subject, htmlBody);
+      Context context = new Context();
+      context.setVariable("fullName", user.getFullName());
+      context.setVariable("otpCode", otpCode);
+      String htmlBody = templateEngine.process("password-reset", context);
+      emailService.sendHtmlEmail(email, "Password Reset OTP", htmlBody);
     }
     return "If an account with that email exists, an OTP has been sent to your email address.";
   }
+
 
   @Override
   public void resetPassword(String email, String otpCode, String newPassword) {

@@ -28,7 +28,6 @@ import org.training.meetingroombooking.exception.AppEx;
 import org.training.meetingroombooking.repository.*;
 import org.training.meetingroombooking.service.UserService;
 
-/** Service xử lý nghiệp vụ User. */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -126,7 +125,6 @@ public class UserServiceImpl implements UserService {
     return userRepository.findAll(spec, pageable).map(userMapper::toUserResponse);
   }
 
-  /** Thêm điều kiện join và distinct cho Specification. */
   private Specification<User> addJoinFilter(
       Specification<User> spec, Set<String> values, String attribute, String fieldName) {
     if (values == null || values.isEmpty()) {

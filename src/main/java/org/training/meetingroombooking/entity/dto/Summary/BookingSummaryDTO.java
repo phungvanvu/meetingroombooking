@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class BookingSummaryDTO {
-  private int period;
-  private int bookings;
+  private Integer period;
+  private Long bookings;
+
+  public BookingSummaryDTO(Number period, Long bookings) {
+    this.period = period == null ? null : period.intValue();
+    this.bookings = bookings;
+  }
 }

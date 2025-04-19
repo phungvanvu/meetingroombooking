@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,7 +38,7 @@ public class RoomDTO {
   @Size(max = 255, message = "{room.note.maxsize}")
   private String note;
 
-  private String imageUrl;
+  private List<String> imageUrls;
 
   private Set<String> equipments;
 }

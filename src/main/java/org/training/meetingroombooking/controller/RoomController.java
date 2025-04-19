@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
@@ -31,10 +32,13 @@ public class RoomController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> createRoom(
-      @RequestPart("room") @Valid RoomDTO dto,
-      @RequestPart(value = "file", required = false) MultipartFile file)
-      throws IOException {
-    return ApiResponse.<RoomDTO>builder().success(true).data(roomService.create(dto, file)).build();
+          @RequestPart("room") @Valid RoomDTO dto,
+          @RequestPart(value = "files", required = false) List<MultipartFile> files)
+          throws IOException {
+    return ApiResponse.<RoomDTO>builder()
+            .success(true)
+            .data(roomService.create(dto, files))
+            .build();
   }
 
   @GetMapping
@@ -53,28 +57,47 @@ public class RoomController {
   @GetMapping("/search")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<Page<RoomDTO>> searchRooms(
-      @RequestParam(value = "roomName", required = false) String roomName,
-      @RequestParam(value = "locations", required = false) List<String> locations,
-      @RequestParam(value = "available", required = false) Boolean available,
-      @RequestParam(value = "capacities", required = false) List<Integer> capacities,
-      @RequestParam(value = "equipments", required = false) Set<String> equipments,
-      @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "size", defaultValue = "6") int size) {
-    Page<RoomDTO> roomsPage =
-        roomService.getRooms(roomName, locations, available, capacities, equipments, page, size);
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "locations", required = false) String locations,
+          @RequestParam(value = "available", required = false) Boolean available,
+          @RequestParam(value = "capacities", required = false) List<Integer> capacities,
+          @RequestParam(value = "equipments", required = false) Set<String> equipments,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "6") int size) {
+    List<String> locList = (locations == null || locations.isBlank())
+            ? Collections.emptyList()
+            : List.of(locations.trim());
+    Page<RoomDTO> roomsPage = roomService.getRooms(
+            roomName,
+            locList,
+            available,
+            capacities,
+            equipments,
+            page,
+            size
+    );
     return ApiResponse.<Page<RoomDTO>>builder().success(true).data(roomsPage).build();
   }
 
   @GetMapping("/available")
   public ApiResponse<Page<RoomDTO>> getAvailableRooms(
-      @RequestParam(value = "roomName", required = false) String roomName,
-      @RequestParam(value = "locations", required = false) List<String> locations,
-      @RequestParam(value = "capacities", required = false) List<Integer> capacities,
-      @RequestParam(value = "equipments", required = false) Set<String> equipments,
-      @RequestParam(value = "page", defaultValue = "0") int page,
-      @RequestParam(value = "size", defaultValue = "6") int size) {
-    Page<RoomDTO> roomsPage =
-        roomService.getAvailableRooms(roomName, locations, capacities, equipments, page, size);
+          @RequestParam(value = "roomName", required = false) String roomName,
+          @RequestParam(value = "locations", required = false) String locations,
+          @RequestParam(value = "capacities", required = false) List<Integer> capacities,
+          @RequestParam(value = "equipments", required = false) Set<String> equipments,
+          @RequestParam(value = "page", defaultValue = "0") int page,
+          @RequestParam(value = "size", defaultValue = "6") int size) {
+    List<String> locList = (locations == null || locations.isBlank())
+            ? Collections.emptyList()
+            : List.of(locations.trim());
+    Page<RoomDTO> roomsPage = roomService.getAvailableRooms(
+            roomName,
+            locList,
+            capacities,
+            equipments,
+            page,
+            size
+    );
     return ApiResponse.<Page<RoomDTO>>builder().success(true).data(roomsPage).build();
   }
 
@@ -86,14 +109,14 @@ public class RoomController {
   @PutMapping("/{roomId}")
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<RoomDTO> updateRoom(
-      @PathVariable Long roomId,
-      @RequestPart("room") @Valid RoomDTO dto,
-      @RequestPart(value = "file", required = false) MultipartFile file)
-      throws IOException {
+          @PathVariable Long roomId,
+          @RequestPart("room") @Valid RoomDTO dto,
+          @RequestPart(value = "files", required = false) List<MultipartFile> files) throws IOException {
+
     return ApiResponse.<RoomDTO>builder()
-        .success(true)
-        .data(roomService.update(roomId, dto, file))
-        .build();
+            .success(true)
+            .data(roomService.update(roomId, dto, files))
+            .build();
   }
 
   @DeleteMapping("/{roomId}")
