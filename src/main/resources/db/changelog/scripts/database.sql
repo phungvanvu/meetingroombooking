@@ -1,6 +1,6 @@
 -- liquibase formatted sql
 
--- changeset Vu:1744818566828-1
+-- changeset Vu:1745042810936-1
 CREATE TABLE equipments
 (
     equipment_name VARCHAR(50) NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE equipments
     CONSTRAINT pk_equipments PRIMARY KEY (equipment_name)
 );
 
--- changeset Vu:1744818566828-2
+-- changeset Vu:1745042810936-2
 CREATE TABLE `groups`
 (
     group_name   VARCHAR(50) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE `groups`
     CONSTRAINT pk_groups PRIMARY KEY (group_name)
 );
 
--- changeset Vu:1744818566828-3
+-- changeset Vu:1745042810936-3
 CREATE TABLE invalidated_token
 (
     id          VARCHAR(255) NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE invalidated_token
     CONSTRAINT pk_invalidated_token PRIMARY KEY (id)
 );
 
--- changeset Vu:1744818566828-4
+-- changeset Vu:1745042810936-4
 CREATE TABLE notifications
 (
     notification_id BIGINT AUTO_INCREMENT NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE notifications
     CONSTRAINT pk_notifications PRIMARY KEY (notification_id)
 );
 
--- changeset Vu:1744818566828-5
+-- changeset Vu:1745042810936-5
 CREATE TABLE password_reset_otps
 (
     otp         VARCHAR(255) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE password_reset_otps
     CONSTRAINT pk_password_reset_otps PRIMARY KEY (otp)
 );
 
--- changeset Vu:1744818566828-6
+-- changeset Vu:1745042810936-6
 CREATE TABLE permissions
 (
     permission_name VARCHAR(50) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE permissions
     CONSTRAINT pk_permissions PRIMARY KEY (permission_name)
 );
 
--- changeset Vu:1744818566828-7
+-- changeset Vu:1745042810936-7
 CREATE TABLE positions
 (
     position_name VARCHAR(75) NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE positions
     CONSTRAINT pk_positions PRIMARY KEY (position_name)
 );
 
--- changeset Vu:1744818566828-8
+-- changeset Vu:1745042810936-8
 CREATE TABLE role_permissions
 (
     permission_name VARCHAR(50) NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE role_permissions
     CONSTRAINT pk_role_permissions PRIMARY KEY (permission_name, role_name)
 );
 
--- changeset Vu:1744818566828-9
+-- changeset Vu:1745042810936-9
 CREATE TABLE roles
 (
     role_name     VARCHAR(50) NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE roles
     CONSTRAINT pk_roles PRIMARY KEY (role_name)
 );
 
--- changeset Vu:1744818566828-10
+-- changeset Vu:1745042810936-10
 CREATE TABLE room_bookings
 (
     booking_id    BIGINT AUTO_INCREMENT NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE room_bookings
     CONSTRAINT pk_roombookings PRIMARY KEY (booking_id)
 );
 
--- changeset Vu:1744818566828-11
+-- changeset Vu:1745042810936-11
 CREATE TABLE room_equipment
 (
     id             BIGINT AUTO_INCREMENT NOT NULL,
@@ -103,7 +103,16 @@ CREATE TABLE room_equipment
     CONSTRAINT pk_room_equipment PRIMARY KEY (id)
 );
 
--- changeset Vu:1744818566828-12
+-- changeset Vu:1745042810936-12
+CREATE TABLE room_images
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL,
+    url     VARCHAR(255) NOT NULL,
+    room_id BIGINT       NOT NULL,
+    CONSTRAINT pk_room_images PRIMARY KEY (id)
+);
+
+-- changeset Vu:1745042810936-13
 CREATE TABLE rooms
 (
     room_id   BIGINT AUTO_INCREMENT NOT NULL,
@@ -112,11 +121,10 @@ CREATE TABLE rooms
     capacity  INT          NOT NULL,
     available BIT(1)       NOT NULL,
     note      TEXT NULL,
-    image_url VARCHAR(255) NULL,
     CONSTRAINT pk_rooms PRIMARY KEY (room_id)
 );
 
--- changeset Vu:1744818566828-13
+-- changeset Vu:1745042810936-14
 CREATE TABLE user_roles
 (
     role_name VARCHAR(50) NOT NULL,
@@ -124,7 +132,7 @@ CREATE TABLE user_roles
     CONSTRAINT pk_user_roles PRIMARY KEY (role_name, user_id)
 );
 
--- changeset Vu:1744818566828-14
+-- changeset Vu:1745042810936-15
 CREATE TABLE users
 (
     user_id      BIGINT AUTO_INCREMENT NOT NULL,
@@ -140,55 +148,59 @@ CREATE TABLE users
     CONSTRAINT pk_users PRIMARY KEY (user_id)
 );
 
--- changeset Vu:1744818566828-15
+-- changeset Vu:1745042810936-16
 ALTER TABLE users
     ADD CONSTRAINT uc_users_email UNIQUE (email);
 
--- changeset Vu:1744818566828-16
+-- changeset Vu:1745042810936-17
 ALTER TABLE users
     ADD CONSTRAINT uc_users_username UNIQUE (user_name);
 
--- changeset Vu:1744818566828-17
+-- changeset Vu:1745042810936-18
 ALTER TABLE notifications
     ADD CONSTRAINT FK_NOTIFICATIONS_ON_USER FOREIGN KEY (user_id) REFERENCES users (user_id);
 
--- changeset Vu:1744818566828-18
+-- changeset Vu:1745042810936-19
 ALTER TABLE room_bookings
     ADD CONSTRAINT FK_ROOMBOOKINGS_ON_BOOKEDBY FOREIGN KEY (booked_by) REFERENCES users (user_id);
 
--- changeset Vu:1744818566828-19
+-- changeset Vu:1745042810936-20
 ALTER TABLE room_bookings
     ADD CONSTRAINT FK_ROOMBOOKINGS_ON_ROOMID FOREIGN KEY (room_id) REFERENCES rooms (room_id);
 
--- changeset Vu:1744818566828-20
+-- changeset Vu:1745042810936-21
 ALTER TABLE room_equipment
     ADD CONSTRAINT FK_ROOM_EQUIPMENT_ON_EQUIPMENTNAME FOREIGN KEY (equipment_name) REFERENCES equipments (equipment_name) ON DELETE CASCADE;
 
--- changeset Vu:1744818566828-21
+-- changeset Vu:1745042810936-22
 ALTER TABLE room_equipment
     ADD CONSTRAINT FK_ROOM_EQUIPMENT_ON_ROOMID FOREIGN KEY (room_id) REFERENCES rooms (room_id) ON DELETE CASCADE;
 
--- changeset Vu:1744818566828-22
+-- changeset Vu:1745042810936-23
+ALTER TABLE room_images
+    ADD CONSTRAINT FK_ROOM_IMAGES_ON_ROOM FOREIGN KEY (room_id) REFERENCES rooms (room_id);
+
+-- changeset Vu:1745042810936-24
 ALTER TABLE users
     ADD CONSTRAINT FK_USERS_ON_GROUPID FOREIGN KEY (group_id) REFERENCES `groups` (group_name) ON DELETE SET NULL;
 
--- changeset Vu:1744818566828-23
+-- changeset Vu:1745042810936-25
 ALTER TABLE users
     ADD CONSTRAINT FK_USERS_ON_POSITIONID FOREIGN KEY (position_id) REFERENCES positions (position_name) ON DELETE SET NULL;
 
--- changeset Vu:1744818566828-24
+-- changeset Vu:1745042810936-26
 ALTER TABLE role_permissions
     ADD CONSTRAINT fk_rolper_on_permission FOREIGN KEY (permission_name) REFERENCES permissions (permission_name);
 
--- changeset Vu:1744818566828-25
+-- changeset Vu:1745042810936-27
 ALTER TABLE role_permissions
     ADD CONSTRAINT fk_rolper_on_role FOREIGN KEY (role_name) REFERENCES roles (role_name);
 
--- changeset Vu:1744818566828-26
+-- changeset Vu:1745042810936-28
 ALTER TABLE user_roles
     ADD CONSTRAINT fk_userol_on_role FOREIGN KEY (role_name) REFERENCES roles (role_name);
 
--- changeset Vu:1744818566828-27
+-- changeset Vu:1745042810936-29
 ALTER TABLE user_roles
     ADD CONSTRAINT fk_userol_on_user FOREIGN KEY (user_id) REFERENCES users (user_id);
 

@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +37,6 @@ import org.training.meetingroombooking.service.EmailService;
 import org.training.meetingroombooking.service.NotificationService;
 import org.training.meetingroombooking.service.RoomBookingService;
 
-/** Service implementation for managing room bookings. */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,10 +45,7 @@ public class RoomBookingServiceImpl implements RoomBookingService {
   private static final long REMINDER_INTERVAL_MS = 3_600_000; // 1 hour
 
   private final RoomBookingRepository roomBookingRepo;
-
-  @Qualifier("roomBookingMapperImpl")
   private final RoomBookingMapper mapper;
-
   private final EmailService emailService;
   private final RoomRepository roomRepo;
   private final UserRepository userRepo;
@@ -64,19 +59,15 @@ public class RoomBookingServiceImpl implements RoomBookingService {
         userRepo
             .findById(dto.getBookedById())
             .orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-
     if (roomBookingRepo.existsByRoomAndTimeOverlap(
         dto.getRoomId(), dto.getStartTime(), dto.getEndTime())) {
       throw new AppEx(ErrorCode.ALREADY_BOOKED);
     }
-
     RoomBooking entity = mapper.toEntity(dto);
     entity.setRoom(room);
     entity.setBookedBy(user);
-
     RoomBooking saved = roomBookingRepo.save(entity);
     RoomBookingDTO result = mapper.toDTO(saved);
-
     notifyOnCreate(result);
     return result;
   }
@@ -163,14 +154,12 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
   @Override
   public List<RoomBookingDTO> getAll() {
-    return roomBookingRepo.findAll().stream().map(mapper::toDTO).collect(Collectors.toList());
+    return toDTOList(roomBookingRepo.findAll());
   }
 
   @Override
   public List<RoomBookingDTO> getBookingsByUserName(String userName) {
-    return roomBookingRepo.findByBookedBy_UserName(userName).stream()
-        .map(mapper::toDTO)
-        .collect(Collectors.toList());
+    return toDTOList(roomBookingRepo.findByBookedBy_UserName(userName));
   }
 
   @Override
@@ -227,11 +216,6 @@ public class RoomBookingServiceImpl implements RoomBookingService {
     RoomBooking booking =
         roomBookingRepo.findById(id).orElseThrow(() -> new AppEx(ErrorCode.ROOM_BOOKING_NOT_FOUND));
     roomBookingRepo.deleteById(id);
-    String content =
-        String.format(
-            "Your booking for room '%s' from %s to %s has been deleted.",
-            booking.getRoom().getRoomName(), booking.getStartTime(), booking.getEndTime());
-    sendNotification(booking.getBookedBy().getUserId(), content, NotificationType.WARNING);
   }
 
   @Override
@@ -297,39 +281,34 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
   @Override
   public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
-    Room room = roomRepo.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-    return room.getBookings().stream()
-        .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-        .map(mapper::toDTO)
-        .collect(Collectors.toList());
+    Room room = roomRepo.findById(roomId)
+            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    return toDTOList(
+            room.getBookings().stream()
+                    .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
+                    .toList()
+    );
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookings() {
-    LocalDateTime now = LocalDateTime.now();
-    return roomBookingRepo.findByStatusAndStartTimeAfter(BookingStatus.CONFIRMED, now).stream()
-        .map(mapper::toDTO)
-        .collect(Collectors.toList());
+    return toDTOList(
+            roomBookingRepo.findByStatusAndStartTimeAfter(
+                    BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookingsByUserName(String userName) {
-    LocalDateTime now = LocalDateTime.now();
-    return roomBookingRepo
-        .findByBookedBy_UserNameAndStatusAndStartTimeAfter(userName, BookingStatus.CONFIRMED, now)
-        .stream()
-        .map(mapper::toDTO)
-        .collect(Collectors.toList());
+    return toDTOList(
+            roomBookingRepo.findByBookedBy_UserNameAndStatusAndStartTimeAfter(
+                    userName, BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookingsByRoomId(Long roomId) {
-    LocalDateTime now = LocalDateTime.now();
-    return roomBookingRepo
-        .findByRoom_roomIdAndStatusAndStartTimeAfter(roomId, BookingStatus.CONFIRMED, now)
-        .stream()
-        .map(mapper::toDTO)
-        .collect(Collectors.toList());
+    return toDTOList(
+            roomBookingRepo.findByRoom_roomIdAndStatusAndStartTimeAfter(
+                    roomId, BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
@@ -391,4 +370,11 @@ public class RoomBookingServiceImpl implements RoomBookingService {
         NotificationDTO.builder().userId(userId).content(content).type(type).build();
     notificationService.create(dto);
   }
+
+  private List<RoomBookingDTO> toDTOList(List<RoomBooking> bookings) {
+    return bookings.stream()
+            .map(mapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
 }

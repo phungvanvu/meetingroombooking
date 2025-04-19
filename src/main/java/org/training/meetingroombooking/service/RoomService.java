@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.RoomDTO;
 
 public interface RoomService {
-  RoomDTO create(RoomDTO dto, MultipartFile file) throws IOException;
+  RoomDTO create(RoomDTO dto, List<MultipartFile> files) throws IOException;
 
   RoomDTO findById(Long roomId);
 
@@ -36,7 +36,7 @@ public interface RoomService {
 
   ByteArrayOutputStream exportRoomsToExcel() throws IOException;
 
-  RoomDTO update(Long roomId, RoomDTO dto, MultipartFile file) throws IOException;
+  RoomDTO update(Long roomId, RoomDTO dto, List<MultipartFile> files) throws IOException;
 
   void delete(Long roomId);
 
