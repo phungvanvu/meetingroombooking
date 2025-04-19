@@ -58,7 +58,7 @@ public class RoomServiceImpl implements RoomService {
     if (files != null && !files.isEmpty()) {
       for (MultipartFile file : files) {
         if (file.isEmpty()) continue;
-        String fileName = dto.getRoomName() + "_" + System.currentTimeMillis() + ".jpg";
+        String fileName = dto.getRoomName() + "_" + System.currentTimeMillis();
         String url = uploadRoomImage(fileName, file);
         RoomImage image = RoomImage.builder().url(url).build();
         room.addImage(image);
@@ -149,7 +149,7 @@ public class RoomServiceImpl implements RoomService {
     if (files != null && !files.isEmpty()) {
       for (MultipartFile file : files) {
         if (file.isEmpty()) continue;
-        String fileName = dto.getRoomName() + "_" + System.currentTimeMillis() + ".jpg";
+        String fileName = dto.getRoomName() + "_" + System.currentTimeMillis();
         String url = uploadRoomImage(fileName, file);
         RoomImage image = RoomImage.builder().url(url).build();
         room.addImage(image);
