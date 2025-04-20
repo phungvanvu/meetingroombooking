@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
@@ -118,11 +120,12 @@ public class UserController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<byte[]> exportUsersToExcel() throws IOException {
     ByteArrayOutputStream outputStream = userService.exportUserToExcel();
-    String currentTime = LocalTime.now().toString().replace(":", "-");
-    String fileName = "users_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
+    String timestamp = LocalDateTime.now().format(formatter);
+    String fileName = "users_export_" + timestamp + ".xlsx";
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(outputStream.toByteArray());
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(outputStream.toByteArray());
   }
 }
