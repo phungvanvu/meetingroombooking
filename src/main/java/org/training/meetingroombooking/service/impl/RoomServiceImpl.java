@@ -163,7 +163,6 @@ public class RoomServiceImpl implements RoomService {
   public void delete(Long roomId) {
     Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
-
     if (bookingRepository.existsByRoom(room)) {
       throw new AppEx(ErrorCode.CANNOT_DELETE_ROOM_IN_USE);
     }
@@ -172,19 +171,26 @@ public class RoomServiceImpl implements RoomService {
 
   @Override
   public void deleteMultipleRooms(List<Long> roomIds) {
-    if (roomIds == null || roomIds.isEmpty()) {
-      throw new AppEx(ErrorCode.INVALID_INPUT);
-    }
     List<Room> rooms = roomRepository.findAllById(roomIds);
     if (rooms.size() != roomIds.size()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
-    rooms.forEach(r -> {
+    List<Room> roomsToDelete = new ArrayList<>();
+    List<String> roomsNotDeleted = new ArrayList<>();
+    for (Room r : rooms) {
       if (bookingRepository.existsByRoom(r)) {
-        throw new AppEx(ErrorCode.CANNOT_DELETE_ROOM_IN_USE);
+        roomsNotDeleted.add(r.getRoomName());
+      } else {
+        roomsToDelete.add(r);
       }
-    });
-    roomRepository.deleteAll(rooms);
+    }
+    if (!roomsToDelete.isEmpty()) {
+      roomRepository.deleteAll(roomsToDelete);
+    }
+    if (!roomsNotDeleted.isEmpty()) {
+      throw new AppEx(ErrorCode.PARTIAL_ROOM_DELETE_FAILED,
+              "The following rooms could not be deleted due to active bookings: " + String.join(", ", roomsNotDeleted));
+    }
   }
 
   // --- Private helpers ---

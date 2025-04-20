@@ -3,6 +3,7 @@ package org.training.meetingroombooking.service.impl;
 import jakarta.persistence.criteria.Join;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -240,9 +241,7 @@ public class UserServiceImpl implements UserService {
               .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
       user.setGroup(grp);
     }
-
     userMapper.updateEntity(user, request);
-
     if (request.getPassword() != null && !request.getPassword().isBlank()) {
       user.setPassword(passwordEncoder.encode(request.getPassword()));
     }
@@ -273,26 +272,32 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  @Transactional
   public void deleteMultipleUsers(List<Long> userIds) {
-    if (userIds == null || userIds.isEmpty()) {
-      throw new AppEx(ErrorCode.INVALID_INPUT);
-    }
     String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
     List<User> users = userRepository.findAllById(userIds);
     if (users.size() != userIds.size()) {
       throw new AppEx(ErrorCode.USER_NOT_FOUND);
     }
+    List<User> usersToDelete = new ArrayList<>();
+    List<String> usersNotDeleted = new ArrayList<>();
     for (User u : users) {
       if (u.getUserName().equals(currentUser)) {
-        throw new AppEx(ErrorCode.CANNOT_DELETE_CURRENT_USER);
-      }
-      if (roomBookingRepository.existsByBookedBy(u)) {
-        throw new AppEx(ErrorCode.CANNOT_DELETE_USER_IN_USE);
+        usersNotDeleted.add(u.getUserName());
+      } else if (roomBookingRepository.existsByBookedBy(u)) {
+        usersNotDeleted.add(u.getUserName());
+      } else {
+        usersToDelete.add(u);
       }
     }
-    userRepository.deleteAll(users);
+    if (!usersToDelete.isEmpty()) {
+      userRepository.deleteAll(usersToDelete);
+    }
+    if (!usersNotDeleted.isEmpty()) {
+      throw new AppEx(ErrorCode.PARTIAL_USER_DELETE_FAILED,
+              "The following users could not be deleted: " + String.join(", ", usersNotDeleted));
+    }
   }
+
 
   @Override
   public void changePassword(ChangePasswordRequest request) {
