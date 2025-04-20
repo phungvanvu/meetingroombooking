@@ -29,6 +29,8 @@ public enum ErrorCode {
   ALREADY_BOOKED(HttpStatus.CONFLICT, "This room is already booked for the selected time."),
   BATCH_CANCELLATION_FAILED(HttpStatus.CONFLICT, "Some bookings could not be cancelled."),
   CANNOT_DELETE_CURRENT_USER(HttpStatus.CONFLICT, "Cannot delete your own account."),
+  PARTIAL_ROOM_DELETE_FAILED(HttpStatus.CONFLICT, "Some rooms could not be deleted due to active bookings."),
+  PARTIAL_USER_DELETE_FAILED(HttpStatus.CONFLICT, "Some users could not be deleted due to active bookings."),
 
   // Các lỗi 401 Unauthorized
   INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "Incorrect username or password."),

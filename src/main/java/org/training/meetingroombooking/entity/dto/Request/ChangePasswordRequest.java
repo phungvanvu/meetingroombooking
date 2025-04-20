@@ -13,6 +13,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ChangePasswordRequest {
 
+  // oldPassword: Không để trống, không chứa khoảng trắng, tối thiểu 8 ký tự và phải có:
+  // - chữ cái viết hoa
+  // - chữ cái viết thường
+  // - chữ số
+  // - ký tự đặc biệt (@$!%*?&)
   @NotBlank(message = "{password.old.notblank}")
   @Pattern(regexp = "^[^\\s]+$", message = "{password.pattern.nospaces}")
   @Pattern(
@@ -20,6 +25,11 @@ public class ChangePasswordRequest {
       message = "{password.pattern.complexity}")
   private String oldPassword;
 
+  // newPassword: Không để trống, không chứa khoảng trắng, tối thiểu 8 ký tự và phải có:
+  // - chữ cái viết hoa
+  // - chữ cái viết thường
+  // - chữ số
+  // - ký tự đặc biệt (@$!%*?&)
   @NotBlank(message = "{password.new.notblank}")
   @Pattern(regexp = "^[^\\s]+$", message = "{password.pattern.nospaces}")
   @Pattern(
