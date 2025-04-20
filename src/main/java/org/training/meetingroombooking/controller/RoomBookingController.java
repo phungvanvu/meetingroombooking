@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -203,11 +204,13 @@ public class RoomBookingController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<byte[]> exportBookingsToExcel() throws IOException {
     ByteArrayOutputStream outputStream = roomBookingService.exportBookingsToExcel();
-    String currentTime = LocalTime.now().toString().replace(":", "-");
-    String fileName = "bookings_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
+    String timestamp = LocalDateTime.now().format(formatter);
+    String fileName = "bookings_export_" + timestamp + ".xlsx";
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(outputStream.toByteArray());
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(outputStream.toByteArray());
   }
+
 }

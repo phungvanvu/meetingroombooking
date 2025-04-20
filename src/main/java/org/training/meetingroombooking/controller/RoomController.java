@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -140,11 +142,13 @@ public class RoomController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<byte[]> exportRoomsToExcel() throws IOException {
     ByteArrayOutputStream outputStream = roomService.exportRoomsToExcel();
-    String currentTime = LocalTime.now().toString().replace(":", "-");
-    String fileName = "rooms_export_" + LocalDate.now() + "_" + currentTime + ".xlsx";
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss-SSS");
+    String timestamp = LocalDateTime.now().format(formatter);
+    String fileName = "rooms_export_" + timestamp + ".xlsx";
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-        .body(outputStream.toByteArray());
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(outputStream.toByteArray());
   }
+
 }
