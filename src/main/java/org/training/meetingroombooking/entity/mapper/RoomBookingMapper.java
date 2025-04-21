@@ -6,8 +6,7 @@ import org.mapstruct.MappingTarget;
 import org.training.meetingroombooking.entity.dto.RoomBookingDTO;
 import org.training.meetingroombooking.entity.models.RoomBooking;
 
-@Mapper(
-    componentModel = "spring")
+@Mapper(componentModel = "spring")
 public interface RoomBookingMapper {
   RoomBooking toEntity(RoomBookingDTO dto);
 

@@ -60,7 +60,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     return "If an account with that email exists, an OTP has been sent to your email address.";
   }
 
-
   @Override
   public void resetPassword(String email, String otpCode, String newPassword) {
     PasswordResetOtp passwordResetOtp =

@@ -23,5 +23,4 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
 
   @Query("SELECT r FROM Room r WHERE r.available = false")
   List<Room> findUnavailableRooms();
-
 }

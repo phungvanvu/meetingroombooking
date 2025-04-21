@@ -18,13 +18,10 @@ import org.training.meetingroombooking.entity.models.RoomImage;
 public interface RoomMapper {
 
   @Mapping(
-          target = "equipments",
-          source = "roomEquipments",
-          qualifiedByName = "mapRoomEquipmentToStringSet")
-  @Mapping(
-          target = "imageUrls",
-          source = "images",
-          qualifiedByName = "mapRoomImageToStringList")
+      target = "equipments",
+      source = "roomEquipments",
+      qualifiedByName = "mapRoomEquipmentToStringSet")
+  @Mapping(target = "imageUrls", source = "images", qualifiedByName = "mapRoomImageToStringList")
   RoomDTO toDTO(Room entity);
 
   @Mapping(
@@ -34,9 +31,9 @@ public interface RoomMapper {
   Room toEntity(RoomDTO dto);
 
   @Mapping(
-          target = "roomEquipments",
-          source = "equipments",
-          qualifiedByName = "mapStringSetToRoomEquipmentSet")
+      target = "roomEquipments",
+      source = "equipments",
+      qualifiedByName = "mapStringSetToRoomEquipmentSet")
   void updateRoom(@MappingTarget Room entity, RoomDTO dto);
 
   @Named("mapRoomEquipmentToStringSet")

@@ -281,34 +281,30 @@ public class RoomBookingServiceImpl implements RoomBookingService {
 
   @Override
   public List<RoomBookingDTO> getBookingsByRoomId(Long roomId) {
-    Room room = roomRepo.findById(roomId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    Room room = roomRepo.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     return toDTOList(
-            room.getBookings().stream()
-                    .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                    .toList()
-    );
+        room.getBookings().stream().filter(b -> b.getStatus() == BookingStatus.CONFIRMED).toList());
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookings() {
     return toDTOList(
-            roomBookingRepo.findByStatusAndStartTimeAfter(
-                    BookingStatus.CONFIRMED, LocalDateTime.now()));
+        roomBookingRepo.findByStatusAndStartTimeAfter(
+            BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookingsByUserName(String userName) {
     return toDTOList(
-            roomBookingRepo.findByBookedBy_UserNameAndStatusAndStartTimeAfter(
-                    userName, BookingStatus.CONFIRMED, LocalDateTime.now()));
+        roomBookingRepo.findByBookedBy_UserNameAndStatusAndStartTimeAfter(
+            userName, BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
   public List<RoomBookingDTO> getUpcomingBookingsByRoomId(Long roomId) {
     return toDTOList(
-            roomBookingRepo.findByRoom_roomIdAndStatusAndStartTimeAfter(
-                    roomId, BookingStatus.CONFIRMED, LocalDateTime.now()));
+        roomBookingRepo.findByRoom_roomIdAndStatusAndStartTimeAfter(
+            roomId, BookingStatus.CONFIRMED, LocalDateTime.now()));
   }
 
   @Override
@@ -372,9 +368,6 @@ public class RoomBookingServiceImpl implements RoomBookingService {
   }
 
   private List<RoomBookingDTO> toDTOList(List<RoomBooking> bookings) {
-    return bookings.stream()
-            .map(mapper::toDTO)
-            .collect(Collectors.toList());
+    return bookings.stream().map(mapper::toDTO).collect(Collectors.toList());
   }
-
 }
