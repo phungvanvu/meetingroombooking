@@ -57,7 +57,6 @@ public class RoomBookingController {
   }
 
   @GetMapping("/by-room-id/{roomId}")
-  @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<List<RoomBookingDTO>> getBookingsByRoomId(@PathVariable Long roomId) {
     List<RoomBookingDTO> bookings = roomBookingService.getBookingsByRoomId(roomId);
     return ApiResponse.<List<RoomBookingDTO>>builder().success(true).data(bookings).build();
