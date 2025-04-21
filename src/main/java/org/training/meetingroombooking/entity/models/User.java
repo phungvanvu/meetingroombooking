@@ -1,15 +1,9 @@
 package org.training.meetingroombooking.entity.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +54,9 @@ public class User {
   @JoinColumn(name = "groupId")
   @OnDelete(action = OnDeleteAction.SET_NULL)
   private GroupEntity group;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Notification> notifications = new ArrayList<>();
 
   @ManyToMany
   @JoinTable(

@@ -3,9 +3,7 @@ package org.training.meetingroombooking.controller;
 import jakarta.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -207,9 +205,8 @@ public class RoomBookingController {
     String timestamp = LocalDateTime.now().format(formatter);
     String fileName = "bookings_export_" + timestamp + ".xlsx";
     return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(outputStream.toByteArray());
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
+        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .body(outputStream.toByteArray());
   }
-
 }

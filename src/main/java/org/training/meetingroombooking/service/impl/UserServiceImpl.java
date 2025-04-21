@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
@@ -67,7 +66,6 @@ public class UserServiceImpl implements UserService {
     if (request.getPassword() == null || request.getPassword().isBlank()) {
       throw new AppEx(ErrorCode.PASSWORD_NULL);
     }
-
     Position position =
         positionRepository
             .findById(request.getPosition())
@@ -76,7 +74,6 @@ public class UserServiceImpl implements UserService {
         groupRepository
             .findById(request.getGroup())
             .orElseThrow(() -> new AppEx(ErrorCode.GROUP_NOT_FOUND));
-
     Set<Role> roles = roleRepository.findByRoleNameIn(request.getRoles());
     if (roles.isEmpty()
         || !roles.stream()
@@ -85,13 +82,11 @@ public class UserServiceImpl implements UserService {
             .containsAll(request.getRoles())) {
       throw new AppEx(ErrorCode.ROLE_NOT_FOUND);
     }
-
     User user = userMapper.toEntity(request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
     user.setPosition(position);
     user.setGroup(group);
     user.setRoles(roles);
-
     return userMapper.toUserResponse(userRepository.save(user));
   }
 
@@ -106,7 +101,6 @@ public class UserServiceImpl implements UserService {
       int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "userId"));
     Specification<User> spec = Specification.where(null);
-
     if (fullName != null && !fullName.isBlank()) {
       spec =
           spec.and(
@@ -221,7 +215,6 @@ public class UserServiceImpl implements UserService {
   public UserResponse update(Long userId, UserRequest request) {
     User user =
         userRepository.findById(userId).orElseThrow(() -> new AppEx(ErrorCode.USER_NOT_FOUND));
-
     if (request.getUserName() != null
         && !request.getUserName().equals(user.getUserName())
         && userRepository.existsByUserName(request.getUserName())) {
@@ -252,7 +245,6 @@ public class UserServiceImpl implements UserService {
       }
       user.setRoles(rs);
     }
-
     return userMapper.toUserResponse(userRepository.save(user));
   }
 
@@ -279,12 +271,13 @@ public class UserServiceImpl implements UserService {
       throw new AppEx(ErrorCode.USER_NOT_FOUND);
     }
     List<User> usersToDelete = new ArrayList<>();
-    List<String> usersNotDeleted = new ArrayList<>();
+    List<String> currentUsers = new ArrayList<>();
+    List<String> usersWithBookings = new ArrayList<>();
     for (User u : users) {
       if (u.getUserName().equals(currentUser)) {
-        usersNotDeleted.add(u.getUserName());
+        currentUsers.add(u.getUserName());
       } else if (roomBookingRepository.existsByBookedBy(u)) {
-        usersNotDeleted.add(u.getUserName());
+        usersWithBookings.add(u.getUserName());
       } else {
         usersToDelete.add(u);
       }
@@ -292,9 +285,19 @@ public class UserServiceImpl implements UserService {
     if (!usersToDelete.isEmpty()) {
       userRepository.deleteAll(usersToDelete);
     }
-    if (!usersNotDeleted.isEmpty()) {
-      throw new AppEx(ErrorCode.PARTIAL_USER_DELETE_FAILED,
-              "The following users could not be deleted: " + String.join(", ", usersNotDeleted));
+    if (!currentUsers.isEmpty() || !usersWithBookings.isEmpty()) {
+      StringBuilder errorMessage = new StringBuilder("Could not delete the following users: ");
+      if (!currentUsers.isEmpty()) {
+        errorMessage.append("Your account (").append(String.join(", ", currentUsers)).append(") ");
+      }
+
+      if (!usersWithBookings.isEmpty()) {
+        if (!currentUsers.isEmpty()) {
+          errorMessage.append("and ");
+        }
+        errorMessage.append("Users with active bookings: ").append(String.join(", ", usersWithBookings));
+      }
+      throw new AppEx(ErrorCode.PARTIAL_USER_DELETE_FAILED, errorMessage.toString());
     }
   }
 

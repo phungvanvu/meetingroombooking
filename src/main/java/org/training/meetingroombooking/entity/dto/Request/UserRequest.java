@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserRequest {
 
-  // userName: Không null, không để trống, tối đa 50 ký tự, chỉ chứa chữ cái và số, không chứa khoảng trắng
+  // userName: Không null, không để trống, tối đa 50 ký tự, chỉ chứa chữ cái và số, không chứa
+  // khoảng trắng
   @NotBlank(message = "{username.notblank}")
   @NotNull(message = "{username.notnull}")
   @Size(max = 50, message = "{username.maxsize}")

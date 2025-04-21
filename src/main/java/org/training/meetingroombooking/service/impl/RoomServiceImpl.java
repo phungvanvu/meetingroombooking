@@ -3,7 +3,6 @@ package org.training.meetingroombooking.service.impl;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Subquery;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,54 +69,52 @@ public class RoomServiceImpl implements RoomService {
 
   @Override
   public RoomDTO findById(Long roomId) {
-    return roomRepository.findById(roomId)
-            .map(roomMapper::toDTO)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    return roomRepository
+        .findById(roomId)
+        .map(roomMapper::toDTO)
+        .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
   }
 
   @Override
   public List<RoomDTO> getAll() {
-    return roomRepository.findAll().stream()
-            .map(roomMapper::toDTO)
-            .collect(Collectors.toList());
+    return roomRepository.findAll().stream().map(roomMapper::toDTO).collect(Collectors.toList());
   }
 
   @Override
   public List<RoomDTO> getAllAvailable() {
     return roomRepository.findAllByAvailableTrue().stream()
-            .map(roomMapper::toDTO)
-            .collect(Collectors.toList());
+        .map(roomMapper::toDTO)
+        .collect(Collectors.toList());
   }
 
   @Override
   public Page<RoomDTO> getRooms(
-          String roomName,
-          List<String> locations,
-          Boolean available,
-          List<Integer> capacities,
-          Set<String> equipments,
-          int page,
-          int size) {
+      String roomName,
+      List<String> locations,
+      Boolean available,
+      List<Integer> capacities,
+      Set<String> equipments,
+      int page,
+      int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("roomId").descending());
-    Specification<Room> spec = Specification.where(
+    Specification<Room> spec =
+        Specification.where(
             specByRoomName(roomName)
-                    .and(specByLocations(locations))
-                    .and(specByAvailable(available))
-                    .and(specByCapacities(capacities))
-                    .and(specByEquipments(equipments))
-    );
-    return roomRepository.findAll(spec, pageable)
-            .map(roomMapper::toDTO);
+                .and(specByLocations(locations))
+                .and(specByAvailable(available))
+                .and(specByCapacities(capacities))
+                .and(specByEquipments(equipments)));
+    return roomRepository.findAll(spec, pageable).map(roomMapper::toDTO);
   }
 
   @Override
   public Page<RoomDTO> getAvailableRooms(
-          String roomName,
-          List<String> locations,
-          List<Integer> capacities,
-          Set<String> equipments,
-          int page,
-          int size) {
+      String roomName,
+      List<String> locations,
+      List<Integer> capacities,
+      Set<String> equipments,
+      int page,
+      int size) {
     return getRooms(roomName, locations, true, capacities, equipments, page, size);
   }
 
@@ -126,7 +123,7 @@ public class RoomServiceImpl implements RoomService {
     List<RoomDTO> rooms = getAll();
 
     try (InputStream template = getClass().getResourceAsStream("/templates/rooms_template.xlsx");
-         Workbook wb = (template != null) ? new XSSFWorkbook(template) : new XSSFWorkbook()) {
+        Workbook wb = (template != null) ? new XSSFWorkbook(template) : new XSSFWorkbook()) {
 
       Sheet sheet = (wb.getNumberOfSheets() > 0) ? wb.getSheetAt(0) : wb.createSheet("Rooms");
       if (sheet.getPhysicalNumberOfRows() == 0) {
@@ -142,11 +139,12 @@ public class RoomServiceImpl implements RoomService {
 
   @Override
   public RoomDTO update(Long roomId, RoomDTO dto, List<MultipartFile> files) throws IOException {
-    Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    Room room =
+        roomRepository.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     roomMapper.updateRoom(room, dto);
     linkEquipments(room);
     if (files != null && !files.isEmpty()) {
+      room.getImages().clear();
       for (MultipartFile file : files) {
         if (file.isEmpty()) continue;
         String fileName = dto.getRoomName() + "_" + System.currentTimeMillis();
@@ -161,8 +159,8 @@ public class RoomServiceImpl implements RoomService {
 
   @Override
   public void delete(Long roomId) {
-    Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
+    Room room =
+        roomRepository.findById(roomId).orElseThrow(() -> new AppEx(ErrorCode.ROOM_NOT_FOUND));
     if (bookingRepository.existsByRoom(room)) {
       throw new AppEx(ErrorCode.CANNOT_DELETE_ROOM_IN_USE);
     }
@@ -172,24 +170,28 @@ public class RoomServiceImpl implements RoomService {
   @Override
   public void deleteMultipleRooms(List<Long> roomIds) {
     List<Room> rooms = roomRepository.findAllById(roomIds);
+
     if (rooms.size() != roomIds.size()) {
       throw new AppEx(ErrorCode.ROOM_NOT_FOUND);
     }
     List<Room> roomsToDelete = new ArrayList<>();
-    List<String> roomsNotDeleted = new ArrayList<>();
-    for (Room r : rooms) {
-      if (bookingRepository.existsByRoom(r)) {
-        roomsNotDeleted.add(r.getRoomName());
+    List<String> roomsWithBookings = new ArrayList<>();
+    for (Room room : rooms) {
+      if (bookingRepository.existsByRoom(room)) {
+        roomsWithBookings.add(room.getRoomName());
       } else {
-        roomsToDelete.add(r);
+        roomsToDelete.add(room);
       }
     }
     if (!roomsToDelete.isEmpty()) {
       roomRepository.deleteAll(roomsToDelete);
     }
-    if (!roomsNotDeleted.isEmpty()) {
-      throw new AppEx(ErrorCode.PARTIAL_ROOM_DELETE_FAILED,
-              "The following rooms could not be deleted due to active bookings: " + String.join(", ", roomsNotDeleted));
+    if (!roomsWithBookings.isEmpty()) {
+      String errorMessage =
+          "Some rooms could not be deleted:\n"
+              + "- Rooms with active bookings: "
+              + String.join(", ", roomsWithBookings);
+      throw new AppEx(ErrorCode.PARTIAL_ROOM_DELETE_FAILED, errorMessage);
     }
   }
 
@@ -242,30 +244,24 @@ public class RoomServiceImpl implements RoomService {
 
   private Specification<Room> specByRoomName(String name) {
     return (root, query, cb) ->
-            (name == null || name.isBlank())
-                    ? cb.conjunction()
-                    : cb.like(cb.lower(root.get("roomName")), "%" + name.toLowerCase() + "%");
+        (name == null || name.isBlank())
+            ? cb.conjunction()
+            : cb.like(cb.lower(root.get("roomName")), "%" + name.toLowerCase() + "%");
   }
 
   private Specification<Room> specByLocations(List<String> locs) {
     return (root, query, cb) ->
-            (locs == null || locs.isEmpty())
-                    ? cb.conjunction()
-                    : root.get("location").in(locs);
+        (locs == null || locs.isEmpty()) ? cb.conjunction() : root.get("location").in(locs);
   }
 
   private Specification<Room> specByAvailable(Boolean avail) {
     return (root, query, cb) ->
-            (avail == null)
-                    ? cb.conjunction()
-                    : cb.equal(root.get("available"), avail);
+        (avail == null) ? cb.conjunction() : cb.equal(root.get("available"), avail);
   }
 
   private Specification<Room> specByCapacities(List<Integer> caps) {
     return (root, query, cb) ->
-            (caps == null || caps.isEmpty())
-                    ? cb.conjunction()
-                    : root.get("capacity").in(caps);
+        (caps == null || caps.isEmpty()) ? cb.conjunction() : root.get("capacity").in(caps);
   }
 
   private Specification<Room> specByEquipments(Set<String> eqs) {

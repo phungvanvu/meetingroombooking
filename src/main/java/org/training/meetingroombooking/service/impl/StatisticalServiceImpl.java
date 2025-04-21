@@ -44,29 +44,31 @@ public class StatisticalServiceImpl implements StatisticalService {
     long unavailableRooms = roomRepository.countUnavailableRooms();
     long totalBookings = roomBookingRepository.countTotalBookings();
     long todayBookings = roomBookingRepository.countBookingsToday(today);
-    List<RoomDTO> availableRoomList = roomRepository.findAvailableRooms()
-            .stream().map(roomMapper::toDTO).toList();
-    List<RoomDTO> unavailableRoomList = roomRepository.findUnavailableRooms()
-            .stream().map(roomMapper::toDTO).toList();
-    List<RoomBookingDTO> todayBookingList = roomBookingRepository.findBookingsToday(today)
-            .stream().map(roomBookingMapper::toDTO).toList();
+    List<RoomDTO> availableRoomList =
+        roomRepository.findAvailableRooms().stream().map(roomMapper::toDTO).toList();
+    List<RoomDTO> unavailableRoomList =
+        roomRepository.findUnavailableRooms().stream().map(roomMapper::toDTO).toList();
+    List<RoomBookingDTO> todayBookingList =
+        roomBookingRepository.findBookingsToday(today).stream()
+            .map(roomBookingMapper::toDTO)
+            .toList();
     return RoomStatisticsDTO.builder()
-            .totalRooms(totalRooms)
-            .availableRooms(availableRooms)
-            .unavailableRooms(unavailableRooms)
-            .totalBookings(totalBookings)
-            .todayBookings(todayBookings)
-            .availableRoomList(availableRoomList)
-            .unavailableRoomList(unavailableRoomList)
-            .todayBookingList(todayBookingList)
-            .build();
+        .totalRooms(totalRooms)
+        .availableRooms(availableRooms)
+        .unavailableRooms(unavailableRooms)
+        .totalBookings(totalBookings)
+        .todayBookings(todayBookings)
+        .availableRoomList(availableRoomList)
+        .unavailableRoomList(unavailableRoomList)
+        .todayBookingList(todayBookingList)
+        .build();
   }
+
   @Override
   public List<BookingSummaryDTO> getWeeklyBookings() {
-    return roomBookingRepository.findWeeklyBookingsNative()
-            .stream()
-            .map(p -> new BookingSummaryDTO(p.getPeriod(), p.getBookings()))
-            .toList();
+    return roomBookingRepository.findWeeklyBookingsNative().stream()
+        .map(p -> new BookingSummaryDTO(p.getPeriod(), p.getBookings()))
+        .toList();
   }
 
   @Override
@@ -88,8 +90,7 @@ public class StatisticalServiceImpl implements StatisticalService {
 
   @Override
   public RoomSummaryDTO getMostBookedRoom() {
-    List<RoomSummaryDTO> topRooms =
-            roomBookingRepository.findTopBookedRooms(PageRequest.of(0, 1));
+    List<RoomSummaryDTO> topRooms = roomBookingRepository.findTopBookedRooms(PageRequest.of(0, 1));
     return topRooms.isEmpty() ? null : topRooms.get(0);
   }
 }
