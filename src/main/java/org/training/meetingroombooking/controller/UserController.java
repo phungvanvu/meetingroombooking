@@ -7,18 +7,22 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
+
+import jakarta.validation.groups.Default;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
 import org.training.meetingroombooking.service.UserService;
+import org.training.meetingroombooking.validation.impl.ValidationUser;
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -32,11 +36,13 @@ public class UserController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public ApiResponse<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+  public ApiResponse<UserResponse> createUser(
+          @Validated({Default.class, ValidationUser.OnCreate.class})
+          @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
-        .success(true)
-        .data(userService.createUser(request))
-        .build();
+            .success(true)
+            .data(userService.createUser(request))
+            .build();
   }
 
   @GetMapping("/search")
@@ -80,11 +86,11 @@ public class UserController {
   @PutMapping("/{userId}")
   @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<UserResponse> updateUser(
-      @PathVariable Long userId, @Valid @RequestBody UserRequest request) {
+          @PathVariable Long userId, @Validated({Default.class}) @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
-        .success(true)
-        .data(userService.update(userId, request))
-        .build();
+            .success(true)
+            .data(userService.update(userId, request))
+            .build();
   }
 
   @DeleteMapping("/{userId}")

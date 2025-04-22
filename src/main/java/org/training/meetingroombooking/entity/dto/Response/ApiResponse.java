@@ -25,6 +25,10 @@ public class ApiResponse<T> {
     return ApiResponse.builder().success(false).error(error).build();
   }
 
+  public static <T> ApiResponse<T> error(ApiError error, T data) {
+    return ApiResponse.<T>builder().success(false).error(error).data(data).build();
+  }
+
   public static class Builder<T> {
     private boolean success;
     private T data;
