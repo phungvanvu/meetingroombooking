@@ -10,11 +10,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.training.meetingroombooking.entity.enums.BookingStatus;
 import org.training.meetingroombooking.entity.enums.Purpose;
+import org.training.meetingroombooking.validation.StartBeforeEnd;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@StartBeforeEnd
 public class RoomBookingDTO {
 
   private Long bookingId;
