@@ -1,6 +1,7 @@
 package org.training.meetingroombooking.service.impl;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -66,19 +67,20 @@ public class StatisticalServiceImpl implements StatisticalService {
 
   @Override
   public List<BookingSummaryDTO> getWeeklyBookings() {
-    return roomBookingRepository.findWeeklyBookingsNative().stream()
-        .map(p -> new BookingSummaryDTO(p.getPeriod(), p.getBookings()))
-        .toList();
+    int year = Year.now().getValue();
+    return roomBookingRepository.findWeeklyBookings(year);
   }
 
   @Override
   public List<BookingSummaryDTO> getMonthlyBookings() {
-    return roomBookingRepository.findMonthlyBookings();
+    int year = Year.now().getValue();
+    return roomBookingRepository.findMonthlyBookings(year);
   }
 
   @Override
   public List<BookingSummaryDTO> getQuarterlyBookings() {
-    return roomBookingRepository.findQuarterlyBookings();
+    int year = Year.now().getValue();
+    return roomBookingRepository.findQuarterlyBookings(year);
   }
 
   @Override
