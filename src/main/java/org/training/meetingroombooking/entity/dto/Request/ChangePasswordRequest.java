@@ -19,10 +19,6 @@ public class ChangePasswordRequest {
   // - chữ số
   // - ký tự đặc biệt (@$!%*?&)
   @NotBlank(message = "{password.old.notblank}")
-  @Pattern(regexp = "^[^\\s]+$", message = "{password.pattern.nospaces}")
-  @Pattern(
-      regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-      message = "{password.pattern.complexity}")
   private String oldPassword;
 
   // newPassword: Không để trống, không chứa khoảng trắng, tối thiểu 8 ký tự và phải có:
