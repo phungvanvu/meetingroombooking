@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
@@ -22,6 +23,8 @@ public interface UserService {
       int size);
 
   List<UserResponse> getAll();
+
+  void importUsersFromExcel(MultipartFile file);
 
   ByteArrayOutputStream exportUserToExcel() throws IOException;
 

@@ -44,18 +44,24 @@ public class PasswordResetServiceImpl implements PasswordResetService {
   public String initiatePasswordReset(String email) throws MessagingException {
     Optional<User> optionalUser = userRepository.findByEmail(email);
     if (optionalUser.isPresent()) {
-      User user = optionalUser.get();
-      String otpCode = generateOTP();
-      PasswordResetOtp otp = new PasswordResetOtp();
-      otp.setOtp(otpCode);
-      otp.setEmail(email);
-      otp.setExpiryDate(LocalDateTime.now().plusMinutes(5));
-      otpRepository.save(otp);
-      Context context = new Context();
-      context.setVariable("fullName", user.getFullName());
-      context.setVariable("otpCode", otpCode);
-      String htmlBody = templateEngine.process("password-reset", context);
-      emailService.sendHtmlEmail(email, "Password Reset OTP", htmlBody);
+      Optional<PasswordResetOtp> existingOtp = otpRepository.findTopByEmailOrderByCreatedDateDesc(email);
+      boolean isTooSoon = existingOtp.isPresent() &&
+              existingOtp.get().getCreatedDate().plusMinutes(1).isAfter(LocalDateTime.now());
+      if (!isTooSoon) {
+        String otpCode = generateOTP();
+        PasswordResetOtp otp = new PasswordResetOtp();
+        otp.setOtp(otpCode);
+        otp.setEmail(email);
+        otp.setExpiryDate(LocalDateTime.now().plusMinutes(5));
+        otp.setCreatedDate(LocalDateTime.now());
+        otpRepository.save(otp);
+        User user = optionalUser.get();
+        Context context = new Context();
+        context.setVariable("fullName", user.getFullName());
+        context.setVariable("otpCode", otpCode);
+        String htmlBody = templateEngine.process("password-reset", context);
+        emailService.sendHtmlEmail(email, "Password Reset OTP", htmlBody);
+      }
     }
     return "If an account with that email exists, an OTP has been sent to your email address.";
   }

@@ -86,23 +86,23 @@ public interface RoomBookingRepository
       @Param("endTime") LocalDateTime endTime,
       @Param("bookingId") Long bookingId);
 
-  /**
-   * Weekly booking summary for a given year
-   */
-  @Query(value = """
+  /** Weekly booking summary for a given year */
+  @Query(
+      value =
+          """
     SELECT WEEK(rb.created_at, 1)     AS period,
            COUNT(*)                   AS bookings
       FROM room_bookings rb
      WHERE YEAR(rb.created_at) = :year
   GROUP BY WEEK(rb.created_at, 1)
   ORDER BY WEEK(rb.created_at, 1)
-  """, nativeQuery = true)
+  """,
+      nativeQuery = true)
   List<BookingSummaryDTO> findWeeklyBookings(@Param("year") int year);
 
-  /**
-   * Monthly booking summary for a given year
-   */
-  @Query("""
+  /** Monthly booking summary for a given year */
+  @Query(
+      """
     SELECT new org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO(
       MONTH(rb.startTime),
       COUNT(rb)
@@ -111,14 +111,12 @@ public interface RoomBookingRepository
     WHERE YEAR(rb.startTime) = :year
     GROUP BY MONTH(rb.startTime)
     ORDER BY MONTH(rb.startTime)
-  """ )
+  """)
   List<BookingSummaryDTO> findMonthlyBookings(@Param("year") int year);
 
-  /**
-   * Quarterly booking summary for a given year
-   */
+  /** Quarterly booking summary for a given year */
   @Query(
-          """
+      """
             SELECT new org.training.meetingroombooking.entity.dto.Summary.BookingSummaryDTO(
               FLOOR((MONTH(rb.startTime) - 1) / 3) + 1,
               COUNT(rb)
@@ -127,10 +125,8 @@ public interface RoomBookingRepository
             WHERE YEAR(rb.startTime) = :year
             GROUP BY FLOOR((MONTH(rb.startTime) - 1) / 3) + 1
             ORDER BY 1
-          """
-  )
+          """)
   List<BookingSummaryDTO> findQuarterlyBookings(@Param("year") int year);
-
 
   // Đếm số lượt đặt trong tháng (theo tháng truyền vào)
   @Query(

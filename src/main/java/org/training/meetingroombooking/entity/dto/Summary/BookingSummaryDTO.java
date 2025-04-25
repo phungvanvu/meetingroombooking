@@ -12,7 +12,7 @@ public class BookingSummaryDTO {
   private Long bookings;
 
   public BookingSummaryDTO(Integer period, Long bookings) {
-    this.period   = period;
+    this.period = period;
     this.bookings = bookings;
   }
 }
