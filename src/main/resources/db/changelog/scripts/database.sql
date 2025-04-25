@@ -44,6 +44,7 @@ CREATE TABLE password_reset_otps
     otp         VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NULL,
     expiry_date datetime NULL,
+    created_date datetime NULL,
     CONSTRAINT pk_password_reset_otps PRIMARY KEY (otp)
 );
 

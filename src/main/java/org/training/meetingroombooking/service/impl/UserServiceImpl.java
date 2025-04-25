@@ -3,10 +3,13 @@ package org.training.meetingroombooking.service.impl;
 import jakarta.persistence.criteria.Join;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.*;
@@ -15,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.UserResponse;
@@ -38,6 +43,7 @@ public class UserServiceImpl implements UserService {
   private final RoomBookingRepository roomBookingRepository;
   private final UserMapper userMapper;
   private final PasswordEncoder passwordEncoder;
+  private final Validator validator;
 
   public UserServiceImpl(
       UserRepository userRepository,
@@ -45,13 +51,15 @@ public class UserServiceImpl implements UserService {
       UserMapper userMapper,
       PositionRepository positionRepository,
       GroupRepository groupRepository,
-      RoomBookingRepository roomBookingRepository) {
+      RoomBookingRepository roomBookingRepository,
+      Validator validator) {
     this.userRepository = userRepository;
     this.roleRepository = roleRepository;
     this.userMapper = userMapper;
     this.positionRepository = positionRepository;
     this.groupRepository = groupRepository;
     this.roomBookingRepository = roomBookingRepository;
+    this.validator = validator;
     this.passwordEncoder = new BCryptPasswordEncoder(10);
   }
 
@@ -139,6 +147,40 @@ public class UserServiceImpl implements UserService {
     return userRepository.findAll().stream()
         .map(userMapper::toUserResponse)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * Import users from an Excel file. Reads into DTOs for validation, then creates users in a transaction.
+   */
+  @Override
+  @Transactional
+  public void importUsersFromExcel(MultipartFile file) {
+    List<UserRequest> dtos = new ArrayList<>();
+    try (InputStream is = file.getInputStream(); Workbook workbook = new XSSFWorkbook(is)) {
+      Sheet sheet = workbook.getSheetAt(0);
+      Iterator<Row> rows = sheet.iterator();
+      if (!rows.hasNext()) {
+        throw new AppEx(ErrorCode.VALIDATION_ERROR, "Excel file is empty");
+      }
+      Map<String, Integer> headerMap = mapHeader(rows.next());
+      while (rows.hasNext()) {
+        Row row = rows.next();
+        UserRequest dto = mapRowToDto(row, headerMap);
+        Set<ConstraintViolation<UserRequest>> violations = validator.validate(dto);
+        if (!violations.isEmpty()) {
+          String msg = violations.stream()
+                  .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                  .collect(Collectors.joining(", "));
+          throw new AppEx(ErrorCode.VALIDATION_ERROR, msg);
+        }
+        dtos.add(dto);
+      }
+    } catch (IOException e) {
+      throw new AppEx(ErrorCode.VALIDATION_ERROR, "Failed to read Excel: " + e.getMessage());
+    }
+    for (UserRequest dto : dtos) {
+      createUser(dto);
+    }
   }
 
   @Override
@@ -295,12 +337,13 @@ public class UserServiceImpl implements UserService {
         if (!currentUsers.isEmpty()) {
           errorMessage.append("and ");
         }
-        errorMessage.append("Users with active bookings: ").append(String.join(", ", usersWithBookings));
+        errorMessage
+            .append("Users with active bookings: ")
+            .append(String.join(", ", usersWithBookings));
       }
       throw new AppEx(ErrorCode.PARTIAL_USER_DELETE_FAILED, errorMessage.toString());
     }
   }
-
 
   @Override
   public void changePassword(ChangePasswordRequest request) {
@@ -318,5 +361,46 @@ public class UserServiceImpl implements UserService {
     }
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     userRepository.save(user);
+  }
+
+  /**
+   * Map header row to column index by header name (case-insensitive).
+   */
+  private Map<String, Integer> mapHeader(Row headerRow) {
+    Map<String, Integer> map = new HashMap<>();
+    DataFormatter fmt = new DataFormatter();
+    for (Cell cell : headerRow) {
+      String header = fmt.formatCellValue(cell).trim().toLowerCase();
+      map.put(header, cell.getColumnIndex());
+    }
+    return map;
+  }
+
+  /**
+   * Convert an Excel row into a UserRequest DTO.
+   */
+  private UserRequest mapRowToDto(Row row, Map<String, Integer> headerMap) {
+    DataFormatter fmt = new DataFormatter();
+    Function<String, String> getCellValue = key -> {
+      Integer idx = headerMap.get(key.toLowerCase());
+      return idx == null ? null : fmt.formatCellValue(row.getCell(idx)).trim();
+    };
+    String rolesStr = getCellValue.apply("roles");
+    Set<String> roles = (rolesStr == null || rolesStr.isEmpty()) ?
+            Collections.emptySet() :
+            Arrays.stream(rolesStr.split("\\s*,\\s*"))
+                    .collect(Collectors.toSet());
+    return UserRequest.builder()
+            .userName(getCellValue.apply("username"))
+            .fullName(getCellValue.apply("fullname"))
+            .department(getCellValue.apply("department"))
+            .email(getCellValue.apply("email"))
+            .phoneNumber(getCellValue.apply("phonenumber"))
+            .password(getCellValue.apply("password"))
+            .enabled(Boolean.parseBoolean(getCellValue.apply("enabled")))
+            .position(getCellValue.apply("position"))
+            .group(getCellValue.apply("group"))
+            .roles(roles)
+            .build();
   }
 }

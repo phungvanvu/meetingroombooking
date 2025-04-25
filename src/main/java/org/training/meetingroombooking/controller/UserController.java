@@ -1,14 +1,13 @@
 package org.training.meetingroombooking.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
-
-import jakarta.validation.groups.Default;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,6 +16,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.training.meetingroombooking.entity.dto.Request.ChangePasswordRequest;
 import org.training.meetingroombooking.entity.dto.Request.UserRequest;
 import org.training.meetingroombooking.entity.dto.Response.ApiResponse;
@@ -37,12 +37,11 @@ public class UserController {
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
   public ApiResponse<UserResponse> createUser(
-          @Validated({Default.class, ValidationUser.OnCreate.class})
-          @RequestBody UserRequest request) {
+      @Validated({Default.class, ValidationUser.OnCreate.class}) @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
-            .success(true)
-            .data(userService.createUser(request))
-            .build();
+        .success(true)
+        .data(userService.createUser(request))
+        .build();
   }
 
   @GetMapping("/search")
@@ -86,11 +85,11 @@ public class UserController {
   @PutMapping("/{userId}")
   @PostAuthorize("returnObject.data.userName == authentication.name or hasRole('ADMIN')")
   public ApiResponse<UserResponse> updateUser(
-          @PathVariable Long userId, @Validated({Default.class}) @RequestBody UserRequest request) {
+      @PathVariable Long userId, @Validated({Default.class}) @RequestBody UserRequest request) {
     return ApiResponse.<UserResponse>builder()
-            .success(true)
-            .data(userService.update(userId, request))
-            .build();
+        .success(true)
+        .data(userService.update(userId, request))
+        .build();
   }
 
   @DeleteMapping("/{userId}")
@@ -118,6 +117,20 @@ public class UserController {
         .success(true)
         .data("Password changed successfully")
         .build();
+  }
+
+  /**
+   * Import users via Excel upload. Only ADMIN can import.
+   */
+  @PostMapping("/import-users-excel")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ApiResponse<String> importUsers(
+          @RequestPart("file") MultipartFile file) {
+    userService.importUsersFromExcel(file);
+    return ApiResponse.<String>builder()
+            .success(true)
+            .data("Users imported successfully")
+            .build();
   }
 
   @GetMapping("/export-users-excel")
